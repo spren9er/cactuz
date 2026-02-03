@@ -306,4 +306,14 @@
   .footer a:hover {
     color: #333333;
   }
+
+  @media (max-width: 768px) {
+    p {
+      padding: 4px 10px;
+    }
+
+    .controls {
+      margin: 20px 10px;
+    }
+  }
 </style>
