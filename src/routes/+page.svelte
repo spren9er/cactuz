@@ -116,7 +116,11 @@
     </div>
   </div>
 
-  <div class="visualization">
+  <div
+    class="visualization"
+    style:width={`${width}px`}
+    style:height={`${height}px`}
+  >
     <Cactus
       {nodes}
       {width}
@@ -151,9 +155,12 @@
 </main>
 
 <style>
+  :global(html, body) {
+    background: #f9f9f9;
+  }
+
   .container {
     max-width: 1200px;
-    margin: 0 auto;
     padding: 20px;
     font-family: monospace;
   }
@@ -179,6 +186,7 @@
 
   .controls {
     margin: 20px;
+    margin-bottom: 40px;
     border-radius: 8px;
   }
 
@@ -199,19 +207,26 @@
     width: 100%;
     margin-top: 5px;
   }
+
   .visualization {
+    background-color: #ffffff;
+    border: 1px solid #dedede;
+    border-radius: 12px;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: center;
-    margin: 20px 0;
+    align-items: center;
+    margin: 20px auto;
+    width: fit-content;
   }
 
   .footer {
     text-align: center;
-    position: absolute;
-    bottom: 20px;
+    position: fixed;
+    bottom: 16px;
     width: 200px;
-    left: 50%;
     margin-left: -100px;
+    left: 50%;
   }
 
   .footer a {
