@@ -254,14 +254,30 @@ export class CactusLayout {
    * Generate hierarchical edge bundling path between two nodes
    * @param {NodeData} sourceNode - Source node data
    * @param {NodeData} targetNode - Target node data
-   * @param {number} beta - Bundling strength (0 = straight line, 1 = full bundling)
+   * @param {number} tension - Bundling tension (0 = straight line, 1 = full bundling)
    * @returns {Point[]} Array of {x, y} points for the bundled path
    */
-  generateBundledPath(sourceNode, targetNode, beta = 0.85) {
+  generateBundledPath(sourceNode, targetNode, tension = 0.85) {
     const source = sourceNode.node;
     const target = targetNode.node;
 
-    const lca = this.findLowestCommonAncestor(source, target);
+    // Find the path through the hierarchy
+    const sourcePath = this.getPathToRoot(source);
+    const targetPath = this.getPathToRoot(target);
+
+    // Find the lowest common ancestor
+    let lca = null;
+    for (let i = 0; i < Math.min(sourcePath.length, targetPath.length); i++) {
+      if (
+        sourcePath[sourcePath.length - 1 - i] ===
+        targetPath[targetPath.length - 1 - i]
+      ) {
+        lca = sourcePath[sourcePath.length - 1 - i];
+      } else {
+        break;
+      }
+    }
+
     if (!lca) {
       return [
         { x: sourceNode.x, y: sourceNode.y },
@@ -269,53 +285,115 @@ export class CactusLayout {
       ];
     }
 
-    /** @type {NodeData[]} */
-    const pathNodes = [];
+    // Build the full hierarchical path
+    const lcaIndex = sourcePath.indexOf(lca);
+    const hierarchicalNodes = [
+      ...sourcePath.slice(0, lcaIndex + 1),
+      ...targetPath.slice(0, targetPath.indexOf(lca)).reverse(),
+    ];
 
-    let current = source.parentRef;
-    while (current && current !== lca) {
-      const nodeData = this.nodes.find((n) => n.node === current);
-      if (nodeData) pathNodes.push(nodeData);
-      current = current.parentRef;
+    // Convert to NodeData positions
+    const pathPoints = hierarchicalNodes
+      .map((node) => {
+        const nodeData = this.nodes.find((n) => n.node === node);
+        return nodeData ? { x: nodeData.x, y: nodeData.y } : null;
+      })
+      .filter((p) => p !== null);
+
+    if (pathPoints.length < 2) {
+      return [
+        { x: sourceNode.x, y: sourceNode.y },
+        { x: targetNode.x, y: targetNode.y },
+      ];
     }
 
-    const lcaData = this.nodes.find((n) => n.node === lca);
-    if (lcaData) pathNodes.push(lcaData);
+    // Generate spline curve with tension (reduced segments for performance)
+    return this.generateSplineCurve(pathPoints, tension, 8);
+  }
 
-    /** @type {NodeData[]} */
-    const targetPath = [];
-    current = target.parentRef;
-    while (current && current !== lca) {
-      const nodeData = this.nodes.find((n) => n.node === current);
-      if (nodeData) targetPath.unshift(nodeData);
-      current = current.parentRef;
+  /**
+   * Get path from node to root
+   * @param {TreeNode} node - Starting node
+   * @returns {TreeNode[]} Path to root
+   */
+  getPathToRoot(node) {
+    const path = [];
+    /** @type {TreeNode|null} */
+    let current = node;
+    while (current) {
+      path.push(current);
+      current = current.parentRef || null;
     }
-    pathNodes.push(...targetPath);
+    return path;
+  }
 
-    /** @type {Point[]} */
-    const points = [];
-    points.push({ x: sourceNode.x, y: sourceNode.y });
+  /**
+   * Generate a smooth spline curve through points with tension control
+   * @param {Point[]} points - Control points
+   * @param {number} tension - Curve tension (0-1)
+   * @param {number} segments - Number of segments between points
+   * @returns {Point[]} Smooth curve points
+   */
+  generateSplineCurve(points, tension, segments) {
+    if (points.length < 2) return points;
+    if (points.length === 2) return points;
 
-    if (pathNodes.length > 0) {
-      for (let i = 0; i < pathNodes.length; i++) {
-        const bundledX =
-          sourceNode.x +
-          beta * (pathNodes[i].x - sourceNode.x) +
-          (1 - beta) *
-            ((i + 1) / (pathNodes.length + 1)) *
-            (targetNode.x - sourceNode.x);
-        const bundledY =
-          sourceNode.y +
-          beta * (pathNodes[i].y - sourceNode.y) +
-          (1 - beta) *
-            ((i + 1) / (pathNodes.length + 1)) *
-            (targetNode.y - sourceNode.y);
-        points.push({ x: bundledX, y: bundledY });
+    const result = [];
+
+    // Add first point
+    result.push(points[0]);
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(0, i - 1)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(points.length - 1, i + 2)];
+
+      for (let t = 0; t < segments; t++) {
+        const u = t / segments;
+        const splinePoint = this.catmullRomSpline(p0, p1, p2, p3, u, tension);
+        result.push(splinePoint);
       }
     }
 
-    points.push({ x: targetNode.x, y: targetNode.y });
-    return points;
+    // Add last point
+    result.push(points[points.length - 1]);
+    return result;
+  }
+
+  /**
+   * Catmull-Rom spline interpolation with tension
+   * @param {Point} p0 - Control point 0
+   * @param {Point} p1 - Control point 1
+   * @param {Point} p2 - Control point 2
+   * @param {Point} p3 - Control point 3
+   * @param {number} t - Parameter (0-1)
+   * @param {number} tension - Tension factor
+   * @returns {Point} Interpolated point
+   */
+  catmullRomSpline(p0, p1, p2, p3, t, tension) {
+    const t2 = t * t;
+    const t3 = t2 * t;
+
+    // Tension-adjusted coefficients
+    const factor = tension * 0.5;
+
+    const x =
+      2 * p1.x +
+      (-p0.x + p2.x) * t +
+      (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+      (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3;
+
+    const y =
+      2 * p1.y +
+      (-p0.y + p2.y) * t +
+      (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+      (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3;
+
+    return {
+      x: x * factor + p1.x * (1 - factor) + (p2.x - p1.x) * t * (1 - factor),
+      y: y * factor + p1.y * (1 - factor) + (p2.y - p1.y) * t * (1 - factor),
+    };
   }
 
   /**

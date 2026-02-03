@@ -3,11 +3,12 @@
 
   import { CactusLayout } from '$lib/cactusLayout.js';
 
-  /** @type {{ nodes: Array<{id: string, name: string, parent: string|null, weight?: number}>, width?: number, height?: number, options?: {overlap?: number, arcSpan?: number, sizeGrowthRate?: number, orientation?: number, zoom?: number}, styles?: {fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, highlightFill?: string, highlightStroke?: string, highlight?: boolean, depths?: Array<{depth: number, fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, highlightFill?: string, highlightStroke?: string, highlight?: boolean}>}, pannable?: boolean, zoomable?: boolean }} */
+  /** @type {{ width: number, height: number, nodes: Array<{id: string, name: string, parent: string|null, weight?: number}>, links?: Array<{source: string, target: string}>, options?: {overlap?: number, arcSpan?: number, sizeGrowthRate?: number, orientation?: number, zoom?: number}, styles?: {fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, edge?: string, edgeWidth?: number, highlightFill?: string, highlightStroke?: string, highlight?: boolean, depths?: Array<{depth: number, fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, edge?: string, edgeWidth?: number, highlightFill?: string, highlightStroke?: string, highlight?: boolean}>}, pannable?: boolean, zoomable?: boolean }} */
   let {
+    width,
+    height,
     nodes,
-    width = 800,
-    height = 600,
+    links = [],
     options = {},
     styles = {},
     pannable = true,
@@ -33,6 +34,8 @@
     labelFontFamily: 'monospace',
     lineWidth: 1,
     line: '#333333',
+    edge: '#ff6b6b',
+    edgeWidth: 2,
     highlightFill: '#ffefef',
     highlightStroke: '#d32f2f',
     highlight: true,
@@ -53,6 +56,9 @@
 
   /** @type {Array<{x: number, y: number, radius: number, node: any, isLeaf: boolean, depth: number}>} */
   let renderedNodes = [];
+
+  /** @type {CactusLayout|null} */
+  let cactusLayout = null;
 
   // Pan and zoom state
   let panX = 0;
@@ -87,7 +93,7 @@
   function calculateLayout() {
     if (!nodes?.length) return;
 
-    const cactus = new CactusLayout(
+    cactusLayout = new CactusLayout(
       width,
       height,
       mergedOptions.zoom,
@@ -96,7 +102,7 @@
       mergedOptions.sizeGrowthRate,
     );
 
-    renderedNodes = cactus.render(
+    renderedNodes = cactusLayout.render(
       nodes,
       width / 2,
       height / 2,
@@ -315,6 +321,165 @@
       },
     );
 
+    // Draw hierarchical edge bundling for links AFTER nodes
+    if (links?.length && cactusLayout && ctx) {
+      // Group links by their hierarchical paths for bundling
+      /** @type {Array<{link: any, sourceNode: any, targetNode: any, hierarchicalPath: any[], lca: any}>} */
+      const validLinks = [];
+
+      // First pass: collect all valid links and build hierarchical paths
+      links.forEach((link) => {
+        const sourceNode = renderedNodes.find((n) => n.node.id === link.source);
+        const targetNode = renderedNodes.find((n) => n.node.id === link.target);
+
+        if (sourceNode && targetNode) {
+          // Filter links based on hover state
+          if (hoveredNodeId !== null) {
+            if (
+              link.source !== hoveredNodeId &&
+              link.target !== hoveredNodeId
+            ) {
+              return; // Skip this link - not connected to hovered node
+            }
+          }
+
+          // Build hierarchical path from source to target
+          const sourcePath = [];
+          const targetPath = [];
+
+          let current = sourceNode.node;
+          while (current) {
+            sourcePath.push(current);
+            current = current.parentRef;
+          }
+
+          current = targetNode.node;
+          while (current) {
+            targetPath.push(current);
+            current = current.parentRef;
+          }
+
+          // Find lowest common ancestor (closest to leaves)
+          let lca = null;
+          for (
+            let i = 0;
+            i < Math.min(sourcePath.length, targetPath.length);
+            i++
+          ) {
+            const sourceAncestor = sourcePath[sourcePath.length - 1 - i];
+            const targetAncestor = targetPath[targetPath.length - 1 - i];
+            if (sourceAncestor === targetAncestor) {
+              lca = sourceAncestor;
+            } else {
+              break;
+            }
+          }
+
+          // Create hierarchical path: source -> ... -> lca -> ... -> target
+          const hierarchicalPath = [sourceNode.node];
+
+          // Add source path up to (but not including) LCA
+          const sourceLcaIndex = sourcePath.indexOf(lca);
+          if (sourceLcaIndex > 0) {
+            for (let i = 1; i < sourceLcaIndex; i++) {
+              hierarchicalPath.push(sourcePath[i]);
+            }
+          }
+
+          // Add LCA if it exists and creates a meaningful bundle point
+          if (lca && lca !== sourceNode.node && lca !== targetNode.node) {
+            hierarchicalPath.push(lca);
+          }
+
+          // Add target path from LCA down to target (excluding LCA)
+          const targetLcaIndex = targetPath.indexOf(lca);
+          if (targetLcaIndex > 0) {
+            for (let i = targetLcaIndex - 1; i >= 0; i--) {
+              hierarchicalPath.push(targetPath[i]);
+            }
+          }
+
+          // Always add target node
+          if (
+            hierarchicalPath[hierarchicalPath.length - 1] !== targetNode.node
+          ) {
+            hierarchicalPath.push(targetNode.node);
+          }
+
+          validLinks.push({
+            link,
+            sourceNode,
+            targetNode,
+            hierarchicalPath,
+            lca,
+          });
+        }
+      });
+
+      // Group links by shared path segments for bundling
+      validLinks.forEach(({ sourceNode, targetNode, hierarchicalPath }) => {
+        // Convert hierarchical path to coordinates
+        const pathCoords = hierarchicalPath
+          .map((/** @type {any} */ node) => {
+            const nodeData = renderedNodes.find((n) => n.node === node);
+            return nodeData ? { x: nodeData.x, y: nodeData.y } : null;
+          })
+          .filter((/** @type {any} */ coord) => coord !== null);
+
+        // Fallback to direct line if no valid path
+        if (pathCoords.length < 2) {
+          pathCoords.length = 0;
+          pathCoords.push({ x: sourceNode.x, y: sourceNode.y });
+          pathCoords.push({ x: targetNode.x, y: targetNode.y });
+        }
+
+        const currentEdgeColor = mergedStyle.edge;
+        const currentEdgeWidth = mergedStyle.edgeWidth;
+
+        if (currentEdgeWidth > 0 && currentEdgeColor !== 'none' && ctx) {
+          ctx.strokeStyle = currentEdgeColor;
+          ctx.lineWidth = currentEdgeWidth;
+
+          if (pathCoords.length === 2) {
+            // Simple direct line
+            ctx.beginPath();
+            ctx.moveTo(pathCoords[0]?.x ?? 0, pathCoords[0]?.y ?? 0);
+            ctx.lineTo(pathCoords[1]?.x ?? 0, pathCoords[1]?.y ?? 0);
+            ctx.stroke();
+          } else if (pathCoords.length > 2) {
+            // Draw smooth curve through hierarchical path points
+            ctx.beginPath();
+            ctx.moveTo(pathCoords[0]?.x ?? 0, pathCoords[0]?.y ?? 0);
+
+            // Use quadratic curves between consecutive points
+            for (let i = 1; i < pathCoords.length; i++) {
+              const currentPoint = pathCoords[i];
+              if (!currentPoint) continue;
+
+              if (i === pathCoords.length - 1) {
+                // Last segment - line to target
+                ctx.lineTo(currentPoint.x, currentPoint.y);
+              } else {
+                // Create smooth curve through intermediate points
+                const nextPoint = pathCoords[i + 1];
+                if (nextPoint) {
+                  const cpx = (currentPoint.x + nextPoint.x) / 2;
+                  const cpy = (currentPoint.y + nextPoint.y) / 2;
+                  ctx.quadraticCurveTo(
+                    currentPoint.x,
+                    currentPoint.y,
+                    cpx,
+                    cpy,
+                  );
+                }
+              }
+            }
+            ctx.stroke();
+          }
+        }
+      });
+    }
+
     // Restore the context state
     ctx.restore();
   }
@@ -338,6 +503,13 @@
 
   $effect(() => {
     render();
+  });
+
+  // Re-render when links change
+  $effect(() => {
+    if (links) {
+      scheduleRender();
+    }
   });
 
   /** @param {MouseEvent} event */

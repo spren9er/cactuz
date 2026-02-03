@@ -5,6 +5,9 @@
   /** @type {Array<{id: string, name: string, parent: string|null}>} */
   let nodes = [];
 
+  /** @type {Array<{source: string, target: string}>} */
+  let links = [];
+
   let width = 780;
   let height = 780;
 
@@ -17,8 +20,12 @@
   };
 
   async function loadFlareData() {
-    const response = await fetch('/flare_wo_weights.json');
+    const response = await fetch('/flareNodesWithoutWeights.json');
     nodes = await response.json();
+
+    // Load real links from imports data
+    const linksResponse = await fetch('/flareLinks.json');
+    links = await linksResponse.json();
   }
 
   onMount(() => {
@@ -131,9 +138,10 @@
     style:height={`${height}px`}
   >
     <Cactus
-      {nodes}
       {width}
       {height}
+      {nodes}
+      {links}
       options={{
         overlap: config.overlap,
         arcSpan: (config.arcSpan * Math.PI) / 180,
@@ -143,6 +151,8 @@
       }}
       styles={{
         labelFontFamily: 'monospace',
+        edge: '#ff6b6b',
+        edgeWidth: 1,
         depths: [
           {
             depth: -1,

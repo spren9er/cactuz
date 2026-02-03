@@ -1,0 +1,3058 @@
+[
+  {
+    "source": "flare.analytics.cluster.AgglomerativeCluster",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.analytics.cluster.AgglomerativeCluster",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.analytics.cluster.AgglomerativeCluster",
+    "target": "flare.util.math.IMatrix"
+  },
+  {
+    "source": "flare.analytics.cluster.AgglomerativeCluster",
+    "target": "flare.analytics.cluster.MergeEdge"
+  },
+  {
+    "source": "flare.analytics.cluster.AgglomerativeCluster",
+    "target": "flare.analytics.cluster.HierarchicalCluster"
+  },
+  {
+    "source": "flare.analytics.cluster.AgglomerativeCluster",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.analytics.cluster.CommunityStructure",
+    "target": "flare.analytics.cluster.HierarchicalCluster"
+  },
+  {
+    "source": "flare.analytics.cluster.CommunityStructure",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.analytics.cluster.CommunityStructure",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.analytics.cluster.CommunityStructure",
+    "target": "flare.analytics.cluster.MergeEdge"
+  },
+  {
+    "source": "flare.analytics.cluster.CommunityStructure",
+    "target": "flare.util.math.IMatrix"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.vis.data.Tree"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.analytics.cluster.MergeEdge"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.util.Sort"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.analytics.cluster.HierarchicalCluster",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.analytics.graph.BetweennessCentrality",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.analytics.graph.BetweennessCentrality",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.analytics.graph.BetweennessCentrality",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.analytics.graph.BetweennessCentrality",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.analytics.graph.BetweennessCentrality",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.analytics.graph.BetweennessCentrality",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.analytics.graph.BetweennessCentrality",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.analytics.graph.LinkDistance",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.analytics.graph.LinkDistance",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.analytics.graph.LinkDistance",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.analytics.graph.LinkDistance",
+    "target": "flare.analytics.graph.ShortestPaths"
+  },
+  {
+    "source": "flare.analytics.graph.LinkDistance",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.analytics.graph.LinkDistance",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.analytics.graph.LinkDistance",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.analytics.graph.MaxFlowMinCut",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.analytics.graph.MaxFlowMinCut",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.analytics.graph.MaxFlowMinCut",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.analytics.graph.MaxFlowMinCut",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.analytics.graph.MaxFlowMinCut",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.analytics.graph.MaxFlowMinCut",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.analytics.graph.ShortestPaths",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.analytics.graph.ShortestPaths",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.analytics.graph.ShortestPaths",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.analytics.graph.ShortestPaths",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.analytics.graph.ShortestPaths",
+    "target": "flare.util.heap.HeapNode"
+  },
+  {
+    "source": "flare.analytics.graph.ShortestPaths",
+    "target": "flare.util.heap.FibonacciHeap"
+  },
+  {
+    "source": "flare.analytics.graph.ShortestPaths",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.analytics.graph.ShortestPaths",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.analytics.graph.SpanningTree",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.analytics.graph.SpanningTree",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.analytics.graph.SpanningTree",
+    "target": "flare.vis.operator.IOperator"
+  },
+  {
+    "source": "flare.analytics.graph.SpanningTree",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.analytics.graph.SpanningTree",
+    "target": "flare.vis.data.TreeBuilder"
+  },
+  {
+    "source": "flare.analytics.graph.SpanningTree",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.analytics.optimization.AspectRatioBanker",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.analytics.optimization.AspectRatioBanker",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.analytics.optimization.AspectRatioBanker",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.analytics.optimization.AspectRatioBanker",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.analytics.optimization.AspectRatioBanker",
+    "target": "flare.vis.axis.CartesianAxes"
+  },
+  {
+    "source": "flare.analytics.optimization.AspectRatioBanker",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.analytics.optimization.AspectRatioBanker",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.analytics.optimization.AspectRatioBanker",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.animate.Easing",
+    "target": "flare.animate.Transition"
+  },
+  {
+    "source": "flare.animate.FunctionSequence",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.animate.FunctionSequence",
+    "target": "flare.animate.Transition"
+  },
+  {
+    "source": "flare.animate.FunctionSequence",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.animate.FunctionSequence",
+    "target": "flare.animate.Sequence"
+  },
+  {
+    "source": "flare.animate.FunctionSequence",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.animate.interpolate.ArrayInterpolator",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.animate.interpolate.ArrayInterpolator",
+    "target": "flare.animate.interpolate.Interpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.ColorInterpolator",
+    "target": "flare.animate.interpolate.Interpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.DateInterpolator",
+    "target": "flare.animate.interpolate.Interpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.Interpolator",
+    "target": "flare.animate.interpolate.NumberInterpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.Interpolator",
+    "target": "flare.animate.interpolate.ColorInterpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.Interpolator",
+    "target": "flare.animate.interpolate.PointInterpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.Interpolator",
+    "target": "flare.animate.interpolate.ObjectInterpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.Interpolator",
+    "target": "flare.animate.interpolate.MatrixInterpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.Interpolator",
+    "target": "flare.animate.interpolate.RectangleInterpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.Interpolator",
+    "target": "flare.animate.interpolate.DateInterpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.Interpolator",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.animate.interpolate.Interpolator",
+    "target": "flare.animate.interpolate.ArrayInterpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.MatrixInterpolator",
+    "target": "flare.animate.interpolate.Interpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.NumberInterpolator",
+    "target": "flare.animate.interpolate.Interpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.ObjectInterpolator",
+    "target": "flare.animate.interpolate.Interpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.PointInterpolator",
+    "target": "flare.animate.interpolate.Interpolator"
+  },
+  {
+    "source": "flare.animate.interpolate.RectangleInterpolator",
+    "target": "flare.animate.interpolate.Interpolator"
+  },
+  {
+    "source": "flare.animate.ISchedulable",
+    "target": "flare.animate.Scheduler"
+  },
+  {
+    "source": "flare.animate.Parallel",
+    "target": "flare.animate.Easing"
+  },
+  {
+    "source": "flare.animate.Parallel",
+    "target": "flare.animate.Transition"
+  },
+  {
+    "source": "flare.animate.Parallel",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.animate.Pause",
+    "target": "flare.animate.Transition"
+  },
+  {
+    "source": "flare.animate.Scheduler",
+    "target": "flare.animate.ISchedulable"
+  },
+  {
+    "source": "flare.animate.Scheduler",
+    "target": "flare.animate.Pause"
+  },
+  {
+    "source": "flare.animate.Scheduler",
+    "target": "flare.animate.Transition"
+  },
+  {
+    "source": "flare.animate.Sequence",
+    "target": "flare.animate.Easing"
+  },
+  {
+    "source": "flare.animate.Sequence",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.animate.Sequence",
+    "target": "flare.animate.Transition"
+  },
+  {
+    "source": "flare.animate.Sequence",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.animate.TransitionEvent"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.animate.Scheduler"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.animate.Pause"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.animate.Parallel"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.animate.Easing"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.animate.Sequence"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.animate.ISchedulable"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.animate.Transition",
+    "target": "flare.animate.Tween"
+  },
+  {
+    "source": "flare.animate.Transitioner",
+    "target": "flare.util.IValueProxy"
+  },
+  {
+    "source": "flare.animate.Transitioner",
+    "target": "flare.animate.Parallel"
+  },
+  {
+    "source": "flare.animate.Transitioner",
+    "target": "flare.animate.Easing"
+  },
+  {
+    "source": "flare.animate.Transitioner",
+    "target": "flare.animate.Sequence"
+  },
+  {
+    "source": "flare.animate.Transitioner",
+    "target": "flare.animate.Transition"
+  },
+  {
+    "source": "flare.animate.Transitioner",
+    "target": "flare.animate.Tween"
+  },
+  {
+    "source": "flare.animate.Transitioner",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.animate.TransitionEvent",
+    "target": "flare.animate.Transition"
+  },
+  {
+    "source": "flare.animate.Tween",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.animate.Tween",
+    "target": "flare.animate.Transition"
+  },
+  {
+    "source": "flare.animate.Tween",
+    "target": "flare.animate.interpolate.Interpolator"
+  },
+  {
+    "source": "flare.animate.Tween",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.data.converters.Converters",
+    "target": "flare.data.converters.IDataConverter"
+  },
+  {
+    "source": "flare.data.converters.Converters",
+    "target": "flare.data.converters.GraphMLConverter"
+  },
+  {
+    "source": "flare.data.converters.Converters",
+    "target": "flare.data.converters.JSONConverter"
+  },
+  {
+    "source": "flare.data.converters.Converters",
+    "target": "flare.data.converters.DelimitedTextConverter"
+  },
+  {
+    "source": "flare.data.converters.DelimitedTextConverter",
+    "target": "flare.data.DataSet"
+  },
+  {
+    "source": "flare.data.converters.DelimitedTextConverter",
+    "target": "flare.data.DataUtil"
+  },
+  {
+    "source": "flare.data.converters.DelimitedTextConverter",
+    "target": "flare.data.DataTable"
+  },
+  {
+    "source": "flare.data.converters.DelimitedTextConverter",
+    "target": "flare.data.converters.IDataConverter"
+  },
+  {
+    "source": "flare.data.converters.DelimitedTextConverter",
+    "target": "flare.data.DataSchema"
+  },
+  {
+    "source": "flare.data.converters.DelimitedTextConverter",
+    "target": "flare.data.DataField"
+  },
+  {
+    "source": "flare.data.converters.GraphMLConverter",
+    "target": "flare.data.DataSet"
+  },
+  {
+    "source": "flare.data.converters.GraphMLConverter",
+    "target": "flare.data.DataUtil"
+  },
+  {
+    "source": "flare.data.converters.GraphMLConverter",
+    "target": "flare.data.DataTable"
+  },
+  {
+    "source": "flare.data.converters.GraphMLConverter",
+    "target": "flare.data.converters.IDataConverter"
+  },
+  {
+    "source": "flare.data.converters.GraphMLConverter",
+    "target": "flare.data.DataSchema"
+  },
+  {
+    "source": "flare.data.converters.GraphMLConverter",
+    "target": "flare.data.DataField"
+  },
+  {
+    "source": "flare.data.converters.IDataConverter",
+    "target": "flare.data.DataSet"
+  },
+  {
+    "source": "flare.data.converters.IDataConverter",
+    "target": "flare.data.DataSchema"
+  },
+  {
+    "source": "flare.data.converters.JSONConverter",
+    "target": "flare.data.DataSet"
+  },
+  {
+    "source": "flare.data.converters.JSONConverter",
+    "target": "flare.data.DataUtil"
+  },
+  {
+    "source": "flare.data.converters.JSONConverter",
+    "target": "flare.data.DataTable"
+  },
+  {
+    "source": "flare.data.converters.JSONConverter",
+    "target": "flare.data.converters.IDataConverter"
+  },
+  {
+    "source": "flare.data.converters.JSONConverter",
+    "target": "flare.data.DataSchema"
+  },
+  {
+    "source": "flare.data.converters.JSONConverter",
+    "target": "flare.data.DataField"
+  },
+  {
+    "source": "flare.data.converters.JSONConverter",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.data.DataField",
+    "target": "flare.data.DataUtil"
+  },
+  {
+    "source": "flare.data.DataSchema",
+    "target": "flare.data.DataField"
+  },
+  {
+    "source": "flare.data.DataSchema",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.data.DataSet",
+    "target": "flare.data.DataTable"
+  },
+  {
+    "source": "flare.data.DataSource",
+    "target": "flare.data.converters.IDataConverter"
+  },
+  {
+    "source": "flare.data.DataSource",
+    "target": "flare.data.converters.Converters"
+  },
+  {
+    "source": "flare.data.DataSource",
+    "target": "flare.data.DataSchema"
+  },
+  {
+    "source": "flare.data.DataTable",
+    "target": "flare.data.DataSchema"
+  },
+  {
+    "source": "flare.data.DataUtil",
+    "target": "flare.data.DataField"
+  },
+  {
+    "source": "flare.data.DataUtil",
+    "target": "flare.data.DataSchema"
+  },
+  {
+    "source": "flare.display.LineSprite",
+    "target": "flare.display.DirtySprite"
+  },
+  {
+    "source": "flare.display.RectSprite",
+    "target": "flare.util.Colors"
+  },
+  {
+    "source": "flare.display.RectSprite",
+    "target": "flare.display.DirtySprite"
+  },
+  {
+    "source": "flare.display.TextSprite",
+    "target": "flare.display.DirtySprite"
+  },
+  {
+    "source": "flare.flex.FlareVis",
+    "target": "flare.display.DirtySprite"
+  },
+  {
+    "source": "flare.flex.FlareVis",
+    "target": "flare.data.DataSet"
+  },
+  {
+    "source": "flare.flex.FlareVis",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.flex.FlareVis",
+    "target": "flare.vis.axis.CartesianAxes"
+  },
+  {
+    "source": "flare.flex.FlareVis",
+    "target": "flare.vis.axis.Axes"
+  },
+  {
+    "source": "flare.flex.FlareVis",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.physics.DragForce",
+    "target": "flare.physics.Simulation"
+  },
+  {
+    "source": "flare.physics.DragForce",
+    "target": "flare.physics.Particle"
+  },
+  {
+    "source": "flare.physics.DragForce",
+    "target": "flare.physics.IForce"
+  },
+  {
+    "source": "flare.physics.GravityForce",
+    "target": "flare.physics.Simulation"
+  },
+  {
+    "source": "flare.physics.GravityForce",
+    "target": "flare.physics.Particle"
+  },
+  {
+    "source": "flare.physics.GravityForce",
+    "target": "flare.physics.IForce"
+  },
+  {
+    "source": "flare.physics.IForce",
+    "target": "flare.physics.Simulation"
+  },
+  {
+    "source": "flare.physics.NBodyForce",
+    "target": "flare.physics.Simulation"
+  },
+  {
+    "source": "flare.physics.NBodyForce",
+    "target": "flare.physics.Particle"
+  },
+  {
+    "source": "flare.physics.NBodyForce",
+    "target": "flare.physics.IForce"
+  },
+  {
+    "source": "flare.physics.Simulation",
+    "target": "flare.physics.Particle"
+  },
+  {
+    "source": "flare.physics.Simulation",
+    "target": "flare.physics.NBodyForce"
+  },
+  {
+    "source": "flare.physics.Simulation",
+    "target": "flare.physics.DragForce"
+  },
+  {
+    "source": "flare.physics.Simulation",
+    "target": "flare.physics.GravityForce"
+  },
+  {
+    "source": "flare.physics.Simulation",
+    "target": "flare.physics.Spring"
+  },
+  {
+    "source": "flare.physics.Simulation",
+    "target": "flare.physics.SpringForce"
+  },
+  {
+    "source": "flare.physics.Simulation",
+    "target": "flare.physics.IForce"
+  },
+  {
+    "source": "flare.physics.Spring",
+    "target": "flare.physics.Particle"
+  },
+  {
+    "source": "flare.physics.SpringForce",
+    "target": "flare.physics.Simulation"
+  },
+  {
+    "source": "flare.physics.SpringForce",
+    "target": "flare.physics.Particle"
+  },
+  {
+    "source": "flare.physics.SpringForce",
+    "target": "flare.physics.Spring"
+  },
+  {
+    "source": "flare.physics.SpringForce",
+    "target": "flare.physics.IForce"
+  },
+  {
+    "source": "flare.query.AggregateExpression",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.And",
+    "target": "flare.query.CompositeExpression"
+  },
+  {
+    "source": "flare.query.And",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Arithmetic",
+    "target": "flare.query.BinaryExpression"
+  },
+  {
+    "source": "flare.query.Arithmetic",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Average",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Average",
+    "target": "flare.query.AggregateExpression"
+  },
+  {
+    "source": "flare.query.BinaryExpression",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Comparison",
+    "target": "flare.query.Not"
+  },
+  {
+    "source": "flare.query.Comparison",
+    "target": "flare.query.BinaryExpression"
+  },
+  {
+    "source": "flare.query.Comparison",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Comparison",
+    "target": "flare.query.Or"
+  },
+  {
+    "source": "flare.query.CompositeExpression",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.CompositeExpression",
+    "target": "flare.query.If"
+  },
+  {
+    "source": "flare.query.Count",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Count",
+    "target": "flare.query.AggregateExpression"
+  },
+  {
+    "source": "flare.query.DateUtil",
+    "target": "flare.query.Fn"
+  },
+  {
+    "source": "flare.query.Distinct",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Distinct",
+    "target": "flare.query.AggregateExpression"
+  },
+  {
+    "source": "flare.query.Expression",
+    "target": "flare.query.Variable"
+  },
+  {
+    "source": "flare.query.Expression",
+    "target": "flare.query.IsA"
+  },
+  {
+    "source": "flare.query.Expression",
+    "target": "flare.query.ExpressionIterator"
+  },
+  {
+    "source": "flare.query.Expression",
+    "target": "flare.util.IPredicate"
+  },
+  {
+    "source": "flare.query.Expression",
+    "target": "flare.query.Literal"
+  },
+  {
+    "source": "flare.query.Expression",
+    "target": "flare.util.IEvaluable"
+  },
+  {
+    "source": "flare.query.Expression",
+    "target": "flare.query.If"
+  },
+  {
+    "source": "flare.query.ExpressionIterator",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Fn",
+    "target": "flare.query.DateUtil"
+  },
+  {
+    "source": "flare.query.Fn",
+    "target": "flare.query.CompositeExpression"
+  },
+  {
+    "source": "flare.query.Fn",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Fn",
+    "target": "flare.query.StringUtil"
+  },
+  {
+    "source": "flare.query.If",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.IsA",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.IsA",
+    "target": "flare.query.If"
+  },
+  {
+    "source": "flare.query.Literal",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Match",
+    "target": "flare.query.BinaryExpression"
+  },
+  {
+    "source": "flare.query.Match",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Match",
+    "target": "flare.query.StringUtil"
+  },
+  {
+    "source": "flare.query.Maximum",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Maximum",
+    "target": "flare.query.AggregateExpression"
+  },
+  {
+    "source": "flare.query.methods.add",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.add",
+    "target": "flare.query.Arithmetic"
+  },
+  {
+    "source": "flare.query.methods.and",
+    "target": "flare.query.And"
+  },
+  {
+    "source": "flare.query.methods.and",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.average",
+    "target": "flare.query.Average"
+  },
+  {
+    "source": "flare.query.methods.average",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.count",
+    "target": "flare.query.Count"
+  },
+  {
+    "source": "flare.query.methods.count",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.distinct",
+    "target": "flare.query.Distinct"
+  },
+  {
+    "source": "flare.query.methods.distinct",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.div",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.div",
+    "target": "flare.query.Arithmetic"
+  },
+  {
+    "source": "flare.query.methods.eq",
+    "target": "flare.query.Comparison"
+  },
+  {
+    "source": "flare.query.methods.eq",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.fn",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.fn",
+    "target": "flare.query.Fn"
+  },
+  {
+    "source": "flare.query.methods.gt",
+    "target": "flare.query.Comparison"
+  },
+  {
+    "source": "flare.query.methods.gt",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.gte",
+    "target": "flare.query.Comparison"
+  },
+  {
+    "source": "flare.query.methods.gte",
+    "target": "flare.query.methods.gt"
+  },
+  {
+    "source": "flare.query.methods.gte",
+    "target": "flare.query.methods.eq"
+  },
+  {
+    "source": "flare.query.methods.gte",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.iff",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.iff",
+    "target": "flare.query.If"
+  },
+  {
+    "source": "flare.query.methods.isa",
+    "target": "flare.query.IsA"
+  },
+  {
+    "source": "flare.query.methods.isa",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.lt",
+    "target": "flare.query.Comparison"
+  },
+  {
+    "source": "flare.query.methods.lt",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.lte",
+    "target": "flare.query.Comparison"
+  },
+  {
+    "source": "flare.query.methods.lte",
+    "target": "flare.query.methods.lt"
+  },
+  {
+    "source": "flare.query.methods.lte",
+    "target": "flare.query.methods.eq"
+  },
+  {
+    "source": "flare.query.methods.lte",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.max",
+    "target": "flare.query.Maximum"
+  },
+  {
+    "source": "flare.query.methods.max",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.min",
+    "target": "flare.query.Minimum"
+  },
+  {
+    "source": "flare.query.methods.min",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.mod",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.mod",
+    "target": "flare.query.Arithmetic"
+  },
+  {
+    "source": "flare.query.methods.mul",
+    "target": "flare.query.methods.lt"
+  },
+  {
+    "source": "flare.query.methods.mul",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.mul",
+    "target": "flare.query.Arithmetic"
+  },
+  {
+    "source": "flare.query.methods.neq",
+    "target": "flare.query.Comparison"
+  },
+  {
+    "source": "flare.query.methods.neq",
+    "target": "flare.query.methods.eq"
+  },
+  {
+    "source": "flare.query.methods.neq",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.not",
+    "target": "flare.query.Not"
+  },
+  {
+    "source": "flare.query.methods.not",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.or",
+    "target": "flare.query.Or"
+  },
+  {
+    "source": "flare.query.methods.orderby",
+    "target": "flare.query.Query"
+  },
+  {
+    "source": "flare.query.methods.orderby",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.range",
+    "target": "flare.query.methods.max"
+  },
+  {
+    "source": "flare.query.methods.range",
+    "target": "flare.query.Range"
+  },
+  {
+    "source": "flare.query.methods.range",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.range",
+    "target": "flare.query.methods.min"
+  },
+  {
+    "source": "flare.query.methods.select",
+    "target": "flare.query.Query"
+  },
+  {
+    "source": "flare.query.methods.stddev",
+    "target": "flare.query.methods.and"
+  },
+  {
+    "source": "flare.query.methods.stddev",
+    "target": "flare.query.Variance"
+  },
+  {
+    "source": "flare.query.methods.stddev",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.sub",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.sub",
+    "target": "flare.query.Arithmetic"
+  },
+  {
+    "source": "flare.query.methods.sum",
+    "target": "flare.query.Sum"
+  },
+  {
+    "source": "flare.query.methods.sum",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.update",
+    "target": "flare.query.Query"
+  },
+  {
+    "source": "flare.query.methods.variance",
+    "target": "flare.query.Variance"
+  },
+  {
+    "source": "flare.query.methods.variance",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods.where",
+    "target": "flare.query.Query"
+  },
+  {
+    "source": "flare.query.methods.where",
+    "target": "flare.query.methods.lt"
+  },
+  {
+    "source": "flare.query.methods.where",
+    "target": "flare.query.methods.lte"
+  },
+  {
+    "source": "flare.query.methods.xor",
+    "target": "flare.query.Xor"
+  },
+  {
+    "source": "flare.query.methods.xor",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.methods._",
+    "target": "flare.query.Literal"
+  },
+  {
+    "source": "flare.query.methods._",
+    "target": "flare.query.methods.or"
+  },
+  {
+    "source": "flare.query.Minimum",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Minimum",
+    "target": "flare.query.AggregateExpression"
+  },
+  {
+    "source": "flare.query.Not",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Or",
+    "target": "flare.query.CompositeExpression"
+  },
+  {
+    "source": "flare.query.Or",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.query.Variable"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.query.Sum"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.util.Sort"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.query.Not"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.query.AggregateExpression"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.query.Literal"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.query.Query",
+    "target": "flare.query.If"
+  },
+  {
+    "source": "flare.query.Range",
+    "target": "flare.query.And"
+  },
+  {
+    "source": "flare.query.Range",
+    "target": "flare.query.Comparison"
+  },
+  {
+    "source": "flare.query.Range",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.StringUtil",
+    "target": "flare.query.Fn"
+  },
+  {
+    "source": "flare.query.Sum",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Sum",
+    "target": "flare.query.AggregateExpression"
+  },
+  {
+    "source": "flare.query.Variable",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Variable",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.query.Variance",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.query.Variance",
+    "target": "flare.query.AggregateExpression"
+  },
+  {
+    "source": "flare.query.Xor",
+    "target": "flare.query.CompositeExpression"
+  },
+  {
+    "source": "flare.query.Xor",
+    "target": "flare.query.Expression"
+  },
+  {
+    "source": "flare.scale.IScaleMap",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.scale.LinearScale",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.scale.LinearScale",
+    "target": "flare.util.Strings"
+  },
+  {
+    "source": "flare.scale.LinearScale",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.scale.LinearScale",
+    "target": "flare.scale.QuantitativeScale"
+  },
+  {
+    "source": "flare.scale.LinearScale",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.scale.LogScale",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.scale.LogScale",
+    "target": "flare.util.Strings"
+  },
+  {
+    "source": "flare.scale.LogScale",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.scale.LogScale",
+    "target": "flare.scale.QuantitativeScale"
+  },
+  {
+    "source": "flare.scale.LogScale",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.scale.OrdinalScale",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.scale.OrdinalScale",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.scale.OrdinalScale",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.scale.QuantileScale",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.scale.QuantileScale",
+    "target": "flare.util.Strings"
+  },
+  {
+    "source": "flare.scale.QuantileScale",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.scale.QuantileScale",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.scale.QuantitativeScale",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.scale.QuantitativeScale",
+    "target": "flare.util.Strings"
+  },
+  {
+    "source": "flare.scale.QuantitativeScale",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.scale.RootScale",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.scale.RootScale",
+    "target": "flare.util.Strings"
+  },
+  {
+    "source": "flare.scale.RootScale",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.scale.RootScale",
+    "target": "flare.scale.QuantitativeScale"
+  },
+  {
+    "source": "flare.scale.RootScale",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.scale.Scale",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.scale.Scale",
+    "target": "flare.util.Strings"
+  },
+  {
+    "source": "flare.scale.ScaleType",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.scale.TimeScale",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.scale.TimeScale",
+    "target": "flare.util.Dates"
+  },
+  {
+    "source": "flare.scale.TimeScale",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.scale.TimeScale",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.util.Arrays",
+    "target": "flare.util.IValueProxy"
+  },
+  {
+    "source": "flare.util.Arrays",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.util.Arrays",
+    "target": "flare.util.IEvaluable"
+  },
+  {
+    "source": "flare.util.Colors",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.util.Dates",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.util.Displays",
+    "target": "flare.util.IValueProxy"
+  },
+  {
+    "source": "flare.util.Displays",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.util.Displays",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.util.Displays",
+    "target": "flare.util.IEvaluable"
+  },
+  {
+    "source": "flare.util.Displays",
+    "target": "flare.util.Sort"
+  },
+  {
+    "source": "flare.util.Filter",
+    "target": "flare.util.IPredicate"
+  },
+  {
+    "source": "flare.util.Filter",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.util.heap.FibonacciHeap",
+    "target": "flare.util.heap.HeapNode"
+  },
+  {
+    "source": "flare.util.heap.HeapNode",
+    "target": "flare.util.heap.FibonacciHeap"
+  },
+  {
+    "source": "flare.util.math.DenseMatrix",
+    "target": "flare.util.math.IMatrix"
+  },
+  {
+    "source": "flare.util.math.SparseMatrix",
+    "target": "flare.util.math.IMatrix"
+  },
+  {
+    "source": "flare.util.Maths",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.util.palette.ColorPalette",
+    "target": "flare.util.palette.Palette"
+  },
+  {
+    "source": "flare.util.palette.ColorPalette",
+    "target": "flare.util.Colors"
+  },
+  {
+    "source": "flare.util.palette.ShapePalette",
+    "target": "flare.util.palette.Palette"
+  },
+  {
+    "source": "flare.util.palette.ShapePalette",
+    "target": "flare.util.Shapes"
+  },
+  {
+    "source": "flare.util.palette.SizePalette",
+    "target": "flare.util.palette.Palette"
+  },
+  {
+    "source": "flare.util.Property",
+    "target": "flare.util.IPredicate"
+  },
+  {
+    "source": "flare.util.Property",
+    "target": "flare.util.IValueProxy"
+  },
+  {
+    "source": "flare.util.Property",
+    "target": "flare.util.IEvaluable"
+  },
+  {
+    "source": "flare.util.Shapes",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.util.Sort",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.util.Sort",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.util.Stats",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.util.Stats",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.util.Strings",
+    "target": "flare.util.Dates"
+  },
+  {
+    "source": "flare.util.Strings",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.axis.Axes",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.axis.Axes",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.scale.LinearScale"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.util.Strings"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.util.Stats"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.scale.IScaleMap"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.vis.axis.AxisLabel"
+  },
+  {
+    "source": "flare.vis.axis.Axis",
+    "target": "flare.vis.axis.AxisGridLine"
+  },
+  {
+    "source": "flare.vis.axis.AxisGridLine",
+    "target": "flare.vis.axis.Axis"
+  },
+  {
+    "source": "flare.vis.axis.AxisGridLine",
+    "target": "flare.display.LineSprite"
+  },
+  {
+    "source": "flare.vis.axis.AxisLabel",
+    "target": "flare.vis.axis.Axis"
+  },
+  {
+    "source": "flare.vis.axis.AxisLabel",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.axis.CartesianAxes",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.axis.CartesianAxes",
+    "target": "flare.display.RectSprite"
+  },
+  {
+    "source": "flare.vis.axis.CartesianAxes",
+    "target": "flare.vis.axis.Axis"
+  },
+  {
+    "source": "flare.vis.axis.CartesianAxes",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.axis.CartesianAxes",
+    "target": "flare.vis.axis.Axes"
+  },
+  {
+    "source": "flare.vis.axis.CartesianAxes",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.vis.axis.CartesianAxes",
+    "target": "flare.vis.axis.AxisGridLine"
+  },
+  {
+    "source": "flare.vis.controls.AnchorControl",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.AnchorControl",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.vis.controls.AnchorControl",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.controls.ClickControl",
+    "target": "flare.vis.events.SelectionEvent"
+  },
+  {
+    "source": "flare.vis.controls.ClickControl",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.Control",
+    "target": "flare.vis.controls.IControl"
+  },
+  {
+    "source": "flare.vis.controls.Control",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.vis.controls.ControlList",
+    "target": "flare.vis.controls.IControl"
+  },
+  {
+    "source": "flare.vis.controls.ControlList",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.controls.ControlList",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.vis.controls.ControlList",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.DragControl",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.DragControl",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.controls.ExpandControl",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.controls.ExpandControl",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.controls.ExpandControl",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.ExpandControl",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.vis.controls.HoverControl",
+    "target": "flare.vis.events.SelectionEvent"
+  },
+  {
+    "source": "flare.vis.controls.HoverControl",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.IControl",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.PanZoomControl",
+    "target": "flare.util.Displays"
+  },
+  {
+    "source": "flare.vis.controls.PanZoomControl",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.SelectionControl",
+    "target": "flare.vis.events.SelectionEvent"
+  },
+  {
+    "source": "flare.vis.controls.SelectionControl",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.TooltipControl",
+    "target": "flare.animate.Tween"
+  },
+  {
+    "source": "flare.vis.controls.TooltipControl",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.controls.TooltipControl",
+    "target": "flare.vis.controls.Control"
+  },
+  {
+    "source": "flare.vis.controls.TooltipControl",
+    "target": "flare.vis.events.TooltipEvent"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.vis.data.Tree"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.vis.events.DataEvent"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.data.DataSet"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.vis.data.TreeBuilder"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.data.DataSchema"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.util.Sort"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.data.DataField"
+  },
+  {
+    "source": "flare.vis.data.Data",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.util.math.DenseMatrix"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.vis.events.DataEvent"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.util.Stats"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.util.math.IMatrix"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.util.Sort"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.util.IEvaluable"
+  },
+  {
+    "source": "flare.vis.data.DataList",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.data.DataSprite",
+    "target": "flare.util.Colors"
+  },
+  {
+    "source": "flare.vis.data.DataSprite",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.data.DataSprite",
+    "target": "flare.display.DirtySprite"
+  },
+  {
+    "source": "flare.vis.data.DataSprite",
+    "target": "flare.vis.data.render.IRenderer"
+  },
+  {
+    "source": "flare.vis.data.DataSprite",
+    "target": "flare.vis.data.render.ShapeRenderer"
+  },
+  {
+    "source": "flare.vis.data.EdgeSprite",
+    "target": "flare.vis.data.render.EdgeRenderer"
+  },
+  {
+    "source": "flare.vis.data.EdgeSprite",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.data.EdgeSprite",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.data.EdgeSprite",
+    "target": "flare.vis.data.render.ArrowType"
+  },
+  {
+    "source": "flare.vis.data.EdgeSprite",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.data.NodeSprite",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.data.NodeSprite",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.data.NodeSprite",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.data.NodeSprite",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.data.NodeSprite",
+    "target": "flare.vis.data.Tree"
+  },
+  {
+    "source": "flare.vis.data.NodeSprite",
+    "target": "flare.util.Sort"
+  },
+  {
+    "source": "flare.vis.data.NodeSprite",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.vis.data.NodeSprite",
+    "target": "flare.util.IEvaluable"
+  },
+  {
+    "source": "flare.vis.data.NodeSprite",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.data.render.EdgeRenderer",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.data.render.EdgeRenderer",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.data.render.EdgeRenderer",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.data.render.EdgeRenderer",
+    "target": "flare.vis.data.render.IRenderer"
+  },
+  {
+    "source": "flare.vis.data.render.EdgeRenderer",
+    "target": "flare.util.Shapes"
+  },
+  {
+    "source": "flare.vis.data.render.EdgeRenderer",
+    "target": "flare.util.Geometry"
+  },
+  {
+    "source": "flare.vis.data.render.EdgeRenderer",
+    "target": "flare.vis.data.render.ArrowType"
+  },
+  {
+    "source": "flare.vis.data.render.IRenderer",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.data.render.ShapeRenderer",
+    "target": "flare.util.Shapes"
+  },
+  {
+    "source": "flare.vis.data.render.ShapeRenderer",
+    "target": "flare.vis.data.render.IRenderer"
+  },
+  {
+    "source": "flare.vis.data.render.ShapeRenderer",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.scale.TimeScale"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.scale.LinearScale"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.scale.LogScale"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.scale.OrdinalScale"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.scale.RootScale"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.scale.QuantileScale"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.util.Stats"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.scale.QuantitativeScale"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.vis.events.DataEvent"
+  },
+  {
+    "source": "flare.vis.data.ScaleBinding",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.data.Tree",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.data.Tree",
+    "target": "flare.vis.events.DataEvent"
+  },
+  {
+    "source": "flare.vis.data.Tree",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.data.Tree",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.data.TreeBuilder",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.data.TreeBuilder",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.data.TreeBuilder",
+    "target": "flare.vis.data.Tree"
+  },
+  {
+    "source": "flare.vis.data.TreeBuilder",
+    "target": "flare.util.heap.HeapNode"
+  },
+  {
+    "source": "flare.vis.data.TreeBuilder",
+    "target": "flare.util.heap.FibonacciHeap"
+  },
+  {
+    "source": "flare.vis.data.TreeBuilder",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.data.TreeBuilder",
+    "target": "flare.util.IEvaluable"
+  },
+  {
+    "source": "flare.vis.data.TreeBuilder",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.events.DataEvent",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.events.DataEvent",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.events.DataEvent",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.vis.events.DataEvent",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.events.SelectionEvent",
+    "target": "flare.vis.events.DataEvent"
+  },
+  {
+    "source": "flare.vis.events.TooltipEvent",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.events.TooltipEvent",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.events.VisualizationEvent",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.vis.data.ScaleBinding"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.util.palette.SizePalette"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.vis.legend.LegendItem"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.display.RectSprite"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.vis.legend.LegendRange"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.util.Displays"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.util.Orientation"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.util.palette.ShapePalette"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.util.palette.Palette"
+  },
+  {
+    "source": "flare.vis.legend.Legend",
+    "target": "flare.util.palette.ColorPalette"
+  },
+  {
+    "source": "flare.vis.legend.LegendItem",
+    "target": "flare.util.Shapes"
+  },
+  {
+    "source": "flare.vis.legend.LegendItem",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.legend.LegendItem",
+    "target": "flare.vis.legend.Legend"
+  },
+  {
+    "source": "flare.vis.legend.LegendItem",
+    "target": "flare.display.RectSprite"
+  },
+  {
+    "source": "flare.vis.legend.LegendRange",
+    "target": "flare.util.Colors"
+  },
+  {
+    "source": "flare.vis.legend.LegendRange",
+    "target": "flare.vis.legend.Legend"
+  },
+  {
+    "source": "flare.vis.legend.LegendRange",
+    "target": "flare.display.RectSprite"
+  },
+  {
+    "source": "flare.vis.legend.LegendRange",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.legend.LegendRange",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.vis.legend.LegendRange",
+    "target": "flare.util.Stats"
+  },
+  {
+    "source": "flare.vis.legend.LegendRange",
+    "target": "flare.scale.IScaleMap"
+  },
+  {
+    "source": "flare.vis.legend.LegendRange",
+    "target": "flare.util.Orientation"
+  },
+  {
+    "source": "flare.vis.legend.LegendRange",
+    "target": "flare.util.palette.ColorPalette"
+  },
+  {
+    "source": "flare.vis.operator.distortion.BifocalDistortion",
+    "target": "flare.vis.operator.distortion.Distortion"
+  },
+  {
+    "source": "flare.vis.operator.distortion.Distortion",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.distortion.Distortion",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.distortion.Distortion",
+    "target": "flare.vis.events.VisualizationEvent"
+  },
+  {
+    "source": "flare.vis.operator.distortion.Distortion",
+    "target": "flare.vis.axis.Axis"
+  },
+  {
+    "source": "flare.vis.operator.distortion.Distortion",
+    "target": "flare.vis.axis.CartesianAxes"
+  },
+  {
+    "source": "flare.vis.operator.distortion.Distortion",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.distortion.Distortion",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.distortion.FisheyeDistortion",
+    "target": "flare.vis.operator.distortion.Distortion"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ColorEncoder",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ColorEncoder",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ColorEncoder",
+    "target": "flare.vis.operator.encoder.Encoder"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ColorEncoder",
+    "target": "flare.util.palette.Palette"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ColorEncoder",
+    "target": "flare.util.palette.ColorPalette"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ColorEncoder",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.encoder.Encoder",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.encoder.Encoder",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.encoder.Encoder",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.encoder.Encoder",
+    "target": "flare.vis.data.ScaleBinding"
+  },
+  {
+    "source": "flare.vis.operator.encoder.Encoder",
+    "target": "flare.util.palette.Palette"
+  },
+  {
+    "source": "flare.vis.operator.encoder.Encoder",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.vis.operator.encoder.Encoder",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.operator.encoder.Encoder",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.encoder.PropertyEncoder",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.encoder.PropertyEncoder",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.vis.operator.encoder.PropertyEncoder",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.encoder.PropertyEncoder",
+    "target": "flare.vis.operator.encoder.Encoder"
+  },
+  {
+    "source": "flare.vis.operator.encoder.PropertyEncoder",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.vis.operator.encoder.PropertyEncoder",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ShapeEncoder",
+    "target": "flare.util.palette.Palette"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ShapeEncoder",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ShapeEncoder",
+    "target": "flare.util.palette.ShapePalette"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ShapeEncoder",
+    "target": "flare.vis.operator.encoder.Encoder"
+  },
+  {
+    "source": "flare.vis.operator.encoder.ShapeEncoder",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.encoder.SizeEncoder",
+    "target": "flare.util.palette.Palette"
+  },
+  {
+    "source": "flare.vis.operator.encoder.SizeEncoder",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.vis.operator.encoder.SizeEncoder",
+    "target": "flare.vis.operator.encoder.Encoder"
+  },
+  {
+    "source": "flare.vis.operator.encoder.SizeEncoder",
+    "target": "flare.util.palette.SizePalette"
+  },
+  {
+    "source": "flare.vis.operator.encoder.SizeEncoder",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.filter.FisheyeTreeFilter",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.filter.FisheyeTreeFilter",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.filter.FisheyeTreeFilter",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.filter.FisheyeTreeFilter",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.operator.filter.FisheyeTreeFilter",
+    "target": "flare.vis.data.Tree"
+  },
+  {
+    "source": "flare.vis.operator.filter.FisheyeTreeFilter",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.filter.FisheyeTreeFilter",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.filter.GraphDistanceFilter",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.filter.GraphDistanceFilter",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.filter.GraphDistanceFilter",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.filter.GraphDistanceFilter",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.filter.GraphDistanceFilter",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.operator.filter.VisibilityFilter",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.filter.VisibilityFilter",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.filter.VisibilityFilter",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.vis.operator.filter.VisibilityFilter",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.filter.VisibilityFilter",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.IOperator",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.IOperator",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.vis.operator.IOperator",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.label.Labeler",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.label.Labeler",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.label.Labeler",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.operator.label.Labeler",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.label.Labeler",
+    "target": "flare.util.Shapes"
+  },
+  {
+    "source": "flare.vis.operator.label.Labeler",
+    "target": "flare.util.Filter"
+  },
+  {
+    "source": "flare.vis.operator.label.Labeler",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.operator.label.Labeler",
+    "target": "flare.util.IEvaluable"
+  },
+  {
+    "source": "flare.vis.operator.label.Labeler",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.label.RadialLabeler",
+    "target": "flare.vis.operator.label.Labeler"
+  },
+  {
+    "source": "flare.vis.operator.label.RadialLabeler",
+    "target": "flare.util.Shapes"
+  },
+  {
+    "source": "flare.vis.operator.label.RadialLabeler",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.operator.label.RadialLabeler",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.label.RadialLabeler",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.label.StackedAreaLabeler",
+    "target": "flare.vis.operator.label.Labeler"
+  },
+  {
+    "source": "flare.vis.operator.label.StackedAreaLabeler",
+    "target": "flare.display.TextSprite"
+  },
+  {
+    "source": "flare.vis.operator.label.StackedAreaLabeler",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.label.StackedAreaLabeler",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.layout.AxisLayout",
+    "target": "flare.scale.ScaleType"
+  },
+  {
+    "source": "flare.vis.operator.layout.AxisLayout",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.AxisLayout",
+    "target": "flare.vis.axis.CartesianAxes"
+  },
+  {
+    "source": "flare.vis.operator.layout.AxisLayout",
+    "target": "flare.vis.data.ScaleBinding"
+  },
+  {
+    "source": "flare.vis.operator.layout.AxisLayout",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.operator.layout.AxisLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.AxisLayout",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.layout.BundledEdgeRouter",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.layout.BundledEdgeRouter",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.BundledEdgeRouter",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.operator.layout.BundledEdgeRouter",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.BundledEdgeRouter",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.BundledEdgeRouter",
+    "target": "flare.util.Shapes"
+  },
+  {
+    "source": "flare.vis.operator.layout.BundledEdgeRouter",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.BundledEdgeRouter",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.layout.CircleLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.CircleLayout",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.vis.operator.layout.CircleLayout",
+    "target": "flare.vis.data.ScaleBinding"
+  },
+  {
+    "source": "flare.vis.operator.layout.CircleLayout",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.operator.layout.CircleLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.CircleLayout",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.layout.CirclePackingLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.CirclePackingLayout",
+    "target": "flare.vis.data.render.ShapeRenderer"
+  },
+  {
+    "source": "flare.vis.operator.layout.CirclePackingLayout",
+    "target": "flare.util.Shapes"
+  },
+  {
+    "source": "flare.vis.operator.layout.CirclePackingLayout",
+    "target": "flare.util.Sort"
+  },
+  {
+    "source": "flare.vis.operator.layout.CirclePackingLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.CirclePackingLayout",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.layout.DendrogramLayout",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.operator.layout.DendrogramLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.DendrogramLayout",
+    "target": "flare.util.Orientation"
+  },
+  {
+    "source": "flare.vis.operator.layout.DendrogramLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.DendrogramLayout",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.ForceDirectedLayout",
+    "target": "flare.physics.Simulation"
+  },
+  {
+    "source": "flare.vis.operator.layout.ForceDirectedLayout",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.layout.ForceDirectedLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.ForceDirectedLayout",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.ForceDirectedLayout",
+    "target": "flare.physics.Particle"
+  },
+  {
+    "source": "flare.vis.operator.layout.ForceDirectedLayout",
+    "target": "flare.physics.Spring"
+  },
+  {
+    "source": "flare.vis.operator.layout.ForceDirectedLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.ForceDirectedLayout",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.ForceDirectedLayout",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.layout.IcicleTreeLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.IcicleTreeLayout",
+    "target": "flare.util.Orientation"
+  },
+  {
+    "source": "flare.vis.operator.layout.IcicleTreeLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.IndentedTreeLayout",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.layout.IndentedTreeLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.IndentedTreeLayout",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.operator.layout.IndentedTreeLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.IndentedTreeLayout",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.vis.data.EdgeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.vis.axis.CartesianAxes"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.vis.axis.Axes"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.animate.TransitionEvent"
+  },
+  {
+    "source": "flare.vis.operator.layout.Layout",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.layout.NodeLinkTreeLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.NodeLinkTreeLayout",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.operator.layout.NodeLinkTreeLayout",
+    "target": "flare.util.Orientation"
+  },
+  {
+    "source": "flare.vis.operator.layout.NodeLinkTreeLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.PieLayout",
+    "target": "flare.vis.data.DataList"
+  },
+  {
+    "source": "flare.vis.operator.layout.PieLayout",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.PieLayout",
+    "target": "flare.util.Shapes"
+  },
+  {
+    "source": "flare.vis.operator.layout.PieLayout",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.operator.layout.PieLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.PieLayout",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.layout.RadialTreeLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.RadialTreeLayout",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.operator.layout.RadialTreeLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.RandomLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.RandomLayout",
+    "target": "flare.vis.data.DataSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.RandomLayout",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.scale.TimeScale"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.scale.LinearScale"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.scale.OrdinalScale"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.scale.Scale"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.vis.axis.CartesianAxes"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.util.Stats"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.util.Orientation"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.scale.QuantitativeScale"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.util.Maths"
+  },
+  {
+    "source": "flare.vis.operator.layout.StackedAreaLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.layout.TreeMapLayout",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.layout.TreeMapLayout",
+    "target": "flare.vis.data.NodeSprite"
+  },
+  {
+    "source": "flare.vis.operator.layout.TreeMapLayout",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.operator.layout.TreeMapLayout",
+    "target": "flare.vis.operator.layout.Layout"
+  },
+  {
+    "source": "flare.vis.operator.Operator",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.Operator",
+    "target": "flare.vis.operator.IOperator"
+  },
+  {
+    "source": "flare.vis.operator.Operator",
+    "target": "flare.util.Property"
+  },
+  {
+    "source": "flare.vis.operator.Operator",
+    "target": "flare.util.IEvaluable"
+  },
+  {
+    "source": "flare.vis.operator.Operator",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.vis.operator.OperatorList",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.OperatorList",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.operator.OperatorList",
+    "target": "flare.vis.operator.IOperator"
+  },
+  {
+    "source": "flare.vis.operator.OperatorList",
+    "target": "flare.vis.Visualization"
+  },
+  {
+    "source": "flare.vis.operator.OperatorList",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSequence",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSequence",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSequence",
+    "target": "flare.vis.operator.IOperator"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSequence",
+    "target": "flare.vis.operator.OperatorList"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSequence",
+    "target": "flare.animate.FunctionSequence"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSequence",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSwitch",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSwitch",
+    "target": "flare.vis.operator.OperatorList"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSwitch",
+    "target": "flare.vis.operator.IOperator"
+  },
+  {
+    "source": "flare.vis.operator.OperatorSwitch",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.SortOperator",
+    "target": "flare.vis.operator.Operator"
+  },
+  {
+    "source": "flare.vis.operator.SortOperator",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.operator.SortOperator",
+    "target": "flare.util.Arrays"
+  },
+  {
+    "source": "flare.vis.operator.SortOperator",
+    "target": "flare.vis.data.Data"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.animate.Transitioner"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.vis.operator.IOperator"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.animate.Scheduler"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.vis.events.VisualizationEvent"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.vis.data.Tree"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.vis.events.DataEvent"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.vis.axis.Axes"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.vis.axis.CartesianAxes"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.util.Displays"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.vis.operator.OperatorList"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.vis.controls.ControlList"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.animate.ISchedulable"
+  },
+  {
+    "source": "flare.vis.Visualization",
+    "target": "flare.vis.data.Data"
+  }
+]
