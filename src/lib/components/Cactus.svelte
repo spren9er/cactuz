@@ -220,6 +220,7 @@
       depthLevel--;
     }
 
+    // First pass: Draw circles only (no labels)
     renderedNodes.forEach(
       (
         /** @type {{ x: number, y: number, radius: number, node: any, depth: number }} */ {
@@ -262,9 +263,6 @@
           depthStyle?.strokeWidth ?? mergedStyle.strokeWidth;
         const currentStrokeOpacity =
           depthStyle?.strokeOpacity ?? mergedStyle.strokeOpacity;
-        const currentLabel = depthStyle?.label ?? mergedStyle.label;
-        const currentLabelFontFamily =
-          depthStyle?.labelFontFamily ?? mergedStyle.labelFontFamily;
         const currentHighlight = depthStyle?.highlight ?? mergedStyle.highlight;
 
         // Check if this node is hovered and highlighting is enabled
@@ -293,35 +291,12 @@
           ctx.stroke();
         }
 
-        // Reset alpha for text
+        // Reset alpha
         ctx.globalAlpha = 1.0;
-
-        // Add text if radius is large enough and label is not 'none'
-        if (radius > 6 && currentLabel !== 'none') {
-          ctx.fillStyle = currentLabel;
-          const fontSize = Math.min(14, Math.max(8, radius / 3));
-          ctx.font = `${fontSize}px ${currentLabelFontFamily}`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-
-          const text = String(node.name || node.id);
-          const maxWidth = radius * 1.8;
-          let displayText = text;
-
-          const textWidth = ctx.measureText(displayText).width;
-          if (textWidth > maxWidth && displayText.length > 3) {
-            const ratio = maxWidth / textWidth;
-            const truncateLength = Math.floor(displayText.length * ratio);
-            displayText =
-              displayText.substring(0, Math.max(1, truncateLength - 3)) + '...';
-          }
-
-          ctx.fillText(displayText, x, y);
-        }
       },
     );
 
-    // Draw hierarchical edge bundling for links AFTER nodes
+    // Second pass: Draw hierarchical edge bundling
     if (links?.length && cactusLayout && ctx) {
       // Group links by their hierarchical paths for bundling
       /** @type {Array<{link: any, sourceNode: any, targetNode: any, hierarchicalPath: any[], lca: any}>} */
@@ -333,13 +308,20 @@
         const targetNode = renderedNodes.find((n) => n.node.id === link.target);
 
         if (sourceNode && targetNode) {
-          // Filter links based on hover state
+          // Filter links based on hover state (only for leaf nodes)
           if (hoveredNodeId !== null) {
-            if (
-              link.source !== hoveredNodeId &&
-              link.target !== hoveredNodeId
-            ) {
-              return; // Skip this link - not connected to hovered node
+            const hoveredNode = renderedNodes.find(
+              (n) => n.node.id === hoveredNodeId,
+            );
+            const isLeafNode = hoveredNode && hoveredNode.isLeaf;
+
+            if (isLeafNode) {
+              if (
+                link.source !== hoveredNodeId &&
+                link.target !== hoveredNodeId
+              ) {
+                return; // Skip this link - not connected to hovered leaf node
+              }
             }
           }
 
@@ -479,6 +461,69 @@
         }
       });
     }
+
+    // Third pass: Draw labels on top
+    renderedNodes.forEach(
+      (
+        /** @type {{ x: number, y: number, radius: number, node: any, depth: number }} */ {
+          x,
+          y,
+          radius,
+          node,
+          depth,
+        },
+      ) => {
+        if (!ctx) return;
+
+        // Find applicable depth style for labels
+        let depthStyle = null;
+        if (mergedStyle.depths) {
+          for (const ds of mergedStyle.depths) {
+            if (ds.depth === depth) {
+              depthStyle = ds;
+              break;
+            } else if (ds.depth < 0) {
+              // Handle negative depths using our calculated mappings
+              const nodesAtThisNegativeDepth = negativeDepthNodes.get(ds.depth);
+              if (
+                nodesAtThisNegativeDepth &&
+                nodesAtThisNegativeDepth.has(node.id)
+              ) {
+                depthStyle = ds;
+                break;
+              }
+            }
+          }
+        }
+
+        const currentLabel = depthStyle?.label ?? mergedStyle.label;
+        const currentLabelFontFamily =
+          depthStyle?.labelFontFamily ?? mergedStyle.labelFontFamily;
+
+        // Add text if radius is large enough and label is not 'none'
+        if (radius > 6 && currentLabel !== 'none') {
+          ctx.fillStyle = currentLabel;
+          const fontSize = Math.min(14, Math.max(8, radius / 3));
+          ctx.font = `${fontSize}px ${currentLabelFontFamily}`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          const text = String(node.name || node.id);
+          const maxWidth = radius * 1.8;
+          let displayText = text;
+
+          const textWidth = ctx.measureText(displayText).width;
+          if (textWidth > maxWidth && displayText.length > 3) {
+            const ratio = maxWidth / textWidth;
+            const truncateLength = Math.floor(displayText.length * ratio);
+            displayText =
+              displayText.substring(0, Math.max(1, truncateLength - 3)) + '...';
+          }
+
+          ctx.fillText(displayText, x, y);
+        }
+      },
+    );
 
     // Restore the context state
     ctx.restore();

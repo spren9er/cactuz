@@ -19,8 +19,10 @@
     zoom: 1.0,
   };
 
+  let showEdgeBundling = true;
+
   async function loadFlareData() {
-    const response = await fetch('/flareNodesWithoutWeights.json');
+    const response = await fetch('/flareNodes.json');
     nodes = await response.json();
 
     // Load real links from imports data
@@ -141,7 +143,7 @@
       {width}
       {height}
       {nodes}
-      {links}
+      links={showEdgeBundling ? links : []}
       options={{
         overlap: config.overlap,
         arcSpan: (config.arcSpan * Math.PI) / 180,
@@ -151,7 +153,12 @@
       }}
       styles={{
         labelFontFamily: 'monospace',
-        edge: '#ff6b6b',
+        edge: '#e2575a',
+        highlightStroke: '#e2575a',
+        highlightFill: '#ffbbb7',
+        fill: '#dedede',
+        stroke: '#aaaaaa',
+        strokeWidth: 1,
         edgeWidth: 1,
         depths: [
           {
@@ -159,11 +166,26 @@
             label: 'transparent',
             fill: '#333333',
             stroke: 'none',
-            highlightFill: '#d32f2f',
+            strokeWidth: 0,
+            highlightFill: '#e2575a',
+          },
+          {
+            depth: 0,
+            fill: '#333333',
+            stroke: 'white',
+            label: '#efefef',
+            highlightFill: '#333333',
           },
         ],
       }}
     />
+  </div>
+
+  <div class="edge-bundling-control">
+    <label>
+      <input type="checkbox" bind:checked={showEdgeBundling} />
+      Hierarchical Edge Bundling
+    </label>
   </div>
 
   <footer class="footer">
@@ -236,6 +258,25 @@
     align-items: center;
     margin: 20px auto;
     width: fit-content;
+  }
+
+  .edge-bundling-control {
+    text-align: center;
+    margin: 20px auto;
+    font-family: monospace;
+  }
+
+  .edge-bundling-control label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #555;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .edge-bundling-control input[type='checkbox'] {
+    margin: 0;
   }
 
   .footer {
