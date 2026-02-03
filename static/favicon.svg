@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <path
+    d="
+      M24 36
+      L24 16
+      A8 8 0 0 1 40 16
+      L40 30
+      L46 30
+      L46 22
+      A4 4 0 0 1 56 22
+      L54 40
+      L40 40
+      L40 58
+      L24 58
+      L24 46
+      L10 46
+      L8 26
+      A4 4 0 0 1 18 26
+      L18 36
+      Z
+    "
+    fill="black"
+    stroke="black"
+    stroke-width="2"
+    stroke-linejoin="miter"
+  />
+</svg>

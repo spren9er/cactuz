@@ -1,0 +1,1482 @@
+[
+  {
+    "id": "flare",
+    "name": "flare",
+    "parent": null
+  },
+  {
+    "id": "flare.analytics",
+    "name": "analytics",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.analytics.cluster",
+    "name": "cluster",
+    "parent": "flare.analytics"
+  },
+  {
+    "id": "flare.analytics.cluster.AgglomerativeCluster",
+    "name": "AgglomerativeCluster",
+    "parent": "flare.analytics.cluster",
+    "weight": 3938
+  },
+  {
+    "id": "flare.analytics.cluster.CommunityStructure",
+    "name": "CommunityStructure",
+    "parent": "flare.analytics.cluster",
+    "weight": 3812
+  },
+  {
+    "id": "flare.analytics.cluster.HierarchicalCluster",
+    "name": "HierarchicalCluster",
+    "parent": "flare.analytics.cluster",
+    "weight": 6714
+  },
+  {
+    "id": "flare.analytics.cluster.MergeEdge",
+    "name": "MergeEdge",
+    "parent": "flare.analytics.cluster",
+    "weight": 743
+  },
+  {
+    "id": "flare.analytics.graph",
+    "name": "graph",
+    "parent": "flare.analytics"
+  },
+  {
+    "id": "flare.analytics.graph.BetweennessCentrality",
+    "name": "BetweennessCentrality",
+    "parent": "flare.analytics.graph",
+    "weight": 3534
+  },
+  {
+    "id": "flare.analytics.graph.LinkDistance",
+    "name": "LinkDistance",
+    "parent": "flare.analytics.graph",
+    "weight": 5731
+  },
+  {
+    "id": "flare.analytics.graph.MaxFlowMinCut",
+    "name": "MaxFlowMinCut",
+    "parent": "flare.analytics.graph",
+    "weight": 7840
+  },
+  {
+    "id": "flare.analytics.graph.ShortestPaths",
+    "name": "ShortestPaths",
+    "parent": "flare.analytics.graph",
+    "weight": 5914
+  },
+  {
+    "id": "flare.analytics.graph.SpanningTree",
+    "name": "SpanningTree",
+    "parent": "flare.analytics.graph",
+    "weight": 3416
+  },
+  {
+    "id": "flare.analytics.optimization",
+    "name": "optimization",
+    "parent": "flare.analytics"
+  },
+  {
+    "id": "flare.analytics.optimization.AspectRatioBanker",
+    "name": "AspectRatioBanker",
+    "parent": "flare.analytics.optimization",
+    "weight": 7074
+  },
+  {
+    "id": "flare.animate",
+    "name": "animate",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.animate.Easing",
+    "name": "Easing",
+    "parent": "flare.animate",
+    "weight": 17010
+  },
+  {
+    "id": "flare.animate.FunctionSequence",
+    "name": "FunctionSequence",
+    "parent": "flare.animate",
+    "weight": 5842
+  },
+  {
+    "id": "flare.animate.interpolate",
+    "name": "interpolate",
+    "parent": "flare.animate"
+  },
+  {
+    "id": "flare.animate.interpolate.ArrayInterpolator",
+    "name": "ArrayInterpolator",
+    "parent": "flare.animate.interpolate",
+    "weight": 1983
+  },
+  {
+    "id": "flare.animate.interpolate.ColorInterpolator",
+    "name": "ColorInterpolator",
+    "parent": "flare.animate.interpolate",
+    "weight": 2047
+  },
+  {
+    "id": "flare.animate.interpolate.DateInterpolator",
+    "name": "DateInterpolator",
+    "parent": "flare.animate.interpolate",
+    "weight": 1375
+  },
+  {
+    "id": "flare.animate.interpolate.Interpolator",
+    "name": "Interpolator",
+    "parent": "flare.animate.interpolate",
+    "weight": 8746
+  },
+  {
+    "id": "flare.animate.interpolate.MatrixInterpolator",
+    "name": "MatrixInterpolator",
+    "parent": "flare.animate.interpolate",
+    "weight": 2202
+  },
+  {
+    "id": "flare.animate.interpolate.NumberInterpolator",
+    "name": "NumberInterpolator",
+    "parent": "flare.animate.interpolate",
+    "weight": 1382
+  },
+  {
+    "id": "flare.animate.interpolate.ObjectInterpolator",
+    "name": "ObjectInterpolator",
+    "parent": "flare.animate.interpolate",
+    "weight": 1629
+  },
+  {
+    "id": "flare.animate.interpolate.PointInterpolator",
+    "name": "PointInterpolator",
+    "parent": "flare.animate.interpolate",
+    "weight": 1675
+  },
+  {
+    "id": "flare.animate.interpolate.RectangleInterpolator",
+    "name": "RectangleInterpolator",
+    "parent": "flare.animate.interpolate",
+    "weight": 2042
+  },
+  {
+    "id": "flare.animate.ISchedulable",
+    "name": "ISchedulable",
+    "parent": "flare.animate",
+    "weight": 1041
+  },
+  {
+    "id": "flare.animate.Parallel",
+    "name": "Parallel",
+    "parent": "flare.animate",
+    "weight": 5176
+  },
+  {
+    "id": "flare.animate.Pause",
+    "name": "Pause",
+    "parent": "flare.animate",
+    "weight": 449
+  },
+  {
+    "id": "flare.animate.Scheduler",
+    "name": "Scheduler",
+    "parent": "flare.animate",
+    "weight": 5593
+  },
+  {
+    "id": "flare.animate.Sequence",
+    "name": "Sequence",
+    "parent": "flare.animate",
+    "weight": 5534
+  },
+  {
+    "id": "flare.animate.Transition",
+    "name": "Transition",
+    "parent": "flare.animate",
+    "weight": 9201
+  },
+  {
+    "id": "flare.animate.Transitioner",
+    "name": "Transitioner",
+    "parent": "flare.animate",
+    "weight": 19975
+  },
+  {
+    "id": "flare.animate.TransitionEvent",
+    "name": "TransitionEvent",
+    "parent": "flare.animate",
+    "weight": 1116
+  },
+  {
+    "id": "flare.animate.Tween",
+    "name": "Tween",
+    "parent": "flare.animate",
+    "weight": 6006
+  },
+  {
+    "id": "flare.data",
+    "name": "data",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.data.converters",
+    "name": "converters",
+    "parent": "flare.data"
+  },
+  {
+    "id": "flare.data.converters.Converters",
+    "name": "Converters",
+    "parent": "flare.data.converters",
+    "weight": 721
+  },
+  {
+    "id": "flare.data.converters.DelimitedTextConverter",
+    "name": "DelimitedTextConverter",
+    "parent": "flare.data.converters",
+    "weight": 4294
+  },
+  {
+    "id": "flare.data.converters.GraphMLConverter",
+    "name": "GraphMLConverter",
+    "parent": "flare.data.converters",
+    "weight": 9800
+  },
+  {
+    "id": "flare.data.converters.IDataConverter",
+    "name": "IDataConverter",
+    "parent": "flare.data.converters",
+    "weight": 1314
+  },
+  {
+    "id": "flare.data.converters.JSONConverter",
+    "name": "JSONConverter",
+    "parent": "flare.data.converters",
+    "weight": 2220
+  },
+  {
+    "id": "flare.data.DataField",
+    "name": "DataField",
+    "parent": "flare.data",
+    "weight": 1759
+  },
+  {
+    "id": "flare.data.DataSchema",
+    "name": "DataSchema",
+    "parent": "flare.data",
+    "weight": 2165
+  },
+  {
+    "id": "flare.data.DataSet",
+    "name": "DataSet",
+    "parent": "flare.data",
+    "weight": 586
+  },
+  {
+    "id": "flare.data.DataSource",
+    "name": "DataSource",
+    "parent": "flare.data",
+    "weight": 3331
+  },
+  {
+    "id": "flare.data.DataTable",
+    "name": "DataTable",
+    "parent": "flare.data",
+    "weight": 772
+  },
+  {
+    "id": "flare.data.DataUtil",
+    "name": "DataUtil",
+    "parent": "flare.data",
+    "weight": 3322
+  },
+  {
+    "id": "flare.display",
+    "name": "display",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.display.DirtySprite",
+    "name": "DirtySprite",
+    "parent": "flare.display",
+    "weight": 8833
+  },
+  {
+    "id": "flare.display.LineSprite",
+    "name": "LineSprite",
+    "parent": "flare.display",
+    "weight": 1732
+  },
+  {
+    "id": "flare.display.RectSprite",
+    "name": "RectSprite",
+    "parent": "flare.display",
+    "weight": 3623
+  },
+  {
+    "id": "flare.display.TextSprite",
+    "name": "TextSprite",
+    "parent": "flare.display",
+    "weight": 10066
+  },
+  {
+    "id": "flare.flex",
+    "name": "flex",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.flex.FlareVis",
+    "name": "FlareVis",
+    "parent": "flare.flex",
+    "weight": 4116
+  },
+  {
+    "id": "flare.physics",
+    "name": "physics",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.physics.DragForce",
+    "name": "DragForce",
+    "parent": "flare.physics",
+    "weight": 1082
+  },
+  {
+    "id": "flare.physics.GravityForce",
+    "name": "GravityForce",
+    "parent": "flare.physics",
+    "weight": 1336
+  },
+  {
+    "id": "flare.physics.IForce",
+    "name": "IForce",
+    "parent": "flare.physics",
+    "weight": 319
+  },
+  {
+    "id": "flare.physics.NBodyForce",
+    "name": "NBodyForce",
+    "parent": "flare.physics",
+    "weight": 10498
+  },
+  {
+    "id": "flare.physics.Particle",
+    "name": "Particle",
+    "parent": "flare.physics",
+    "weight": 2822
+  },
+  {
+    "id": "flare.physics.Simulation",
+    "name": "Simulation",
+    "parent": "flare.physics",
+    "weight": 9983
+  },
+  {
+    "id": "flare.physics.Spring",
+    "name": "Spring",
+    "parent": "flare.physics",
+    "weight": 2213
+  },
+  {
+    "id": "flare.physics.SpringForce",
+    "name": "SpringForce",
+    "parent": "flare.physics",
+    "weight": 1681
+  },
+  {
+    "id": "flare.query",
+    "name": "query",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.query.AggregateExpression",
+    "name": "AggregateExpression",
+    "parent": "flare.query",
+    "weight": 1616
+  },
+  {
+    "id": "flare.query.And",
+    "name": "And",
+    "parent": "flare.query",
+    "weight": 1027
+  },
+  {
+    "id": "flare.query.Arithmetic",
+    "name": "Arithmetic",
+    "parent": "flare.query",
+    "weight": 3891
+  },
+  {
+    "id": "flare.query.Average",
+    "name": "Average",
+    "parent": "flare.query",
+    "weight": 891
+  },
+  {
+    "id": "flare.query.BinaryExpression",
+    "name": "BinaryExpression",
+    "parent": "flare.query",
+    "weight": 2893
+  },
+  {
+    "id": "flare.query.Comparison",
+    "name": "Comparison",
+    "parent": "flare.query",
+    "weight": 5103
+  },
+  {
+    "id": "flare.query.CompositeExpression",
+    "name": "CompositeExpression",
+    "parent": "flare.query",
+    "weight": 3677
+  },
+  {
+    "id": "flare.query.Count",
+    "name": "Count",
+    "parent": "flare.query",
+    "weight": 781
+  },
+  {
+    "id": "flare.query.DateUtil",
+    "name": "DateUtil",
+    "parent": "flare.query",
+    "weight": 4141
+  },
+  {
+    "id": "flare.query.Distinct",
+    "name": "Distinct",
+    "parent": "flare.query",
+    "weight": 933
+  },
+  {
+    "id": "flare.query.Expression",
+    "name": "Expression",
+    "parent": "flare.query",
+    "weight": 5130
+  },
+  {
+    "id": "flare.query.ExpressionIterator",
+    "name": "ExpressionIterator",
+    "parent": "flare.query",
+    "weight": 3617
+  },
+  {
+    "id": "flare.query.Fn",
+    "name": "Fn",
+    "parent": "flare.query",
+    "weight": 3240
+  },
+  {
+    "id": "flare.query.If",
+    "name": "If",
+    "parent": "flare.query",
+    "weight": 2732
+  },
+  {
+    "id": "flare.query.IsA",
+    "name": "IsA",
+    "parent": "flare.query",
+    "weight": 2039
+  },
+  {
+    "id": "flare.query.Literal",
+    "name": "Literal",
+    "parent": "flare.query",
+    "weight": 1214
+  },
+  {
+    "id": "flare.query.Match",
+    "name": "Match",
+    "parent": "flare.query",
+    "weight": 3748
+  },
+  {
+    "id": "flare.query.Maximum",
+    "name": "Maximum",
+    "parent": "flare.query",
+    "weight": 843
+  },
+  {
+    "id": "flare.query.methods",
+    "name": "methods",
+    "parent": "flare.query"
+  },
+  {
+    "id": "flare.query.methods.add",
+    "name": "add",
+    "parent": "flare.query.methods",
+    "weight": 593
+  },
+  {
+    "id": "flare.query.methods.and",
+    "name": "and",
+    "parent": "flare.query.methods",
+    "weight": 330
+  },
+  {
+    "id": "flare.query.methods.average",
+    "name": "average",
+    "parent": "flare.query.methods",
+    "weight": 287
+  },
+  {
+    "id": "flare.query.methods.count",
+    "name": "count",
+    "parent": "flare.query.methods",
+    "weight": 277
+  },
+  {
+    "id": "flare.query.methods.distinct",
+    "name": "distinct",
+    "parent": "flare.query.methods",
+    "weight": 292
+  },
+  {
+    "id": "flare.query.methods.div",
+    "name": "div",
+    "parent": "flare.query.methods",
+    "weight": 595
+  },
+  {
+    "id": "flare.query.methods.eq",
+    "name": "eq",
+    "parent": "flare.query.methods",
+    "weight": 594
+  },
+  {
+    "id": "flare.query.methods.fn",
+    "name": "fn",
+    "parent": "flare.query.methods",
+    "weight": 460
+  },
+  {
+    "id": "flare.query.methods.gt",
+    "name": "gt",
+    "parent": "flare.query.methods",
+    "weight": 603
+  },
+  {
+    "id": "flare.query.methods.gte",
+    "name": "gte",
+    "parent": "flare.query.methods",
+    "weight": 625
+  },
+  {
+    "id": "flare.query.methods.iff",
+    "name": "iff",
+    "parent": "flare.query.methods",
+    "weight": 748
+  },
+  {
+    "id": "flare.query.methods.isa",
+    "name": "isa",
+    "parent": "flare.query.methods",
+    "weight": 461
+  },
+  {
+    "id": "flare.query.methods.lt",
+    "name": "lt",
+    "parent": "flare.query.methods",
+    "weight": 597
+  },
+  {
+    "id": "flare.query.methods.lte",
+    "name": "lte",
+    "parent": "flare.query.methods",
+    "weight": 619
+  },
+  {
+    "id": "flare.query.methods.max",
+    "name": "max",
+    "parent": "flare.query.methods",
+    "weight": 283
+  },
+  {
+    "id": "flare.query.methods.min",
+    "name": "min",
+    "parent": "flare.query.methods",
+    "weight": 283
+  },
+  {
+    "id": "flare.query.methods.mod",
+    "name": "mod",
+    "parent": "flare.query.methods",
+    "weight": 591
+  },
+  {
+    "id": "flare.query.methods.mul",
+    "name": "mul",
+    "parent": "flare.query.methods",
+    "weight": 603
+  },
+  {
+    "id": "flare.query.methods.neq",
+    "name": "neq",
+    "parent": "flare.query.methods",
+    "weight": 599
+  },
+  {
+    "id": "flare.query.methods.not",
+    "name": "not",
+    "parent": "flare.query.methods",
+    "weight": 386
+  },
+  {
+    "id": "flare.query.methods.or",
+    "name": "or",
+    "parent": "flare.query.methods",
+    "weight": 323
+  },
+  {
+    "id": "flare.query.methods.orderby",
+    "name": "orderby",
+    "parent": "flare.query.methods",
+    "weight": 307
+  },
+  {
+    "id": "flare.query.methods.range",
+    "name": "range",
+    "parent": "flare.query.methods",
+    "weight": 772
+  },
+  {
+    "id": "flare.query.methods.select",
+    "name": "select",
+    "parent": "flare.query.methods",
+    "weight": 296
+  },
+  {
+    "id": "flare.query.methods.stddev",
+    "name": "stddev",
+    "parent": "flare.query.methods",
+    "weight": 363
+  },
+  {
+    "id": "flare.query.methods.sub",
+    "name": "sub",
+    "parent": "flare.query.methods",
+    "weight": 600
+  },
+  {
+    "id": "flare.query.methods.sum",
+    "name": "sum",
+    "parent": "flare.query.methods",
+    "weight": 280
+  },
+  {
+    "id": "flare.query.methods.update",
+    "name": "update",
+    "parent": "flare.query.methods",
+    "weight": 307
+  },
+  {
+    "id": "flare.query.methods.variance",
+    "name": "variance",
+    "parent": "flare.query.methods",
+    "weight": 335
+  },
+  {
+    "id": "flare.query.methods.where",
+    "name": "where",
+    "parent": "flare.query.methods",
+    "weight": 299
+  },
+  {
+    "id": "flare.query.methods.xor",
+    "name": "xor",
+    "parent": "flare.query.methods",
+    "weight": 354
+  },
+  {
+    "id": "flare.query.methods._",
+    "name": "_",
+    "parent": "flare.query.methods",
+    "weight": 264
+  },
+  {
+    "id": "flare.query.Minimum",
+    "name": "Minimum",
+    "parent": "flare.query",
+    "weight": 843
+  },
+  {
+    "id": "flare.query.Not",
+    "name": "Not",
+    "parent": "flare.query",
+    "weight": 1554
+  },
+  {
+    "id": "flare.query.Or",
+    "name": "Or",
+    "parent": "flare.query",
+    "weight": 970
+  },
+  {
+    "id": "flare.query.Query",
+    "name": "Query",
+    "parent": "flare.query",
+    "weight": 13896
+  },
+  {
+    "id": "flare.query.Range",
+    "name": "Range",
+    "parent": "flare.query",
+    "weight": 1594
+  },
+  {
+    "id": "flare.query.StringUtil",
+    "name": "StringUtil",
+    "parent": "flare.query",
+    "weight": 4130
+  },
+  {
+    "id": "flare.query.Sum",
+    "name": "Sum",
+    "parent": "flare.query",
+    "weight": 791
+  },
+  {
+    "id": "flare.query.Variable",
+    "name": "Variable",
+    "parent": "flare.query",
+    "weight": 1124
+  },
+  {
+    "id": "flare.query.Variance",
+    "name": "Variance",
+    "parent": "flare.query",
+    "weight": 1876
+  },
+  {
+    "id": "flare.query.Xor",
+    "name": "Xor",
+    "parent": "flare.query",
+    "weight": 1101
+  },
+  {
+    "id": "flare.scale",
+    "name": "scale",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.scale.IScaleMap",
+    "name": "IScaleMap",
+    "parent": "flare.scale",
+    "weight": 2105
+  },
+  {
+    "id": "flare.scale.LinearScale",
+    "name": "LinearScale",
+    "parent": "flare.scale",
+    "weight": 1316
+  },
+  {
+    "id": "flare.scale.LogScale",
+    "name": "LogScale",
+    "parent": "flare.scale",
+    "weight": 3151
+  },
+  {
+    "id": "flare.scale.OrdinalScale",
+    "name": "OrdinalScale",
+    "parent": "flare.scale",
+    "weight": 3770
+  },
+  {
+    "id": "flare.scale.QuantileScale",
+    "name": "QuantileScale",
+    "parent": "flare.scale",
+    "weight": 2435
+  },
+  {
+    "id": "flare.scale.QuantitativeScale",
+    "name": "QuantitativeScale",
+    "parent": "flare.scale",
+    "weight": 4839
+  },
+  {
+    "id": "flare.scale.RootScale",
+    "name": "RootScale",
+    "parent": "flare.scale",
+    "weight": 1756
+  },
+  {
+    "id": "flare.scale.Scale",
+    "name": "Scale",
+    "parent": "flare.scale",
+    "weight": 4268
+  },
+  {
+    "id": "flare.scale.ScaleType",
+    "name": "ScaleType",
+    "parent": "flare.scale",
+    "weight": 1821
+  },
+  {
+    "id": "flare.scale.TimeScale",
+    "name": "TimeScale",
+    "parent": "flare.scale",
+    "weight": 5833
+  },
+  {
+    "id": "flare.util",
+    "name": "util",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.util.Arrays",
+    "name": "Arrays",
+    "parent": "flare.util",
+    "weight": 8258
+  },
+  {
+    "id": "flare.util.Colors",
+    "name": "Colors",
+    "parent": "flare.util",
+    "weight": 10001
+  },
+  {
+    "id": "flare.util.Dates",
+    "name": "Dates",
+    "parent": "flare.util",
+    "weight": 8217
+  },
+  {
+    "id": "flare.util.Displays",
+    "name": "Displays",
+    "parent": "flare.util",
+    "weight": 12555
+  },
+  {
+    "id": "flare.util.Filter",
+    "name": "Filter",
+    "parent": "flare.util",
+    "weight": 2324
+  },
+  {
+    "id": "flare.util.Geometry",
+    "name": "Geometry",
+    "parent": "flare.util",
+    "weight": 10993
+  },
+  {
+    "id": "flare.util.heap",
+    "name": "heap",
+    "parent": "flare.util"
+  },
+  {
+    "id": "flare.util.heap.FibonacciHeap",
+    "name": "FibonacciHeap",
+    "parent": "flare.util.heap",
+    "weight": 9354
+  },
+  {
+    "id": "flare.util.heap.HeapNode",
+    "name": "HeapNode",
+    "parent": "flare.util.heap",
+    "weight": 1233
+  },
+  {
+    "id": "flare.util.IEvaluable",
+    "name": "IEvaluable",
+    "parent": "flare.util",
+    "weight": 335
+  },
+  {
+    "id": "flare.util.IPredicate",
+    "name": "IPredicate",
+    "parent": "flare.util",
+    "weight": 383
+  },
+  {
+    "id": "flare.util.IValueProxy",
+    "name": "IValueProxy",
+    "parent": "flare.util",
+    "weight": 874
+  },
+  {
+    "id": "flare.util.math",
+    "name": "math",
+    "parent": "flare.util"
+  },
+  {
+    "id": "flare.util.math.DenseMatrix",
+    "name": "DenseMatrix",
+    "parent": "flare.util.math",
+    "weight": 3165
+  },
+  {
+    "id": "flare.util.math.IMatrix",
+    "name": "IMatrix",
+    "parent": "flare.util.math",
+    "weight": 2815
+  },
+  {
+    "id": "flare.util.math.SparseMatrix",
+    "name": "SparseMatrix",
+    "parent": "flare.util.math",
+    "weight": 3366
+  },
+  {
+    "id": "flare.util.Maths",
+    "name": "Maths",
+    "parent": "flare.util",
+    "weight": 17705
+  },
+  {
+    "id": "flare.util.Orientation",
+    "name": "Orientation",
+    "parent": "flare.util",
+    "weight": 1486
+  },
+  {
+    "id": "flare.util.palette",
+    "name": "palette",
+    "parent": "flare.util"
+  },
+  {
+    "id": "flare.util.palette.ColorPalette",
+    "name": "ColorPalette",
+    "parent": "flare.util.palette",
+    "weight": 6367
+  },
+  {
+    "id": "flare.util.palette.Palette",
+    "name": "Palette",
+    "parent": "flare.util.palette",
+    "weight": 1229
+  },
+  {
+    "id": "flare.util.palette.ShapePalette",
+    "name": "ShapePalette",
+    "parent": "flare.util.palette",
+    "weight": 2059
+  },
+  {
+    "id": "flare.util.palette.SizePalette",
+    "name": "SizePalette",
+    "parent": "flare.util.palette",
+    "weight": 2291
+  },
+  {
+    "id": "flare.util.Property",
+    "name": "Property",
+    "parent": "flare.util",
+    "weight": 5559
+  },
+  {
+    "id": "flare.util.Shapes",
+    "name": "Shapes",
+    "parent": "flare.util",
+    "weight": 19118
+  },
+  {
+    "id": "flare.util.Sort",
+    "name": "Sort",
+    "parent": "flare.util",
+    "weight": 6887
+  },
+  {
+    "id": "flare.util.Stats",
+    "name": "Stats",
+    "parent": "flare.util",
+    "weight": 6557
+  },
+  {
+    "id": "flare.util.Strings",
+    "name": "Strings",
+    "parent": "flare.util",
+    "weight": 22026
+  },
+  {
+    "id": "flare.vis",
+    "name": "vis",
+    "parent": "flare"
+  },
+  {
+    "id": "flare.vis.axis",
+    "name": "axis",
+    "parent": "flare.vis"
+  },
+  {
+    "id": "flare.vis.axis.Axes",
+    "name": "Axes",
+    "parent": "flare.vis.axis",
+    "weight": 1302
+  },
+  {
+    "id": "flare.vis.axis.Axis",
+    "name": "Axis",
+    "parent": "flare.vis.axis",
+    "weight": 24593
+  },
+  {
+    "id": "flare.vis.axis.AxisGridLine",
+    "name": "AxisGridLine",
+    "parent": "flare.vis.axis",
+    "weight": 652
+  },
+  {
+    "id": "flare.vis.axis.AxisLabel",
+    "name": "AxisLabel",
+    "parent": "flare.vis.axis",
+    "weight": 636
+  },
+  {
+    "id": "flare.vis.axis.CartesianAxes",
+    "name": "CartesianAxes",
+    "parent": "flare.vis.axis",
+    "weight": 6703
+  },
+  {
+    "id": "flare.vis.controls",
+    "name": "controls",
+    "parent": "flare.vis"
+  },
+  {
+    "id": "flare.vis.controls.AnchorControl",
+    "name": "AnchorControl",
+    "parent": "flare.vis.controls",
+    "weight": 2138
+  },
+  {
+    "id": "flare.vis.controls.ClickControl",
+    "name": "ClickControl",
+    "parent": "flare.vis.controls",
+    "weight": 3824
+  },
+  {
+    "id": "flare.vis.controls.Control",
+    "name": "Control",
+    "parent": "flare.vis.controls",
+    "weight": 1353
+  },
+  {
+    "id": "flare.vis.controls.ControlList",
+    "name": "ControlList",
+    "parent": "flare.vis.controls",
+    "weight": 4665
+  },
+  {
+    "id": "flare.vis.controls.DragControl",
+    "name": "DragControl",
+    "parent": "flare.vis.controls",
+    "weight": 2649
+  },
+  {
+    "id": "flare.vis.controls.ExpandControl",
+    "name": "ExpandControl",
+    "parent": "flare.vis.controls",
+    "weight": 2832
+  },
+  {
+    "id": "flare.vis.controls.HoverControl",
+    "name": "HoverControl",
+    "parent": "flare.vis.controls",
+    "weight": 4896
+  },
+  {
+    "id": "flare.vis.controls.IControl",
+    "name": "IControl",
+    "parent": "flare.vis.controls",
+    "weight": 763
+  },
+  {
+    "id": "flare.vis.controls.PanZoomControl",
+    "name": "PanZoomControl",
+    "parent": "flare.vis.controls",
+    "weight": 5222
+  },
+  {
+    "id": "flare.vis.controls.SelectionControl",
+    "name": "SelectionControl",
+    "parent": "flare.vis.controls",
+    "weight": 7862
+  },
+  {
+    "id": "flare.vis.controls.TooltipControl",
+    "name": "TooltipControl",
+    "parent": "flare.vis.controls",
+    "weight": 8435
+  },
+  {
+    "id": "flare.vis.data",
+    "name": "data",
+    "parent": "flare.vis"
+  },
+  {
+    "id": "flare.vis.data.Data",
+    "name": "Data",
+    "parent": "flare.vis.data",
+    "weight": 20544
+  },
+  {
+    "id": "flare.vis.data.DataList",
+    "name": "DataList",
+    "parent": "flare.vis.data",
+    "weight": 19788
+  },
+  {
+    "id": "flare.vis.data.DataSprite",
+    "name": "DataSprite",
+    "parent": "flare.vis.data",
+    "weight": 10349
+  },
+  {
+    "id": "flare.vis.data.EdgeSprite",
+    "name": "EdgeSprite",
+    "parent": "flare.vis.data",
+    "weight": 3301
+  },
+  {
+    "id": "flare.vis.data.NodeSprite",
+    "name": "NodeSprite",
+    "parent": "flare.vis.data",
+    "weight": 19382
+  },
+  {
+    "id": "flare.vis.data.render",
+    "name": "render",
+    "parent": "flare.vis.data"
+  },
+  {
+    "id": "flare.vis.data.render.ArrowType",
+    "name": "ArrowType",
+    "parent": "flare.vis.data.render",
+    "weight": 698
+  },
+  {
+    "id": "flare.vis.data.render.EdgeRenderer",
+    "name": "EdgeRenderer",
+    "parent": "flare.vis.data.render",
+    "weight": 5569
+  },
+  {
+    "id": "flare.vis.data.render.IRenderer",
+    "name": "IRenderer",
+    "parent": "flare.vis.data.render",
+    "weight": 353
+  },
+  {
+    "id": "flare.vis.data.render.ShapeRenderer",
+    "name": "ShapeRenderer",
+    "parent": "flare.vis.data.render",
+    "weight": 2247
+  },
+  {
+    "id": "flare.vis.data.ScaleBinding",
+    "name": "ScaleBinding",
+    "parent": "flare.vis.data",
+    "weight": 11275
+  },
+  {
+    "id": "flare.vis.data.Tree",
+    "name": "Tree",
+    "parent": "flare.vis.data",
+    "weight": 7147
+  },
+  {
+    "id": "flare.vis.data.TreeBuilder",
+    "name": "TreeBuilder",
+    "parent": "flare.vis.data",
+    "weight": 9930
+  },
+  {
+    "id": "flare.vis.events",
+    "name": "events",
+    "parent": "flare.vis"
+  },
+  {
+    "id": "flare.vis.events.DataEvent",
+    "name": "DataEvent",
+    "parent": "flare.vis.events",
+    "weight": 2313
+  },
+  {
+    "id": "flare.vis.events.SelectionEvent",
+    "name": "SelectionEvent",
+    "parent": "flare.vis.events",
+    "weight": 1880
+  },
+  {
+    "id": "flare.vis.events.TooltipEvent",
+    "name": "TooltipEvent",
+    "parent": "flare.vis.events",
+    "weight": 1701
+  },
+  {
+    "id": "flare.vis.events.VisualizationEvent",
+    "name": "VisualizationEvent",
+    "parent": "flare.vis.events",
+    "weight": 1117
+  },
+  {
+    "id": "flare.vis.legend",
+    "name": "legend",
+    "parent": "flare.vis"
+  },
+  {
+    "id": "flare.vis.legend.Legend",
+    "name": "Legend",
+    "parent": "flare.vis.legend",
+    "weight": 20859
+  },
+  {
+    "id": "flare.vis.legend.LegendItem",
+    "name": "LegendItem",
+    "parent": "flare.vis.legend",
+    "weight": 4614
+  },
+  {
+    "id": "flare.vis.legend.LegendRange",
+    "name": "LegendRange",
+    "parent": "flare.vis.legend",
+    "weight": 10530
+  },
+  {
+    "id": "flare.vis.operator",
+    "name": "operator",
+    "parent": "flare.vis"
+  },
+  {
+    "id": "flare.vis.operator.distortion",
+    "name": "distortion",
+    "parent": "flare.vis.operator"
+  },
+  {
+    "id": "flare.vis.operator.distortion.BifocalDistortion",
+    "name": "BifocalDistortion",
+    "parent": "flare.vis.operator.distortion",
+    "weight": 4461
+  },
+  {
+    "id": "flare.vis.operator.distortion.Distortion",
+    "name": "Distortion",
+    "parent": "flare.vis.operator.distortion",
+    "weight": 6314
+  },
+  {
+    "id": "flare.vis.operator.distortion.FisheyeDistortion",
+    "name": "FisheyeDistortion",
+    "parent": "flare.vis.operator.distortion",
+    "weight": 3444
+  },
+  {
+    "id": "flare.vis.operator.encoder",
+    "name": "encoder",
+    "parent": "flare.vis.operator"
+  },
+  {
+    "id": "flare.vis.operator.encoder.ColorEncoder",
+    "name": "ColorEncoder",
+    "parent": "flare.vis.operator.encoder",
+    "weight": 3179
+  },
+  {
+    "id": "flare.vis.operator.encoder.Encoder",
+    "name": "Encoder",
+    "parent": "flare.vis.operator.encoder",
+    "weight": 4060
+  },
+  {
+    "id": "flare.vis.operator.encoder.PropertyEncoder",
+    "name": "PropertyEncoder",
+    "parent": "flare.vis.operator.encoder",
+    "weight": 4138
+  },
+  {
+    "id": "flare.vis.operator.encoder.ShapeEncoder",
+    "name": "ShapeEncoder",
+    "parent": "flare.vis.operator.encoder",
+    "weight": 1690
+  },
+  {
+    "id": "flare.vis.operator.encoder.SizeEncoder",
+    "name": "SizeEncoder",
+    "parent": "flare.vis.operator.encoder",
+    "weight": 1830
+  },
+  {
+    "id": "flare.vis.operator.filter",
+    "name": "filter",
+    "parent": "flare.vis.operator"
+  },
+  {
+    "id": "flare.vis.operator.filter.FisheyeTreeFilter",
+    "name": "FisheyeTreeFilter",
+    "parent": "flare.vis.operator.filter",
+    "weight": 5219
+  },
+  {
+    "id": "flare.vis.operator.filter.GraphDistanceFilter",
+    "name": "GraphDistanceFilter",
+    "parent": "flare.vis.operator.filter",
+    "weight": 3165
+  },
+  {
+    "id": "flare.vis.operator.filter.VisibilityFilter",
+    "name": "VisibilityFilter",
+    "parent": "flare.vis.operator.filter",
+    "weight": 3509
+  },
+  {
+    "id": "flare.vis.operator.IOperator",
+    "name": "IOperator",
+    "parent": "flare.vis.operator",
+    "weight": 1286
+  },
+  {
+    "id": "flare.vis.operator.label",
+    "name": "label",
+    "parent": "flare.vis.operator"
+  },
+  {
+    "id": "flare.vis.operator.label.Labeler",
+    "name": "Labeler",
+    "parent": "flare.vis.operator.label",
+    "weight": 9956
+  },
+  {
+    "id": "flare.vis.operator.label.RadialLabeler",
+    "name": "RadialLabeler",
+    "parent": "flare.vis.operator.label",
+    "weight": 3899
+  },
+  {
+    "id": "flare.vis.operator.label.StackedAreaLabeler",
+    "name": "StackedAreaLabeler",
+    "parent": "flare.vis.operator.label",
+    "weight": 3202
+  },
+  {
+    "id": "flare.vis.operator.layout",
+    "name": "layout",
+    "parent": "flare.vis.operator"
+  },
+  {
+    "id": "flare.vis.operator.layout.AxisLayout",
+    "name": "AxisLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 6725
+  },
+  {
+    "id": "flare.vis.operator.layout.BundledEdgeRouter",
+    "name": "BundledEdgeRouter",
+    "parent": "flare.vis.operator.layout",
+    "weight": 3727
+  },
+  {
+    "id": "flare.vis.operator.layout.CircleLayout",
+    "name": "CircleLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 9317
+  },
+  {
+    "id": "flare.vis.operator.layout.CirclePackingLayout",
+    "name": "CirclePackingLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 12003
+  },
+  {
+    "id": "flare.vis.operator.layout.DendrogramLayout",
+    "name": "DendrogramLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 4853
+  },
+  {
+    "id": "flare.vis.operator.layout.ForceDirectedLayout",
+    "name": "ForceDirectedLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 8411
+  },
+  {
+    "id": "flare.vis.operator.layout.IcicleTreeLayout",
+    "name": "IcicleTreeLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 4864
+  },
+  {
+    "id": "flare.vis.operator.layout.IndentedTreeLayout",
+    "name": "IndentedTreeLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 3174
+  },
+  {
+    "id": "flare.vis.operator.layout.Layout",
+    "name": "Layout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 7881
+  },
+  {
+    "id": "flare.vis.operator.layout.NodeLinkTreeLayout",
+    "name": "NodeLinkTreeLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 12870
+  },
+  {
+    "id": "flare.vis.operator.layout.PieLayout",
+    "name": "PieLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 2728
+  },
+  {
+    "id": "flare.vis.operator.layout.RadialTreeLayout",
+    "name": "RadialTreeLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 12348
+  },
+  {
+    "id": "flare.vis.operator.layout.RandomLayout",
+    "name": "RandomLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 870
+  },
+  {
+    "id": "flare.vis.operator.layout.StackedAreaLayout",
+    "name": "StackedAreaLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 9121
+  },
+  {
+    "id": "flare.vis.operator.layout.TreeMapLayout",
+    "name": "TreeMapLayout",
+    "parent": "flare.vis.operator.layout",
+    "weight": 9191
+  },
+  {
+    "id": "flare.vis.operator.Operator",
+    "name": "Operator",
+    "parent": "flare.vis.operator",
+    "weight": 2490
+  },
+  {
+    "id": "flare.vis.operator.OperatorList",
+    "name": "OperatorList",
+    "parent": "flare.vis.operator",
+    "weight": 5248
+  },
+  {
+    "id": "flare.vis.operator.OperatorSequence",
+    "name": "OperatorSequence",
+    "parent": "flare.vis.operator",
+    "weight": 4190
+  },
+  {
+    "id": "flare.vis.operator.OperatorSwitch",
+    "name": "OperatorSwitch",
+    "parent": "flare.vis.operator",
+    "weight": 2581
+  },
+  {
+    "id": "flare.vis.operator.SortOperator",
+    "name": "SortOperator",
+    "parent": "flare.vis.operator",
+    "weight": 2023
+  },
+  {
+    "id": "flare.vis.Visualization",
+    "name": "Visualization",
+    "parent": "flare.vis",
+    "weight": 16540
+  }
+]
