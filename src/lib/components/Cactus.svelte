@@ -501,9 +501,9 @@
           depthStyle?.labelFontFamily ?? mergedStyle.labelFontFamily;
 
         // Add text if radius is large enough and label is not 'none'
-        if (radius > 6 && currentLabel !== 'none') {
+        if (radius > 10 && currentLabel !== 'none') {
           ctx.fillStyle = currentLabel;
-          const fontSize = Math.min(14, Math.max(8, radius / 3));
+          const fontSize = Math.min(14, Math.max(7, radius / 3));
           ctx.font = `${fontSize}px ${currentLabelFontFamily}`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -517,7 +517,7 @@
             const ratio = maxWidth / textWidth;
             const truncateLength = Math.floor(displayText.length * ratio);
             displayText =
-              displayText.substring(0, Math.max(1, truncateLength - 3)) + '...';
+              displayText.substring(0, Math.max(1, truncateLength - 3)) + '…';
           }
 
           ctx.fillText(displayText, x, y);
