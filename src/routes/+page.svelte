@@ -34,12 +34,21 @@
   <h1>Cactus Tree Visualization</h1>
 
   <p>
-    Cactus Tree is a visualization technique for representing the structure and
-    connectivity in deeply nested trees. See <a
+    <b>CactusTree</b> is a visualization technique for representing the
+    structure and connectivity in deeply nested trees. The current
+    implementation is based on the original paper
+    <a href="https://ieeexplore.ieee.org/document/8031596">
+      <i>CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling</i>
+    </a>
+    by Tommy Dang and Angus Forbes. See also
+    <a
       href="https://cactustrees.github.io/"
       target="_blank"
-      rel="noopener noreferrer">cactustrees.github.io</a
-    > for more.
+      rel="noopener noreferrer"
+    >
+      cactustrees.github.io
+    </a>
+    for official site about <b>CactusTree</b>.
   </p>
 
   <div class="controls">
@@ -156,13 +165,12 @@
 
 <style>
   :global(html, body) {
+    font-family: monospace;
     background: #f9f9f9;
   }
 
   .container {
-    max-width: 1200px;
     padding: 20px;
-    font-family: monospace;
   }
 
   h1 {
@@ -172,8 +180,8 @@
   }
 
   p {
-    padding: 20px;
-    text-align: center;
+    padding: 20px 150px;
+    text-align: left;
     color: #666;
     margin-bottom: 30px;
     line-height: 1.5;
@@ -185,7 +193,7 @@
   }
 
   .controls {
-    margin: 20px;
+    margin: 20px 80px;
     margin-bottom: 40px;
     border-radius: 8px;
   }
