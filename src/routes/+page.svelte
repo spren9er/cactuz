@@ -26,7 +26,6 @@
     const response = await fetch('/flareNodes.json');
     nodes = await response.json();
 
-    // Load real links from imports data
     const linksResponse = await fetch('/flareLinks.json');
     links = await linksResponse.json();
   }

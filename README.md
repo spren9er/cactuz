@@ -1,6 +1,6 @@
 # cactus-tree
 
-A Svelte library for visualizing hierarchical data structures using the CactusTree algorithm with hierarchical edge bundling.
+A Svelte library for visualizing hierarchical data structures using the *CactusTree* algorithm with hierarchical edge bundling.
 
 <div align="center">
   <img src="https://github.com/spren9er/cactus-tree/blob/main/docs/images/cactus-tree.png?raw=true" alt="cactus-tree" width="50%" height="50%">
@@ -8,7 +8,7 @@ A Svelte library for visualizing hierarchical data structures using the CactusTr
 
 ## Overview
 
-The library **cactus-tree** is based on the research paper ["CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling"](https://ieeexplore.ieee.org/document/8031596) by Tommy Dang and Angus Forbes. This implementation provides both a ready-to-use Svelte component and a standalone layout algorithm for creating interactive tree visualizations.
+The library **cactus-tree** is based on the research paper *[CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling](https://ieeexplore.ieee.org/document/8031596)* by Tommy Dang and Angus Forbes. This implementation provides both a ready-to-use Svelte component and a standalone layout algorithm for creating interactive tree visualizations.
 
 ## Features
 
@@ -107,13 +107,13 @@ interface Styles {
   // Labels
   label?: string;           // Label color (default: '#333333')
   labelFontFamily?: string; // Label font (default: 'monospace')
-  labelLimit?: number;      // Max leaf labels to show (default: 50)
+  labelLimit?: number;      // Threshold for showing labels (default: 50)
 
   // Connections
   line?: string;            // Tree line color (default: '#333333')
   lineWidth?: number;       // Tree line width (default: 1)
   edge?: string;            // Link color (default: '#ff6b6b')
-  edgeWidth?: number;       // Link width (default: 2)
+  edgeWidth?: number;       // Link width (default: 1)
 
   // Hover effects
   highlight?: boolean;      // Enable hover effects (default: true)

@@ -35,7 +35,7 @@
     lineWidth: 1,
     line: '#333333',
     edge: '#ff6b6b',
-    edgeWidth: 2,
+    edgeWidth: 1,
     highlightFill: '#ffcc99',
     highlightStroke: '#ff6600',
     highlight: true,
