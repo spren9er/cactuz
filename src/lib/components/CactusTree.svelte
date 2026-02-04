@@ -463,8 +463,8 @@
     }
 
     // Collect visible node IDs from valid links for leaf label filtering
-    /** @type {Set<string>} */
-    const visibleNodeIds = new Set();
+    /** @type {SvelteSet<string>} */
+    const visibleNodeIds = new SvelteSet();
     if (links?.length && validLinks.length) {
       validLinks.forEach(({ link }) => {
         visibleNodeIds.add(link.source);
@@ -482,7 +482,6 @@
           node,
           depth,
           angle,
-          isLeaf,
         },
       ) => {
         if (!ctx) return;
@@ -563,7 +562,6 @@
             if (isLeftHalf) {
               // For left labels: make readable by rotating 180° additional
               // and position so text starts from left and ends at circle
-              const textWidth = ctx.measureText(text).width;
 
               // Move to position where text should end (at circle)
               ctx.translate(baseX, baseY);
