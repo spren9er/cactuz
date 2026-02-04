@@ -158,12 +158,12 @@ For custom implementations or non-Svelte environments, you can use the layout al
 import { CactusLayout } from 'cactus';
 
 const layout = new CactusLayout(
-  800,    // width
-  600,    // height
-  1.0,    // zoom
-  0.5,    // overlap
+  800,     // width
+  600,     // height
+  1.0,     // zoom
+  0.5,     // overlap
   Math.PI, // arcSpan
-  0.75    // sizeGrowthRate
+  0.75     // sizeGrowthRate
 );
 
 const nodeData = layout.render(nodes, 400, 300, -Math.PI/2);
@@ -319,7 +319,7 @@ Leaf node labels have special behavior:
   options={{
     overlap: -0.5,           // Gaps between nodes
     arcSpan: Math.PI,        // Half circle layout
-    orientation: Math.PI,    // Leftward growth
+    orientation: Math.PI,    // Downward growth
     zoom: 1.5
   }}
 />
