@@ -28,7 +28,7 @@ npm install cactus-tree
 
 ```svelte
 <script>
-  import { Cactus } from 'cactus-tree';
+  import { CactusTree } from 'cactus-tree';
 
   const nodes = [
     { id: 'root', name: 'Root', parent: null },
@@ -41,12 +41,12 @@ npm install cactus-tree
   const links = [{ source: 'leaf1', target: 'leaf2' }];
 </script>
 
-<Cactus width={800} height={600} {nodes} {links} />
+<CactusTree width={800} height={600} {nodes} {links} />
 ```
 
 ## API Reference
 
-### Cactus Component
+### CactusTree Component
 
 #### Props
 
@@ -218,7 +218,7 @@ interface NodeData {
 
 ```svelte
 <script>
-  import { Cactus } from 'cactus-tree';
+  import { CactusTree } from 'cactus-tree';
 
   const styles = {
     fill: '#f0f8ff',
@@ -248,7 +248,7 @@ interface NodeData {
   };
 </script>
 
-<Cactus {width} {height} {nodes} {links} {styles} />
+<CactusTree {width} {height} {nodes} {links} {styles} />
 ```
 
 ### Interactive Features
@@ -275,7 +275,7 @@ Leaf node labels have special behavior:
 ### Basic Tree
 
 ```svelte
-<Cactus
+<CactusTree
   width={600}
   height={400}
   nodes={[
@@ -291,7 +291,7 @@ Leaf node labels have special behavior:
 ### With Edge Bundling
 
 ```svelte
-<Cactus
+<CactusTree
   width={800}
   height={600}
   {nodes}
@@ -309,7 +309,7 @@ Leaf node labels have special behavior:
 ### Custom Layout
 
 ```svelte
-<Cactus
+<CactusTree
   width={1000}
   height={800}
   {nodes}
