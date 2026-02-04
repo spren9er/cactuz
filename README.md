@@ -319,7 +319,7 @@ Leaf node labels have special behavior:
   options={{
     overlap: -0.5,           // Gaps between nodes
     arcSpan: Math.PI,        // Half circle layout
-    orientation: Math.PI,    // Downward growth
+    orientation: Math.PI,    // Leftward growth
     zoom: 1.5
   }}
 />
