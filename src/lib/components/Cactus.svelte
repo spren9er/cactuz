@@ -3,7 +3,7 @@
 
   import { CactusLayout } from '$lib/cactusLayout.js';
 
-  /** @type {{ width: number, height: number, nodes: Array<{id: string, name: string, parent: string|null, weight?: number}>, links?: Array<{source: string, target: string}>, options?: {overlap?: number, arcSpan?: number, sizeGrowthRate?: number, orientation?: number, zoom?: number}, styles?: {fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, edge?: string, edgeWidth?: number, highlightFill?: string, highlightStroke?: string, highlight?: boolean, depths?: Array<{depth: number, fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, edge?: string, edgeWidth?: number, highlightFill?: string, highlightStroke?: string, highlight?: boolean}>}, pannable?: boolean, zoomable?: boolean }} */
+  /** @type {{ width: number, height: number, nodes: Array<{id: string, name: string, parent: string|null, weight?: number}>, links?: Array<{source: string, target: string}>, options?: {overlap?: number, arcSpan?: number, sizeGrowthRate?: number, orientation?: number, zoom?: number}, styles?: {fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, edge?: string, edgeWidth?: number, highlightFill?: string, highlightStroke?: string, highlight?: boolean, labelLimit?: number, depths?: Array<{depth: number, fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, edge?: string, edgeWidth?: number, highlightFill?: string, highlightStroke?: string, highlight?: boolean}>}, pannable?: boolean, zoomable?: boolean }} */
   let {
     width,
     height,
@@ -36,10 +36,10 @@
     line: '#333333',
     edge: '#ff6b6b',
     edgeWidth: 2,
-    highlightFill: '#ffefef',
-    highlightStroke: '#d32f2f',
+    highlightFill: '#ffcc99',
+    highlightStroke: '#ff6600',
     highlight: true,
-    depths: [],
+    labelLimit: 50,
   };
   const mergedStyle = $derived({ ...defaultStyle, ...styles });
 
@@ -178,12 +178,6 @@
     // Calculate negative depth mappings
     negativeDepthNodes.set(-1, new SvelteSet(leafNodes));
 
-    // Debug logging
-    console.log(
-      `Total nodes: ${renderedNodes.length}, Leaf nodes: ${leafNodes.size}`,
-      Array.from(leafNodes),
-    );
-
     /** @type {SvelteSet<string>} */
     let currentLevelNodes = new SvelteSet(leafNodes);
     let depthLevel = -2;
@@ -303,11 +297,11 @@
     );
 
     // Second pass: Draw hierarchical edge bundling
-    if (links?.length && cactusLayout && ctx) {
-      // Group links by their hierarchical paths for bundling
-      /** @type {Array<{link: any, sourceNode: any, targetNode: any, hierarchicalPath: any[], lca: any}>} */
-      const validLinks = [];
+    // Group links by their hierarchical paths for bundling
+    /** @type {Array<{link: any, sourceNode: any, targetNode: any, hierarchicalPath: any[], lca: any}>} */
+    const validLinks = [];
 
+    if (links?.length && cactusLayout && ctx) {
       // First pass: collect all valid links and build hierarchical paths
       links.forEach((link) => {
         const sourceNode = renderedNodes.find((n) => n.node.id === link.source);
@@ -468,6 +462,16 @@
       });
     }
 
+    // Collect visible node IDs from valid links for leaf label filtering
+    /** @type {Set<string>} */
+    const visibleNodeIds = new Set();
+    if (links?.length && validLinks.length) {
+      validLinks.forEach(({ link }) => {
+        visibleNodeIds.add(link.source);
+        visibleNodeIds.add(link.target);
+      });
+    }
+
     // Third pass: Draw labels on top
     renderedNodes.forEach(
       (
@@ -508,29 +512,32 @@
         const currentLabelFontFamily =
           depthStyle?.labelFontFamily ?? mergedStyle.labelFontFamily;
 
-        // Add text if radius is large enough and label is not 'none' (always show for leaf nodes)
         const isActualLeaf = leafNodes.has(node.id);
+
+        // Check if leaf node should show label based on link visibility and leaf count
+        // Only bypass 50-leaf limit when hovering specifically over leaf nodes
+        const isHoveringLeafNode =
+          hoveredNodeId !== null && leafNodes.has(hoveredNodeId);
+        const shouldShowLeafLabel =
+          isActualLeaf &&
+          (isHoveringLeafNode
+            ? visibleNodeIds.has(node.id)
+            : leafNodes.size <= mergedStyle.labelLimit);
+
+        // Add text conditions
         if (
-          isActualLeaf ||
-          (radius > 10 &&
+          shouldShowLeafLabel ||
+          (!isActualLeaf &&
+            radius > 10 &&
             currentLabel !== 'none' &&
             currentLabel !== 'transparent')
         ) {
-          // For leaf nodes, ensure text is always visible
-          ctx.fillStyle = isActualLeaf ? '#333333' : currentLabel;
-
           const text = String(node.name || node.id);
 
-          // Debug logging for leaf nodes
-          if (isActualLeaf) {
-            console.log(
-              `Leaf node: ${text}, radius: ${radius}, label: ${currentLabel}, angle: ${angle}`,
-            );
-          }
-
-          if (isActualLeaf) {
+          if (shouldShowLeafLabel) {
             // For leaf nodes: use font size 7 and position text outside circle with rotation
             const fontSize = 7;
+            ctx.fillStyle = currentLabel;
             ctx.font = `${fontSize}px ${currentLabelFontFamily}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -579,6 +586,7 @@
             ctx.restore();
           } else {
             // For non-leaf nodes: use existing logic
+            ctx.fillStyle = currentLabel;
             const fontSize = Math.min(14, Math.max(7, radius / 3));
             ctx.font = `${fontSize}px ${currentLabelFontFamily}`;
             ctx.textAlign = 'center';

@@ -163,6 +163,7 @@
       }}
       styles={{
         labelFontFamily: 'monospace',
+        labelLimit: 50,
         edge: '#e2575a',
         highlightStroke: '#e2575a',
         highlightFill: '#ffbbb7',
