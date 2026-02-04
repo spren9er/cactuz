@@ -223,7 +223,9 @@
   }
 
   p {
-    padding: 4px 140px;
+    max-width: 750px;
+    margin: 0 auto 15px auto;
+    padding: 4px 4px;
     text-align: left;
     color: #666;
     line-height: 1.5;
@@ -235,14 +237,14 @@
   }
 
   .controls {
-    margin: 20px 140px;
-    margin-bottom: 40px;
+    max-width: 750px;
+    margin: 20px auto 25px auto;
     border-radius: 8px;
   }
 
   .control-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 25px;
   }
 
@@ -305,15 +307,5 @@
 
   .footer a:hover {
     color: #333333;
-  }
-
-  @media (max-width: 768px) {
-    p {
-      padding: 4px 10px;
-    }
-
-    .controls {
-      margin: 20px 10px;
-    }
   }
 </style>
