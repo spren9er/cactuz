@@ -4,16 +4,15 @@ A Svelte library for visualizing hierarchical data structures using the CactusTr
 
 ## Overview
 
-**Cactus** is based on the research paper ["CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling"](https://ieeexplore.ieee.org/document/8031596) by Tommy Dang and Angus Forbes. This implementation provides both a ready-to-use Svelte component and a standalone layout algorithm for creating interactive tree visualizations.
+The JavaScript library **cactus** is based on the research paper ["CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling"](https://ieeexplore.ieee.org/document/8031596) by Tommy Dang and Angus Forbes. This implementation provides both a ready-to-use Svelte component and a standalone layout algorithm for creating interactive tree visualizations.
 
 ## Features
 
-- 🌵 **Fractal-based tree layout** - Recursively stacks child nodes on parent nodes
-- 🔗 **Hierarchical edge bundling** - Groups related connections for cleaner visualization  
-- 🎛️ **Highly customizable** - Extensive styling and behavior options
-- 📱 **Interactive** - Pan, zoom, hover effects, and link filtering
-- 🏷️ **Smart labeling** - Adaptive leaf node labels with rotation and positioning
-- 🎨 **Depth-based styling** - Configure appearance for different tree levels
+- **Fractal-based Tree Layout** - Recursively stacks child nodes on parent nodes
+- **Hierarchical Edge Bundling** - Groups related connections for cleaner visualization  
+- **Highly Customizable** - Extensive styling and behavior options
+- **Interactive** - Pan, zoom, hover effects, and link filtering
+- **Depth-based Styling** - Configure appearance for different tree levels
 
 ## Installation
 
@@ -56,23 +55,23 @@ npm install cactus
 
 | Prop | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
-| `width` | `number` | ✅ | - | Canvas width in pixels |
-| `height` | `number` | ✅ | - | Canvas height in pixels |
-| `nodes` | `Node[]` | ✅ | - | Array of hierarchical nodes |
-| `links` | `Link[]` | ❌ | `[]` | Array of connections between nodes |
-| `options` | `Options` | ❌ | `{}` | Layout and behavior configuration |
-| `styles` | `Styles` | ❌ | `{}` | Visual styling configuration |
-| `pannable` | `boolean` | ❌ | `true` | Enable pan interaction |
-| `zoomable` | `boolean` | ❌ | `true` | Enable zoom interaction |
+| `width` | `number` | yes | - | Canvas width in pixels |
+| `height` | `number` | yes | - | Canvas height in pixels |
+| `nodes` | `Node[]` | yes | - | Array of hierarchical nodes |
+| `links` | `Link[]` | no | `[]` | Array of connections between nodes |
+| `options` | `Options` | no | `{}` | Layout and behavior configuration |
+| `styles` | `Styles` | no | `{}` | Visual styling configuration |
+| `pannable` | `boolean` | no | `true` | Enable pan interaction |
+| `zoomable` | `boolean` | no | `true` | Enable zoom interaction |
 
 #### Node Structure
 
 ```typescript
 interface Node {
-  id: string;           // Unique identifier
-  name: string;         // Display name
+  id: string;            // Unique identifier
+  name: string;          // Display name
   parent: string | null; // Parent node ID (null for root)
-  weight?: number;      // Optional explicit weight
+  weight?: number;       // Optional explicit weight
 }
 ```
 
@@ -89,11 +88,11 @@ interface Link {
 
 ```typescript
 interface Options {
-  overlap?: number;        // Node overlap factor (-2 to 1, default: 0.5)
+  overlap?: number;        // Node overlap factor (-inf to 1, default: 0.5)
   arcSpan?: number;        // Arc span in radians (default: 5π/4)
-  sizeGrowthRate?: number; // Size growth rate (0.3 to 1.0, default: 0.75)
+  sizeGrowthRate?: number; // Size growth rate (default: 0.75)
   orientation?: number;    // Root orientation in radians (default: -π/2)
-  zoom?: number;          // Zoom level (0.25 to 2.0, default: 1.0)
+  zoom?: number;           // Zoom level (default: 1.0)
 }
 ```
 
@@ -114,15 +113,15 @@ interface Styles {
   labelLimit?: number;        // Max leaf labels to show (default: 50)
   
   // Connections
+  line?: string;              // Tree line color (default: '#333333')
   lineWidth?: number;         // Tree line width (default: 1)
-  line?: string;             // Tree line color (default: '#333333')
-  edge?: string;             // Link color (default: '#ff6b6b')
-  edgeWidth?: number;        // Link width (default: 2)
+  edge?: string;              // Link color (default: '#ff6b6b')
+  edgeWidth?: number;         // Link width (default: 2)
   
   // Hover effects
+  highlight?: boolean;        // Enable hover effects (default: true)
   highlightFill?: string;     // Hover fill color (default: '#ffcc99')
   highlightStroke?: string;   // Hover stroke color (default: '#ff6600')
-  highlight?: boolean;        // Enable hover effects (default: true)
   
   // Depth-specific styling
   depths?: DepthStyle[];      // Per-depth style overrides
@@ -141,13 +140,13 @@ interface DepthStyle {
   strokeOpacity?: number;
   label?: string;
   labelFontFamily?: string;
-  lineWidth?: number;
   line?: string;
+  lineWidth?: number;
   edge?: string;
   edgeWidth?: number;
+  highlight?: boolean;
   highlightFill?: string;
   highlightStroke?: string;
-  highlight?: boolean;
 }
 ```
 
@@ -190,12 +189,14 @@ new CactusLayout(
 Computes the layout and returns positioned node data.
 
 **Parameters:**
+
 - `nodes`: Array of node objects or flat node array
 - `startX`: Starting X coordinate (usually width/2)
 - `startY`: Starting Y coordinate (usually height/2)  
 - `startAngle`: Starting angle in radians (default: -π/2)
 
 **Returns:**
+
 ```typescript
 NodeData[] // Array of positioned nodes
 ```
@@ -261,7 +262,6 @@ The component provides several interactive features:
 - **Zoom**: Use mouse wheel to zoom in/out
 - **Hover**: Hover over nodes to highlight connections
 - **Link Filtering**: When hovering over leaf nodes, only connected links are shown
-- **Smart Labels**: Leaf labels automatically position outside circles and rotate for readability
 
 ### Label Behavior
 
@@ -272,12 +272,6 @@ Leaf node labels have special behavior:
 - **Alignment**: Left-side labels are right-aligned, right-side labels are left-aligned  
 - **Filtering**: Labels only appear when connected to visible links (during hover/filtering)
 - **Limit**: When more than `labelLimit` leaves exist, labels are hidden unless filtering
-
-### Performance Considerations
-
-- **Large datasets**: Use `labelLimit` to control label density
-- **Many links**: Consider reducing `edgeWidth` for better performance
-- **Deep hierarchies**: Adjust `sizeGrowthRate` to prevent overlap
 
 ## Examples
 
@@ -330,7 +324,3 @@ Leaf node labels have special behavior:
   }}
 />
 ```
-
-## License
-
-MIT
