@@ -84,6 +84,7 @@ export class CactusLayout {
     // Performance optimization caches
     this.weightCache = new Map();
     this.hierarchyCache = new Map();
+    /** @type {string|null} */
     this.lastDataHash = null;
   }
 
@@ -576,11 +577,14 @@ export class CactusLayout {
     return maxChildDepth + 1;
   }
 
+  /**
+   * @param {Array<{id: string|number, name: string, parent: string|number|null, weight?: number}>} nodeArray
+   */
   buildHierarchyFromArray(nodeArray) {
     const nodeMap = new Map();
 
     // Create lookup map
-    nodeArray.forEach((node) => {
+    nodeArray.forEach((/** @type {any} */ node) => {
       node.children = [];
       node.parentRef = null;
       nodeMap.set(node.id, node);
@@ -588,7 +592,7 @@ export class CactusLayout {
 
     // Build parent-child relationships
     let root = null;
-    nodeArray.forEach((node) => {
+    nodeArray.forEach((/** @type {any} */ node) => {
       if (node.parent) {
         const parentNode = nodeMap.get(node.parent);
         if (parentNode) {
