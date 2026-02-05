@@ -42,6 +42,11 @@ export function calculateLayout(
     return [];
   }
 
+  // For very large datasets, limit the number of nodes to prevent UI freezing
+  const maxNodes = 5000;
+  const processedNodes =
+    nodes.length > maxNodes ? nodes.slice(0, maxNodes) : nodes;
+
   const cactusLayout = new CactusLayout(
     width,
     height,
@@ -52,7 +57,7 @@ export function calculateLayout(
   );
 
   return cactusLayout.render(
-    nodes,
+    processedNodes,
     width / 2,
     height / 2,
     mergedOptions.orientation,
@@ -90,28 +95,37 @@ export function computeZoomLimits(width, height, nodes, mergedOptions) {
   );
 
   let minRadius = Infinity;
-  let maxRadius = -Infinity;
+  let maxRadius = 0;
 
-  baseNodes.forEach(({ radius }) => {
-    if (radius < minRadius) minRadius = radius;
-    if (radius > maxRadius) maxRadius = radius;
+  // Find smallest and largest circle radii from base layout
+  baseNodes.forEach((nodeData) => {
+    const radius = nodeData.radius;
+    minRadius = Math.min(minRadius, radius);
+    maxRadius = Math.max(maxRadius, radius);
   });
 
-  // Calculate reasonable zoom bounds
-  if (minRadius === Infinity || minRadius <= 0) {
-    return { minZoomLimit: 0.1, maxZoomLimit: 10 };
+  // Fallback values if no valid circles found
+  if (!isFinite(minRadius) || minRadius <= 0) {
+    minRadius = 1;
+  }
+  if (maxRadius <= 0) {
+    maxRadius = 100;
   }
 
-  // Min zoom: ensure largest elements fit comfortably on canvas
-  const canvasSize = Math.min(width, height);
-  const minZoomLimit = Math.max(0.05, canvasSize / (maxRadius * 8));
+  // Maximum zoom: smallest circle's diameter should be 1/10 of smaller screen dimension
+  const targetDiameter = Math.min(width, height) / 10;
+  const maxZoomLimit = targetDiameter / (2 * minRadius);
 
-  // Max zoom: ensure smallest visible node is at least 5px radius
-  const maxZoomLimit = Math.min(100, 20 / minRadius);
+  // Minimum zoom: ensure largest content fits comfortably in view
+  // Make sure zoom=1.0 is always allowed as a reasonable starting point
+  const minZoomLimit = Math.max(
+    0.01,
+    Math.min(0.5, Math.min(width, height) / (maxRadius * 8)),
+  );
 
   return {
-    minZoomLimit: Math.max(0.05, minZoomLimit),
-    maxZoomLimit: Math.max(2, maxZoomLimit),
+    minZoomLimit,
+    maxZoomLimit,
   };
 }
 

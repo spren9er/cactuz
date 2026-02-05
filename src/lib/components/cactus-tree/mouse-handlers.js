@@ -34,7 +34,12 @@ export function createMouseMoveHandler(state, width, height, scheduleRender) {
     state.lastMouseY = mouseY;
 
     // Handle hovering (only if not dragging and we have rendered nodes)
-    if (!state.isDragging && state.renderedNodes.length) {
+    // Skip for large datasets to improve performance
+    if (
+      !state.isDragging &&
+      state.renderedNodes.length &&
+      state.renderedNodes.length < 10000
+    ) {
       // Transform mouse coordinates to account for pan only (like original)
       const transformedMouseX = mouseX - state.panX;
       const transformedMouseY = mouseY - state.panY;
@@ -119,19 +124,19 @@ export function createWheelHandler(state, width, height, scheduleRender) {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
-    // Calculate proposed zoom with a more reasonable zoom factor
-    const zoomFactor = event.deltaY > 0 ? 0.8 : 1.25;
+    // Calculate proposed zoom
+    const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
     const proposedZoom = state.currentZoom * zoomFactor;
 
     // Check if at bounds to prevent bouncing
     if (
-      proposedZoom >= state.maxZoomLimit &&
+      proposedZoom > state.maxZoomLimit &&
       state.currentZoom >= state.maxZoomLimit
     ) {
       return; // At max bound, don't zoom further
     }
     if (
-      proposedZoom <= state.minZoomLimit &&
+      proposedZoom < state.minZoomLimit &&
       state.currentZoom <= state.minZoomLimit
     ) {
       return; // At min bound, don't zoom further
@@ -143,12 +148,7 @@ export function createWheelHandler(state, width, height, scheduleRender) {
       Math.min(state.maxZoomLimit, proposedZoom),
     );
 
-    // Only proceed if zoom actually changed
-    if (Math.abs(newZoom - state.currentZoom) < 0.001) {
-      return;
-    }
-
-    // Calculate zoom-to-point: keep the world point under the mouse fixed (like original)
+    // Calculate zoom-to-point: keep the world point under the mouse fixed
     const centerX = width / 2;
     const centerY = height / 2;
 

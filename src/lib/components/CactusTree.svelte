@@ -141,6 +141,13 @@
         );
       minZoomLimit = limits.minZoomLimit;
       maxZoomLimit = limits.maxZoomLimit;
+
+      // Reset zoom if it's outside the new limits
+      if (currentZoom < minZoomLimit || currentZoom > maxZoomLimit) {
+        currentZoom = 1.0;
+        panX = 0;
+        panY = 0;
+      }
     }
   }
 
@@ -316,8 +323,21 @@
   });
 
   $effect(() => {
-    // Only depend on nodes changing, not canvas or ctx
-    if (nodes?.length > 0 && canvas && ctx) {
+    // Watch all reactive dependencies
+    void nodes;
+    void links;
+    void mergedOptions.overlap;
+    void mergedOptions.arcSpan;
+    void mergedOptions.sizeGrowthRate;
+    void mergedOptions.orientation;
+    void mergedOptions.zoom;
+    void currentZoom;
+    void panX;
+    void panY;
+    void width;
+    void height;
+
+    if (nodes?.length > 0 && canvas) {
       scheduleRender();
     }
   });

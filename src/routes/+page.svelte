@@ -12,6 +12,9 @@
   let width = 750;
   let height = 750;
 
+  // Consistent link arrays to prevent reactivity issues
+  $: displayedLinks = showEdgeBundling ? links : [];
+
   let config = {
     overlap: 0.2,
     arcSpan: 225,
@@ -174,7 +177,7 @@
       {width}
       {height}
       {nodes}
-      links={showEdgeBundling ? links : []}
+      links={displayedLinks}
       options={{
         overlap: config.overlap,
         arcSpan: (config.arcSpan * Math.PI) / 180,
