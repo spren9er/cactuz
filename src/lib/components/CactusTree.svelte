@@ -91,13 +91,6 @@
   let lastMouseX = 0;
   let lastMouseY = 0;
 
-  // Track original zoom state for absolute calculations
-  let originalZoom = 1;
-  let originalMouseX = 0;
-  let originalMouseY = 0;
-  let originalPanX = 0;
-  let originalPanY = 0;
-
   // Zoom limits computed upfront after layout calculation
   let minZoomLimit = 0.01;
   let maxZoomLimit = 100.0;
@@ -238,7 +231,8 @@
         if (!parentToChildrenNodeMap.has(parentId)) {
           parentToChildrenNodeMap.set(parentId, []);
         }
-        parentToChildrenNodeMap.get(parentId).push(nodeData);
+        const children = parentToChildrenNodeMap.get(parentId);
+        if (children) children.push(nodeData);
       }
     });
 
@@ -250,7 +244,8 @@
         if (!tempParentToChildrenMap.has(node.parent)) {
           tempParentToChildrenMap.set(node.parent, []);
         }
-        tempParentToChildrenMap.get(node.parent)?.push(node.id);
+        const children = tempParentToChildrenMap.get(node.parent);
+        if (children) children.push(node.id);
       }
     });
 
@@ -292,7 +287,7 @@
       const filteredNodes = new SvelteSet();
 
       // Build parent-child relationships efficiently for this level
-      const levelParentMap = new Map();
+      const levelParentMap = new SvelteMap();
       nextLevelNodes.forEach((nodeId) => {
         const nodeData = nodeIdToNodeMap.get(nodeId);
         if (nodeData && nodeData.parent) {
