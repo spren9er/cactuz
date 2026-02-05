@@ -36,7 +36,7 @@
 </script>
 
 <svelte:head>
-  <title>Cactus Tree Visualization</title>
+  <title>cactus-tree</title>
 </svelte:head>
 
 <main class="container">

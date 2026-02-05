@@ -80,6 +80,11 @@ export class CactusLayout {
     /** @type {NodeData[]} */
     this.nodes = [];
     this.globalScale = 1;
+
+    // Performance optimization caches
+    this.weightCache = new Map();
+    this.hierarchyCache = new Map();
+    this.lastDataHash = null;
   }
 
   /**
@@ -97,19 +102,27 @@ export class CactusLayout {
    * @returns {number} Total weight of the node
    */
   weight(node) {
+    // Check cache first for performance
+    if (this.weightCache.has(node.id)) {
+      return this.weightCache.get(node.id);
+    }
+
+    let weight;
     if (node.weight !== undefined && node.weight !== null) {
-      return node.weight;
+      weight = node.weight;
+    } else if (!node.children || node.children.length === 0) {
+      weight = 1;
+    } else {
+      let totalWeight = 0;
+      for (const child of node.children) {
+        totalWeight += this.weight(child); // Recursive calls will hit cache
+      }
+      weight = totalWeight;
     }
 
-    if (!node.children || node.children.length === 0) {
-      return 1;
-    }
-
-    let totalWeight = 0;
-    for (const child of node.children) {
-      totalWeight += this.weight(child);
-    }
-    return totalWeight;
+    // Cache the result
+    this.weightCache.set(node.id, weight);
+    return weight;
   }
 
   /**
@@ -118,9 +131,10 @@ export class CactusLayout {
    * @returns {TreeNode[]} Sorted list of child nodes
    */
   sortChildNodesByWeight(childList) {
+    // Use cached weights for efficient sorting
     return childList.slice().sort((a, b) => {
-      const weightA = this.weight(a);
-      const weightB = this.weight(b);
+      const weightA = this.weightCache.get(a.id) || this.weight(a);
+      const weightB = this.weightCache.get(b.id) || this.weight(b);
       return weightA - weightB;
     });
   }
@@ -131,15 +145,19 @@ export class CactusLayout {
    * @returns {TreeNode[]} List with max weight nodes in center
    */
   orderMaxInCenter(orderedList) {
-    /** @type {TreeNode[]} */
-    const centeredList = [];
+    // Optimized center ordering using array pushing instead of expensive splicing
+    const left = [];
+    const right = [];
 
-    for (const node of orderedList) {
-      const middleIndex = Math.floor(centeredList.length / 2);
-      centeredList.splice(middleIndex, 0, node);
+    for (let i = 0; i < orderedList.length; i++) {
+      if (i % 2 === 0) {
+        left.push(orderedList[i]);
+      } else {
+        right.unshift(orderedList[i]);
+      }
     }
 
-    return centeredList;
+    return [...left, ...right];
   }
 
   /**
@@ -154,16 +172,18 @@ export class CactusLayout {
   drawCactusLayout(currentNode, x, y, alpha, drawCallback, depth = 0) {
     const childList = currentNode.children || [];
 
-    const nodeWeight = this.weight(currentNode);
+    const nodeWeight = this.weight(currentNode); // Uses cache
     const radius = this.getRadius(nodeWeight);
 
+    // Use Map for O(1) lookups instead of O(n) array.find()
+    const childInfoMap = new Map();
     let totalArcNeeded = 0;
-    /** @type {ChildInfo[]} */
-    const childInfo = [];
+
     for (const child of childList) {
-      const childWeight = this.weight(child);
+      const childWeight = this.weight(child); // Uses cache
       const childRadius = this.getRadius(childWeight);
-      childInfo.push({ child, weight: childWeight, radius: childRadius });
+      const childInfo = { child, weight: childWeight, radius: childRadius };
+      childInfoMap.set(child, childInfo);
       totalArcNeeded += 2 * childRadius;
     }
 
@@ -193,7 +213,7 @@ export class CactusLayout {
     let childAlpha = alpha - this.arcSpan / 2;
 
     for (const child of centeredList) {
-      const info = childInfo.find((ci) => ci.child === child);
+      const info = childInfoMap.get(child); // O(1) lookup!
       if (!info) continue;
 
       const childRadius = info.radius;
@@ -440,19 +460,16 @@ export class CactusLayout {
    */
   render(input, startX, startY, startAngle = -Math.PI / 2) {
     this.nodes = [];
+    this.weightCache.clear(); // Clear cache for fresh calculation
 
-    // Handle both array input and legacy tree input
-    let root;
-    if (Array.isArray(input)) {
-      root = this.buildHierarchyFromArray(input);
-    } else {
-      root = input;
-      this.setParentReferences(root, null);
-    }
+    // Use cached hierarchy if possible
+    const root = this.getCachedHierarchy(input);
 
+    // Store original settings for restoration
     const refOverlap = this.overlap;
     const refArcSpan = this.arcSpan;
 
+    // First pass: calculate layout with standard settings to get bounding box
     this.overlap = 0;
     this.arcSpan = Math.PI;
 
@@ -464,9 +481,11 @@ export class CactusLayout {
     const scaleY = bbox.height > 0 ? this.height / bbox.height : 1;
     this.globalScale = Math.min(scaleX, scaleY) * this.zoom * 0.95;
 
+    // Restore original settings
     this.overlap = refOverlap;
     this.arcSpan = refArcSpan;
 
+    // Second pass: layout with actual settings and apply scaling
     this.nodes = [];
     this.drawCactusLayout(root, 0, 0, startAngle, null);
 
@@ -495,6 +514,68 @@ export class CactusLayout {
    * @param {TreeNode[]} nodeArray - Flat array of nodes
    * @returns {TreeNode} Root node with built hierarchy
    */
+  /**
+   * Get cached hierarchy or build new one
+   * @param {TreeNode[]|TreeNode} input
+   * @returns {TreeNode}
+   */
+  getCachedHierarchy(input) {
+    const dataHash = this.hashData(input);
+
+    if (this.lastDataHash === dataHash && this.hierarchyCache.has(dataHash)) {
+      return this.hierarchyCache.get(dataHash);
+    }
+
+    // Build new hierarchy
+    let root;
+    if (Array.isArray(input)) {
+      root = this.buildHierarchyFromArray(input);
+    } else {
+      root = input;
+      this.setParentReferences(root, null);
+    }
+
+    // Cache it
+    this.hierarchyCache.set(dataHash, root);
+    this.lastDataHash = dataHash;
+
+    return root;
+  }
+
+  /**
+   * Simple hash function for input data
+   * @param {TreeNode[]|TreeNode} input
+   * @returns {string}
+   */
+  hashData(input) {
+    if (Array.isArray(input)) {
+      // Simple hash to avoid circular reference issues
+      const first = input[0] || {};
+      const last = input[input.length - 1] || {};
+      return `${input.length}-${first.id || 'none'}-${first.name || 'none'}-${last.id || 'none'}-${last.name || 'none'}`;
+    }
+    // For object input, create a simple hash without circular references
+    return `single-${input.id || 'root'}-${input.name || 'unnamed'}`;
+  }
+
+  /**
+   * Calculate maximum depth of tree for estimation
+   * @param {TreeNode} node
+   * @returns {number}
+   */
+  calculateMaxDepth(node) {
+    if (!node.children || node.children.length === 0) {
+      return 0;
+    }
+
+    let maxChildDepth = 0;
+    for (const child of node.children) {
+      maxChildDepth = Math.max(maxChildDepth, this.calculateMaxDepth(child));
+    }
+
+    return maxChildDepth + 1;
+  }
+
   buildHierarchyFromArray(nodeArray) {
     const nodeMap = new Map();
 
