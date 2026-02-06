@@ -1,6 +1,6 @@
 # cactus-tree
 
-A Svelte library for visualizing hierarchical data structures using the *CactusTree* algorithm with hierarchical edge bundling.
+A modern Svelte library for visualizing hierarchical data structures using the *CactusTree* algorithm with hierarchical edge bundling.
 
 <div align="center">
   <img src="https://github.com/spren9er/cactus-tree/blob/main/docs/images/cactus-tree.png?raw=true" alt="cactus-tree" width="50%" height="50%">
@@ -88,7 +88,7 @@ interface Options {
   overlap?: number;        // Node overlap factor (-inf to 1, default: 0.5)
   arcSpan?: number;        // Arc span in radians (default: 5π/4)
   sizeGrowthRate?: number; // Size growth rate (default: 0.75)
-  orientation?: number;    // Root orientation in radians (default: -π/2)
+  orientation?: number;    // Root orientation in radians (default: π/2)
   zoom?: number;           // Zoom level (default: 1.0)
 }
 ```
@@ -189,7 +189,7 @@ Computes the layout and returns positioned node data.
 - `nodes`: Array of node objects or flat node array
 - `startX`: Starting X coordinate (usually width/2)
 - `startY`: Starting Y coordinate (usually height/2)
-- `startAngle`: Starting angle in radians (default: -π/2)
+- `startAngle`: Starting angle in radians (default: π/2)
 
 **Returns:**
 
@@ -304,9 +304,9 @@ The component provides several interactive features:
   height={800}
   {nodes}
   options={{
-    overlap: -0.5,        // Gaps between nodes
-    arcSpan: Math.PI,     // Half circle layout
-    orientation: Math.PI, // Leftward growth
+    overlap: -0.5,           // Gaps between nodes
+    arcSpan: Math.PI,        // Half circle layout
+    orientation: Math.PI,    // Leftward growth (180°)
     zoom: 1.5,
   }}
 />

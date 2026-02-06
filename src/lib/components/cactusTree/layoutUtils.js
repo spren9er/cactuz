@@ -4,7 +4,7 @@
  */
 
 import { SvelteSet, SvelteMap } from 'svelte/reactivity';
-import { CactusLayout } from '$lib/cactusLayout.js';
+import { CactusLayout } from './cactusLayout.js';
 
 /**
  * Calculates performance statistics

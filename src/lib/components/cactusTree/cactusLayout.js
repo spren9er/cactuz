@@ -229,7 +229,7 @@ export class CactusLayout {
       const currentOverlap = this.overlap;
       const distance = radius + childRadius * (1 - 2 * currentOverlap);
       const x2 = x + distance * Math.cos(childAlpha);
-      const y2 = y + distance * Math.sin(childAlpha);
+      const y2 = y - distance * Math.sin(childAlpha);
 
       this.drawCactusLayout(child, x2, y2, childAlpha, drawCallback, depth + 1);
 
@@ -455,11 +455,10 @@ export class CactusLayout {
    * @param {TreeNode[]|TreeNode} input - Array of nodes or single root node
    * @param {number} startX - Starting X coordinate
    * @param {number} startY - Starting Y coordinate
-   * @param {number} startAngle - Starting angle in radians (default: π for upward growth)
-
+   * @param {number} startAngle - Starting angle in radians using mathematical convention (0 = right, π/2 = top, π = left, 3π/2 = bottom)
    * @returns {NodeData[]} Array of node data with positions and radii
    */
-  render(input, startX, startY, startAngle = -Math.PI / 2) {
+  render(input, startX, startY, startAngle = Math.PI / 2) {
     this.nodes = [];
     this.weightCache.clear(); // Clear cache for fresh calculation
 
