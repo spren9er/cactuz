@@ -98,40 +98,40 @@ interface Options {
 ```typescript
 interface Styles {
   // Node appearance
-  fill?: string;            // Node fill color (default: '#efefef')
-  fillOpacity?: number;     // Node fill opacity (default: 1)
-  stroke?: string;          // Node stroke color (default: '#333333')
-  strokeWidth?: number;     // Node stroke width (default: 1)
-  strokeOpacity?: number;   // Node stroke opacity (default: 1)
+  fill?: string;             // Node fill color (default: '#efefef')
+  fillOpacity?: number;      // Node fill opacity (default: 1)
+  stroke?: string;           // Node stroke color (default: '#333333')
+  strokeWidth?: number;      // Node stroke width (default: 1)
+  strokeOpacity?: number;    // Node stroke opacity (default: 1)
 
   // Labels
-  label?: string;              // Label color (default: '#333333')
-  labelFontFamily?: string;    // Label font (default: 'monospace')
-  labelLink?: string;          // Label link line color (default: '#333333')
-  labelLinkWidth?: number;     // Label link line width (default: 1)
-  labelLinkPadding?: number;   // Gap between circle and link start in pixels (default: 1.5)
-  labelLinkLength?: number;    // Length of visible link line in pixels (default: 5)
-  labelPadding?: number;       // Padding around label text in pixels (default: 0.5)
-  labelMinFontSize?: number;   // Minimum label font size (default: 8)
-  labelMaxFontSize?: number;   // Maximum label font size (default: 14)
-  labelLimit?: number;         // Maximum number of labels to show (default: 30)
-                               // Shows labels for the N largest nodes by radius (all types)
-                               // Set to 0 to hide all labels (except when hovering)
+  label?: string;            // Label color (default: '#333333')
+  labelFontFamily?: string;  // Label font (default: 'monospace')
+  labelLink?: string;        // Label link line color (default: '#333333')
+  labelLinkWidth?: number;   // Label link line width (default: 1)
+  labelLinkPadding?: number; // Gap between circle and link start in pixels (default: 1.5)
+  labelLinkLength?: number;  // Length of visible link line in pixels (default: 5)
+  labelPadding?: number;     // Padding around label text in pixels (default: 0.5)
+  labelMinFontSize?: number; // Minimum label font size (default: 8)
+  labelMaxFontSize?: number; // Maximum label font size (default: 14)
+  labelLimit?: number;       // Maximum number of labels to show (default: 30)
+                             // Shows labels for the N largest nodes by radius (all types)
+                             // Set to 0 to hide all labels (except when hovering)
 
   // Connections
-  line?: string;            // Tree line color (default: '#333333')
-  lineWidth?: number;       // Tree line width (default: 1)
-  edge?: string;            // Link color (default: '#ff6b6b')
-  edgeWidth?: number;       // Link width (default: 1)
-  edgeOpacity?: number;     // Link opacity (default: 0.1, full opacity when hovering leaf nodes with links)
+  line?: string;             // Tree line color (default: '#333333')
+  lineWidth?: number;        // Tree line width (default: 1)
+  edge?: string;             // Link color (default: '#ff6b6b')
+  edgeWidth?: number;        // Link width (default: 1)
+  edgeOpacity?: number;      // Link opacity (default: 0.1, full opacity when hovering leaf nodes with links)
 
   // Hover effects
-  highlight?: boolean;      // Enable hover effects (default: true)
-  highlightFill?: string;   // Hover fill color (default: '#ffcc99')
-  highlightStroke?: string; // Hover stroke color (default: '#ff6600')
+  highlight?: boolean;       // Enable hover effects (default: true)
+  highlightFill?: string;    // Hover fill color (default: '#ffcc99')
+  highlightStroke?: string;  // Hover stroke color (default: '#ff6600')
 
   // Depth-specific styling
-  depths?: DepthStyle[];    // Per-depth style overrides
+  depths?: DepthStyle[];     // Per-depth style overrides
 }
 ```
 
