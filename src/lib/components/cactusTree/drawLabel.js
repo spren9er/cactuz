@@ -212,6 +212,7 @@ export function shouldShowLabel(
  * @param {Map<number, Set<string>>} negativeDepthNodes - Map of negative depth nodes
  * @param {number} panX - Current pan X offset
  * @param {number} panY - Current pan Y offset
+ * @param {number} zoom - Current layout zoom level
  */
 export function drawLabels(
   ctx,
@@ -224,6 +225,7 @@ export function drawLabels(
   negativeDepthNodes,
   panX = 0,
   panY = 0,
+  zoom = 1.0,
 ) {
   if (!ctx || !renderedNodes.length) return;
 
@@ -329,6 +331,7 @@ export function drawLabels(
   if (nodesWithLabels.length === 0) return;
 
   // Calculate optimal label positions
+  // Convert screen-space values to layout space by dividing by zoom
   const { labels, links } = calculateLabelPositions(
     nodesWithLabels,
     width,
@@ -337,7 +340,9 @@ export function drawLabels(
       fontFamily: mergedStyle.labelFontFamily || 'monospace',
       fontSize: mergedStyle.labelMinFontSize || 8, // All outside labels use min font size
       minRadius: 2, // Lower threshold to show labels for smaller nodes
-      labelPadding: 2, // 2px padding to keep labels close to links
+      labelPadding: (mergedStyle.labelPadding ?? 2) / zoom, // Text padding around label
+      linkPadding: (mergedStyle.labelLinkPadding || 0) / zoom, // Gap between circle and link start
+      linkLength: (mergedStyle.labelLinkLength || 0) / zoom, // Extension of link beyond circle
     },
   );
 
@@ -468,8 +473,9 @@ function drawPositionedLabel(
     // For inside labels, center the text
     ctx.fillText(text, x + labelData.width / 2, y + labelData.height / 2);
   } else {
-    // For outside labels, text is already positioned with padding included in bounding box
-    // The labelPadding (2px on each side) is already included in label dimensions
-    ctx.fillText(text, x + 2, y + 2); // Use labelPadding amount for consistent spacing
+    // For outside labels, text is positioned with padding offset
+    // The labelPadding is included in label dimensions, so offset by that amount
+    const labelPadding = mergedStyle.labelPadding ?? 2;
+    ctx.fillText(text, x + labelPadding, y + labelPadding);
   }
 }

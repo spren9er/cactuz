@@ -459,197 +459,6 @@ export class CircleAwareLabeler {
   }
 }
 
-/**
- * Core label positioning algorithm to resolve overlaps
- */
-export class Labeler {
-  constructor(
-    /** @type {any[]} */ labels,
-    /** @type {any[]} */ anchors,
-    /** @type {number} */ width,
-    /** @type {number} */ height,
-    /** @type {any} */ options = {},
-  ) {
-    this.labels = [...labels]; // Copy to avoid mutating originals
-    this.anchors = anchors;
-    this.width = width;
-    this.height = height;
-    /** @type {any[]} */
-    this.links = [];
-
-    // Configuration options
-    this.maxIterations = (options && options.maxIterations) || 100;
-    this.stepSize = (options && options.stepSize) || 2;
-    this.margin = (options && options.margin) || 5;
-  }
-
-  /**
-   * Main algorithm to resolve label overlaps
-   */
-  call() {
-    this.initializeLinks();
-
-    for (let iteration = 0; iteration < this.maxIterations; iteration++) {
-      let hasOverlaps = false;
-
-      // Check all pairs of labels for overlaps
-      for (let i = 0; i < this.labels.length; i++) {
-        for (let j = i + 1; j < this.labels.length; j++) {
-          if (this.labels[i].overlaps(this.labels[j])) {
-            hasOverlaps = true;
-            this.resolveOverlap(i, j);
-          }
-        }
-      }
-
-      // Keep labels within bounds
-      this.enforceCanvasBounds();
-
-      // Update links after label movements
-      this.updateLinks();
-
-      // If no overlaps remain, we're done
-      if (!hasOverlaps) {
-        break;
-      }
-    }
-  }
-
-  /**
-   * Initialize links from anchors to labels
-   */
-  initializeLinks() {
-    this.links = this.anchors.map(
-      (/** @type {any} */ anchor, /** @type {number} */ i) => {
-        const label = this.labels[i];
-        const labelCenter = label.getCenter();
-
-        // Find the point on the anchor circle closest to the label
-        const angle = Math.atan2(
-          labelCenter.y - anchor.y,
-          labelCenter.x - anchor.x,
-        );
-        const x1 = anchor.x + Math.cos(angle) * anchor.radius;
-        const y1 = anchor.y + Math.sin(angle) * anchor.radius;
-
-        return new Link(x1, y1, labelCenter.x, labelCenter.y);
-      },
-    );
-  }
-
-  /**
-   * Resolve overlap between two labels
-   * @param {number} i - Index of first label
-   * @param {number} j - Index of second label
-   */
-  resolveOverlap(i, j) {
-    const label1 = this.labels[i];
-    const label2 = this.labels[j];
-
-    // Calculate overlap area
-    const overlapX =
-      Math.min(label1.x + label1.width, label2.x + label2.width) -
-      Math.max(label1.x, label2.x);
-    const overlapY =
-      Math.min(label1.y + label1.height, label2.y + label2.height) -
-      Math.max(label1.y, label2.y);
-
-    // Determine movement direction (push apart)
-    const center1 = label1.getCenter();
-    const center2 = label2.getCenter();
-    const dx = center2.x - center1.x;
-    const dy = center2.y - center1.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance === 0) {
-      // Labels are exactly on top of each other, use arbitrary direction
-      this.moveLabel(i, this.stepSize, 0);
-      this.moveLabel(j, -this.stepSize, 0);
-      return;
-    }
-
-    // Normalize direction
-    const unitX = dx / distance;
-    const unitY = dy / distance;
-
-    // Move labels apart based on overlap severity
-    const moveDistance = Math.max(overlapX, overlapY) / 2 + this.margin;
-
-    this.moveLabel(i, -unitX * moveDistance, -unitY * moveDistance);
-    this.moveLabel(j, unitX * moveDistance, unitY * moveDistance);
-  }
-
-  /**
-   * Move a label by the given offset, considering anchor distance penalty
-   * @param {number} index - Label index
-   * @param {number} dx - X offset
-   * @param {number} dy - Y offset
-   */
-  moveLabel(index, dx, dy) {
-    const label = this.labels[index];
-    const anchor = this.anchors[index];
-
-    // Calculate current and proposed distances to anchor
-    const currentCenter = label.getCenter();
-    const currentDistance = anchor.distanceTo(currentCenter.x, currentCenter.y);
-
-    const newX = label.x + dx;
-    const newY = label.y + dy;
-    const newCenter = { x: newX + label.width / 2, y: newY + label.height / 2 };
-    const newDistance = anchor.distanceTo(newCenter.x, newCenter.y);
-
-    // Reduce movement if it increases distance to anchor significantly
-    const distanceIncrease = newDistance - currentDistance;
-    const damping = distanceIncrease > anchor.radius ? 0.5 : 1.0;
-
-    label.x += dx * damping;
-    label.y += dy * damping;
-  }
-
-  /**
-   * Keep labels within canvas bounds
-   */
-  enforceCanvasBounds() {
-    this.labels.forEach((label) => {
-      if (label.x < 0) label.x = 0;
-      if (label.y < 0) label.y = 0;
-      if (label.x + label.width > this.width) {
-        label.x = this.width - label.width;
-      }
-      if (label.y + label.height > this.height) {
-        label.y = this.height - label.height;
-      }
-    });
-  }
-
-  /**
-   * Update link positions after labels have moved
-   */
-  updateLinks() {
-    this.links.forEach((link, i) => {
-      const anchor = this.anchors[i];
-      const label = this.labels[i];
-      const labelCenter = label.getCenter();
-
-      // Update link end point to label center
-      link.x2 = labelCenter.x;
-      link.y2 = labelCenter.y;
-
-      // Update link start point to closest point on anchor circle
-      const angle = Math.atan2(
-        labelCenter.y - anchor.y,
-        labelCenter.x - anchor.x,
-      );
-      link.x1 = anchor.x + Math.cos(angle) * anchor.radius;
-      link.y1 = anchor.y + Math.sin(angle) * anchor.radius;
-
-      // Update length
-      link.length = Math.sqrt(
-        (link.x2 - link.x1) ** 2 + (link.y2 - link.y1) ** 2,
-      );
-    });
-  }
-}
 
 /**
  * Calculate label anchor point based on angle from anchor to label center
@@ -747,8 +556,9 @@ export class LabelPositioner {
     this.options = {
       minRadius: 2, // Lower threshold to show labels for smaller nodes
       maxRadius: 50,
-      labelPadding: 2, // 2px padding to keep labels close to links
-      circleMargin: 5, // Minimum distance from circle edge when placing outside
+      labelPadding: 2, // Text padding (will be overridden by options)
+      linkPadding: 0, // Gap between circle and link start (will be overridden by options)
+      linkLength: 0, // Extension of link beyond circle (will be overridden by options)
       ...options,
     };
 
@@ -783,7 +593,7 @@ export class LabelPositioner {
           // Measure text dimensions
           const text = node.name || node.id;
           const textWidth = this.measureTextWidth(text);
-          const textHeight = this.fontSize + this.options.labelPadding;
+          const textHeight = this.fontSize + this.options.labelPadding * 2;
 
           // Check if label fits inside the circle
           const fitsInside = this.canFitInsideCircle(
@@ -857,8 +667,14 @@ export class LabelPositioner {
    * @returns {{ x: number, y: number }} Position for label
    */
   findOutsidePosition(nodeX, nodeY, nodeRadius, labelWidth, labelHeight) {
-    const margin = this.options.circleMargin;
-    const minDistance = nodeRadius + margin;
+    // Total distance from circle center to label position:
+    // - linkPadding: gap between circle and link start
+    // - linkLength: length of visible link
+    // - labelPadding: gap between link end and label
+    const linkPadding = this.options.linkPadding || 0;
+    const linkLength = this.options.linkLength || 0;
+    const labelPadding = this.options.labelPadding || 0;
+    const minDistance = nodeRadius + linkPadding + linkLength + labelPadding;
 
     // All 8 directions to try
     const angles = [
@@ -1051,6 +867,8 @@ export class LabelPositioner {
     const nodesWithLabels = this.renderedNodes;
 
     // Use Monte Carlo algorithm for placing outside labels
+    // labelAnchorPadding creates a virtual extended circle for overlap detection
+    // It should include all three padding values to maintain proper spacing
     const labeler = new CircleAwareLabeler(
       labels,
       anchors,
@@ -1065,7 +883,7 @@ export class LabelPositioner {
         wOrientation: 3.0,
         maxMove: 15.0,
         maxAngle: Math.PI / 4,
-        labelAnchorPadding: 2,
+        labelAnchorPadding: (this.options.linkPadding || 0) + (this.options.linkLength || 0) + (this.options.labelPadding || 0),
       },
     );
 
@@ -1128,15 +946,27 @@ export class LabelPositioner {
         anchor.y,
       );
 
+      // Calculate the angle from circle center to label anchor point
+      const angle = Math.atan2(
+        labelAnchorPoint.y - anchor.y,
+        labelAnchorPoint.x - anchor.x,
+      );
+
+      // Start link from circle perimeter + linkPadding
+      const linkPadding = this.options.linkPadding || 0;
+      const startDistance = anchor.radius + linkPadding;
+      const perimeterX = anchor.x + Math.cos(angle) * startDistance;
+      const perimeterY = anchor.y + Math.sin(angle) * startDistance;
+
       return {
         nodeId: label.key,
-        x1: anchor.x,
-        y1: anchor.y,
+        x1: perimeterX,
+        y1: perimeterY,
         x2: labelAnchorPoint.x,
         y2: labelAnchorPoint.y,
         length: Math.sqrt(
-          (labelAnchorPoint.x - anchor.x) ** 2 +
-            (labelAnchorPoint.y - anchor.y) ** 2,
+          (labelAnchorPoint.x - perimeterX) ** 2 +
+            (labelAnchorPoint.y - perimeterY) ** 2,
         ),
       };
     });
