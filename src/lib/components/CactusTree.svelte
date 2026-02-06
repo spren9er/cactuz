@@ -32,7 +32,7 @@
     overlap: 0.5,
     arcSpan: (5 * Math.PI) / 4,
     sizeGrowthRate: 0.75,
-    orientation: -Math.PI / 2,
+    orientation: Math.PI / 2,
     zoom: 1.0,
   };
 
