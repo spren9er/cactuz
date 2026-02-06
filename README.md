@@ -268,7 +268,6 @@ The component provides several interactive features:
 - **Pan**: Click and drag to pan the visualization
 - **Zoom**: Use mouse wheel to zoom in/out
 - **Hover**: Hover over nodes to highlight connections
-- **Link Filtering**: When hovering over leaf nodes, only connected links are shown
 
 ## Examples
 
@@ -329,3 +328,4 @@ The component provides several interactive features:
 </div>
 
 For a negative overlap parameter, nodes are connected by links.
+Also, when hovering over leaf nodes, only the links connected to that node are shown, while all other links are hidden. This allows for better readability in dense visualizations.
