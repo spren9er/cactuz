@@ -70,9 +70,10 @@
   </p>
 
   <p>
-    This implementation of <i>CactusTree</i> includes several customizable
-    parameters to control the visual appearance and behavior of the tree layout.
-    The source code of the Svelte library <b>cactus-tree</b> can be found on
+    This modern implementation of <i>CactusTree</i> provides several
+    configurable parameters that allow you to control the visual appearance and
+    layout behavior of the tree. The source code for the Svelte library
+    <b>cactus-tree</b> is available on
     <a href="https://github.com/spren9er/cactus">GitHub</a>.
   </p>
 
@@ -203,7 +204,7 @@
             depth: -1,
             label: '#333333',
             fill: '#333333',
-            stroke: 'none',
+            stroke: '#333333',
             strokeWidth: 0,
             highlightFill: '#e2575a',
           },
@@ -235,9 +236,16 @@
 
 <style>
   :global(html, body) {
+    margin: 0;
+    padding: 0;
     font-family: monospace;
     font-size: 12px;
     background: #f9f9f9;
+  }
+
+  :global(canvas) {
+    display: block;
+    touch-action: none;
   }
 
   .container {
@@ -355,7 +363,7 @@
   }
 
   .footer {
-    background-color: #f9f9f9;
+    background-color: #333333;
     text-align: center;
     position: fixed;
     bottom: 0px;
@@ -365,12 +373,13 @@
   }
 
   .footer a {
-    color: #333333;
+    color: #efefef;
     text-decoration: none;
     font-size: 10px;
   }
 
   .footer a:hover {
-    color: #333333;
+    color: #efefef;
+    text-decoration: underline;
   }
 </style>

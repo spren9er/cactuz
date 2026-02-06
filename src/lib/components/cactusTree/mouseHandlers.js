@@ -1,9 +1,96 @@
 /**
- * Mouse interaction handlers for CactusTree component
- * Handles pan, zoom, hover, and other mouse interactions
+ * Mouse and touch interaction handlers for CactusTree component
+ * Handles pan, zoom, hover, and other mouse/touch interactions
  */
 
 import { findHoveredNode } from './drawNode.js';
+
+/**
+ * Gets coordinates from mouse or touch event
+ * @param {MouseEvent|Touch} event - Mouse event or touch object
+ * @param {HTMLCanvasElement} canvas - Canvas element
+ * @returns {{ x: number, y: number }} Coordinates relative to canvas
+ */
+function getEventCoordinates(event, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top,
+  };
+}
+
+/**
+ * Handles panning logic for both mouse and touch
+ * @param {Object} state - Component state
+ * @param {number} currentX - Current X coordinate
+ * @param {number} currentY - Current Y coordinate
+ * @param {Function} scheduleRender - Render scheduling function
+ */
+function handlePanning(state, currentX, currentY, scheduleRender) {
+  if (!state.isDragging || !state.pannable) return;
+
+  const deltaX = currentX - state.lastMouseX;
+  const deltaY = currentY - state.lastMouseY;
+  state.panX += deltaX;
+  state.panY += deltaY;
+  state.lastMouseX = currentX;
+  state.lastMouseY = currentY;
+  scheduleRender();
+}
+
+/**
+ * Handles zoom logic for both wheel and pinch
+ * @param {Object} state - Component state
+ * @param {number} zoomFactor - Zoom multiplication factor
+ * @param {number} centerX - X coordinate to zoom toward
+ * @param {number} centerY - Y coordinate to zoom toward
+ * @param {number} width - Canvas width
+ * @param {number} height - Canvas height
+ * @param {Function} scheduleRender - Render scheduling function
+ * @returns {boolean} Whether zoom was applied
+ */
+function handleZoom(
+  state,
+  zoomFactor,
+  centerX,
+  centerY,
+  width,
+  height,
+  scheduleRender,
+) {
+  if (!state.zoomable) return false;
+
+  const proposedZoom = state.currentZoom * zoomFactor;
+
+  // Check zoom bounds
+  if (
+    (proposedZoom > state.maxZoomLimit &&
+      state.currentZoom >= state.maxZoomLimit) ||
+    (proposedZoom < state.minZoomLimit &&
+      state.currentZoom <= state.minZoomLimit)
+  ) {
+    return false;
+  }
+
+  const newZoom = Math.max(
+    state.minZoomLimit,
+    Math.min(state.maxZoomLimit, proposedZoom),
+  );
+
+  // Calculate zoom-to-point: keep the world point under the center fixed
+  const canvasCenterX = width / 2;
+  const canvasCenterY = height / 2;
+
+  const worldX = (centerX - canvasCenterX - state.panX) / state.currentZoom;
+  const worldY = (centerY - canvasCenterY - state.panY) / state.currentZoom;
+
+  state.panX = centerX - canvasCenterX - worldX * newZoom;
+  state.panY = centerY - canvasCenterY - worldY * newZoom;
+  state.currentZoom = newZoom;
+
+  scheduleRender();
+  return true;
+}
 
 /**
  * Creates mouse move handler
@@ -17,27 +104,19 @@ export function createMouseMoveHandler(state, width, height, scheduleRender) {
   return function handleMouseMove(/** @type {MouseEvent} */ event) {
     if (!state.canvas) return;
 
-    const rect = state.canvas.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
+    const coords = getEventCoordinates(event, state.canvas);
 
     // Handle panning
-    if (state.isDragging && state.pannable) {
-      const deltaX = mouseX - state.lastMouseX;
-      const deltaY = mouseY - state.lastMouseY;
-      state.panX += deltaX;
-      state.panY += deltaY;
-      scheduleRender();
-    }
+    handlePanning(state, coords.x, coords.y, scheduleRender);
 
-    state.lastMouseX = mouseX;
-    state.lastMouseY = mouseY;
+    state.lastMouseX = coords.x;
+    state.lastMouseY = coords.y;
 
     // Handle hovering (only if not dragging and we have rendered nodes)
     if (!state.isDragging && state.renderedNodes.length) {
       // Transform mouse coordinates to account for pan only (like original)
-      const transformedMouseX = mouseX - state.panX;
-      const transformedMouseY = mouseY - state.panY;
+      const transformedMouseX = coords.x - state.panX;
+      const transformedMouseY = coords.y - state.panY;
 
       // Find which node is being hovered
       const newHoveredNodeId = findHoveredNode(
@@ -65,9 +144,9 @@ export function createMouseDownHandler(state) {
     if (!state.pannable) return;
 
     state.isDragging = true;
-    const rect = state.canvas.getBoundingClientRect();
-    state.lastMouseX = event.clientX - rect.left;
-    state.lastMouseY = event.clientY - rect.top;
+    const coords = getEventCoordinates(event, state.canvas);
+    state.lastMouseX = coords.x;
+    state.lastMouseY = coords.y;
 
     // Prevent text selection during drag
     event.preventDefault();
@@ -111,66 +190,137 @@ export function createMouseLeaveHandler(state, scheduleRender) {
  */
 export function createWheelHandler(state, width, height, scheduleRender) {
   return function handleWheel(/** @type {WheelEvent} */ event) {
-    if (!state.zoomable || !state.canvas) return;
+    if (!state.canvas) return;
 
     event.preventDefault();
 
-    const rect = state.canvas.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
-
-    // Calculate proposed zoom
+    const coords = getEventCoordinates(event, state.canvas);
     const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
-    const proposedZoom = state.currentZoom * zoomFactor;
 
-    // Check if at bounds to prevent bouncing
-    if (
-      proposedZoom > state.maxZoomLimit &&
-      state.currentZoom >= state.maxZoomLimit
-    ) {
-      return; // At max bound, don't zoom further
-    }
-    if (
-      proposedZoom < state.minZoomLimit &&
-      state.currentZoom <= state.minZoomLimit
-    ) {
-      return; // At min bound, don't zoom further
-    }
-
-    // Apply zoom within precomputed bounds
-    const newZoom = Math.max(
-      state.minZoomLimit,
-      Math.min(state.maxZoomLimit, proposedZoom),
+    handleZoom(
+      state,
+      zoomFactor,
+      coords.x,
+      coords.y,
+      width,
+      height,
+      scheduleRender,
     );
-
-    // Calculate zoom-to-point: keep the world point under the mouse fixed
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    // World coordinates of the point under the mouse before zoom
-    const worldX = (mouseX - centerX - state.panX) / state.currentZoom;
-    const worldY = (mouseY - centerY - state.panY) / state.currentZoom;
-
-    // After zoom, calculate new pan to keep the same world point under the mouse
-    // mouseX = centerX + panX + worldX * newZoom
-    // Therefore: panX = mouseX - centerX - worldX * newZoom
-    state.panX = mouseX - centerX - worldX * newZoom;
-    state.panY = mouseY - centerY - worldY * newZoom;
-
-    // Update state
-    state.currentZoom = newZoom;
-
-    scheduleRender();
   };
 }
 
 /**
- * Creates all mouse event handlers for the CactusTree component
- * @param {{ canvas: HTMLCanvasElement, hoveredNodeId: string|null, renderedNodes: Array<any>, isDragging: boolean, pannable: boolean, zoomable: boolean, panX: number, panY: number, currentZoom: number, lastMouseX: number, lastMouseY: number, minZoomLimit: number, maxZoomLimit: number }} state - Component state object
+ * Creates touch start handler
+ * @param {{ canvas: HTMLCanvasElement, isDragging: boolean, pannable: boolean, lastMouseX: number, lastMouseY: number, touches: Array, lastTouchDistance: number }} state - Component state object
+ * @returns {function(TouchEvent): void} Touch start event handler
+ */
+export function createTouchStartHandler(state) {
+  return function handleTouchStart(/** @type {TouchEvent} */ event) {
+    event.preventDefault();
+
+    const touches = Array.from(event.touches);
+    state.touches = touches;
+
+    if (touches.length === 1 && state.pannable) {
+      // Single touch - start panning
+      state.isDragging = true;
+      const coords = getEventCoordinates(touches[0], state.canvas);
+      state.lastMouseX = coords.x;
+      state.lastMouseY = coords.y;
+    } else if (touches.length === 2 && state.zoomable) {
+      // Two touches - start pinch zoom
+      const touch1 = getEventCoordinates(touches[0], state.canvas);
+      const touch2 = getEventCoordinates(touches[1], state.canvas);
+      state.lastTouchDistance = Math.sqrt(
+        Math.pow(touch2.x - touch1.x, 2) + Math.pow(touch2.y - touch1.y, 2),
+      );
+    }
+  };
+}
+
+/**
+ * Creates touch move handler
+ * @param {{ canvas: HTMLCanvasElement, isDragging: boolean, pannable: boolean, zoomable: boolean, panX: number, panY: number, currentZoom: number, lastMouseX: number, lastMouseY: number, touches: Array, lastTouchDistance: number, minZoomLimit: number, maxZoomLimit: number }} state - Component state object
  * @param {number} width - Canvas width
  * @param {number} height - Canvas height
  * @param {Function} scheduleRender - Function to schedule a re-render
- * @returns {{ onMouseMove: function(MouseEvent): void, onMouseDown: function(MouseEvent): void, onMouseUp: function(): void, onMouseLeave: function(): void, onWheel: function(WheelEvent): void }} Object containing all mouse event handlers
+ * @returns {function(TouchEvent): void} Touch move event handler
+ */
+export function createTouchMoveHandler(state, width, height, scheduleRender) {
+  return function handleTouchMove(/** @type {TouchEvent} */ event) {
+    event.preventDefault();
+
+    const touches = Array.from(event.touches);
+
+    if (touches.length === 1 && state.isDragging && state.pannable) {
+      // Single touch panning
+      const coords = getEventCoordinates(touches[0], state.canvas);
+      handlePanning(state, coords.x, coords.y, scheduleRender);
+    } else if (touches.length === 2 && state.zoomable) {
+      // Pinch zoom
+      const touch1 = getEventCoordinates(touches[0], state.canvas);
+      const touch2 = getEventCoordinates(touches[1], state.canvas);
+      const currentDistance = Math.sqrt(
+        Math.pow(touch2.x - touch1.x, 2) + Math.pow(touch2.y - touch1.y, 2),
+      );
+
+      if (state.lastTouchDistance > 0) {
+        const zoomFactor = currentDistance / state.lastTouchDistance;
+        const centerX = (touch1.x + touch2.x) / 2;
+        const centerY = (touch1.y + touch2.y) / 2;
+
+        handleZoom(
+          state,
+          zoomFactor,
+          centerX,
+          centerY,
+          width,
+          height,
+          scheduleRender,
+        );
+      }
+
+      state.lastTouchDistance = currentDistance;
+    }
+  };
+}
+
+/**
+ * Creates touch end handler
+ * @param {{ isDragging: boolean, touches: Array, lastTouchDistance: number }} state - Component state object
+ * @returns {function(TouchEvent): void} Touch end event handler
+ */
+export function createTouchEndHandler(state) {
+  return function handleTouchEnd(/** @type {TouchEvent} */ event) {
+    event.preventDefault();
+
+    const touches = Array.from(event.touches);
+    state.touches = touches;
+
+    if (touches.length === 0) {
+      // No more touches
+      state.isDragging = false;
+      state.lastTouchDistance = 0;
+    } else if (touches.length === 1) {
+      // Down to one touch - reset for potential panning
+      state.lastTouchDistance = 0;
+      if (state.pannable) {
+        const coords = getEventCoordinates(touches[0], state.canvas);
+        state.lastMouseX = coords.x;
+        state.lastMouseY = coords.y;
+        state.isDragging = true;
+      }
+    }
+  };
+}
+
+/**
+ * Creates all mouse and touch event handlers for the CactusTree component
+ * @param {{ canvas: HTMLCanvasElement, hoveredNodeId: string|null, renderedNodes: Array<any>, isDragging: boolean, pannable: boolean, zoomable: boolean, panX: number, panY: number, currentZoom: number, lastMouseX: number, lastMouseY: number, minZoomLimit: number, maxZoomLimit: number, touches: Array, lastTouchDistance: number }} state - Component state object
+ * @param {number} width - Canvas width
+ * @param {number} height - Canvas height
+ * @param {Function} scheduleRender - Function to schedule a re-render
+ * @returns {{ onMouseMove: function(MouseEvent): void, onMouseDown: function(MouseEvent): void, onMouseUp: function(): void, onMouseLeave: function(): void, onWheel: function(WheelEvent): void, onTouchStart: function(TouchEvent): void, onTouchMove: function(TouchEvent): void, onTouchEnd: function(TouchEvent): void }} Object containing all mouse and touch event handlers
  */
 export function createMouseHandlers(state, width, height, scheduleRender) {
   return {
@@ -179,5 +329,8 @@ export function createMouseHandlers(state, width, height, scheduleRender) {
     onMouseUp: createMouseUpHandler(state),
     onMouseLeave: createMouseLeaveHandler(state, scheduleRender),
     onWheel: createWheelHandler(state, width, height, scheduleRender),
+    onTouchStart: createTouchStartHandler(state),
+    onTouchMove: createTouchMoveHandler(state, width, height, scheduleRender),
+    onTouchEnd: createTouchEndHandler(state),
   };
 }

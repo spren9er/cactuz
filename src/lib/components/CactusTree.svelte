@@ -86,6 +86,10 @@
   let lastMouseX = $state(0);
   let lastMouseY = $state(0);
 
+  // Touch state
+  let touches = $state([]);
+  let lastTouchDistance = $state(0);
+
   // Zoom limits (computed each render)
   let minZoomLimit = $state(0.1);
   let maxZoomLimit = $state(10);
@@ -300,6 +304,18 @@
       get maxZoomLimit() {
         return maxZoomLimit;
       },
+      get touches() {
+        return touches;
+      },
+      set touches(value) {
+        touches = value;
+      },
+      get lastTouchDistance() {
+        return lastTouchDistance;
+      },
+      set lastTouchDistance(value) {
+        lastTouchDistance = value;
+      },
       pannable,
       zoomable,
     };
@@ -337,5 +353,8 @@
   onmouseup={mouseHandlers?.onMouseUp}
   onmouseleave={mouseHandlers?.onMouseLeave}
   onwheel={mouseHandlers?.onWheel}
+  ontouchstart={mouseHandlers?.onTouchStart}
+  ontouchmove={mouseHandlers?.onTouchMove}
+  ontouchend={mouseHandlers?.onTouchEnd}
 >
 </canvas>
