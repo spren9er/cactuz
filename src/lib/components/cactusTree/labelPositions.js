@@ -459,7 +459,6 @@ export class CircleAwareLabeler {
   }
 }
 
-
 /**
  * Calculate label anchor point based on angle from anchor to label center
  * Uses angle-based logic for better alignment on edges vs corners
@@ -883,7 +882,10 @@ export class LabelPositioner {
         wOrientation: 3.0,
         maxMove: 15.0,
         maxAngle: Math.PI / 4,
-        labelAnchorPadding: (this.options.linkPadding || 0) + (this.options.linkLength || 0) + (this.options.labelPadding || 0),
+        labelAnchorPadding:
+          (this.options.linkPadding || 0) +
+          (this.options.linkLength || 0) +
+          (this.options.labelPadding || 0),
       },
     );
 

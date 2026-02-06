@@ -191,10 +191,7 @@ export function shouldShowLabel(
       visibleNodeIds,
     );
   } else {
-    return (
-      labelStyle.color !== 'none' &&
-      labelStyle.color !== 'transparent'
-    );
+    return labelStyle.color !== 'none' && labelStyle.color !== 'transparent';
   }
 }
 
@@ -210,7 +207,6 @@ export function shouldShowLabel(
  * @param {Map<number, Set<string>>} negativeDepthNodes - Map of negative depth nodes
  * @param {number} panX - Current pan X offset
  * @param {number} panY - Current pan Y offset
- * @param {number} zoom - Current layout zoom level
  */
 export function drawLabels(
   ctx,
@@ -223,7 +219,6 @@ export function drawLabels(
   negativeDepthNodes,
   panX = 0,
   panY = 0,
-  zoom = 1.0,
 ) {
   if (!ctx || !renderedNodes.length) return;
 
@@ -241,7 +236,7 @@ export function drawLabels(
         /** @type {{x:number,y:number,radius:number}} */ (nodeData);
       const screenX = x + panX;
       const screenY = y + panY;
-      
+
       // Check if the node circle actually intersects with the viewport
       // A circle is in viewport if its center is within viewport + radius distance
       return (

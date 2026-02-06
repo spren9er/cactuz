@@ -201,7 +201,6 @@
     const visibleNodeIds = new SvelteSet(edgeNodeIds);
 
     // Draw labels
-    const layoutZoom = mergedOptions.zoom * currentZoom;
     drawLabels(
       ctx,
       renderedNodes,
@@ -213,7 +212,6 @@
       negativeDepthNodes,
       panX,
       panY,
-      layoutZoom,
     );
 
     ctx.restore();
