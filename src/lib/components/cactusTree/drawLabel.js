@@ -331,7 +331,8 @@ export function drawLabels(
   if (nodesWithLabels.length === 0) return;
 
   // Calculate optimal label positions
-  // Convert screen-space values to layout space by dividing by zoom
+  // Layout is already in screen space (zoom is baked into node positions/radii)
+  // Use padding values directly without any zoom conversion
   const { labels, links } = calculateLabelPositions(
     nodesWithLabels,
     width,
@@ -340,9 +341,9 @@ export function drawLabels(
       fontFamily: mergedStyle.labelFontFamily || 'monospace',
       fontSize: mergedStyle.labelMinFontSize || 8, // All outside labels use min font size
       minRadius: 2, // Lower threshold to show labels for smaller nodes
-      labelPadding: (mergedStyle.labelPadding ?? 2) / zoom, // Text padding around label
-      linkPadding: (mergedStyle.labelLinkPadding || 0) / zoom, // Gap between circle and link start
-      linkLength: (mergedStyle.labelLinkLength || 0) / zoom, // Extension of link beyond circle
+      labelPadding: mergedStyle.labelPadding ?? 0.5, // Text padding around label (screen pixels)
+      linkPadding: mergedStyle.labelLinkPadding || 1.5, // Gap between circle and link start (screen pixels)
+      linkLength: mergedStyle.labelLinkLength || 5, // Extension of link beyond circle (screen pixels)
     },
   );
 
@@ -407,12 +408,10 @@ export function drawLabels(
 function drawLabelConnectors(ctx, links, mergedStyle) {
   const lineColor = mergedStyle.labelLink || mergedStyle.label || '#333333';
   const lineWidth = mergedStyle.labelLinkWidth ?? 1;
-  const lineOpacity = 0.3;
 
   setCanvasStyles(ctx, {
     strokeStyle: lineColor,
     lineWidth: lineWidth,
-    globalAlpha: lineOpacity,
   });
 
   links.forEach((/** @type {any} */ link) => {
@@ -422,9 +421,6 @@ function drawLabelConnectors(ctx, links, mergedStyle) {
     ctx.lineTo(link.x2, link.y2);
     ctx.stroke();
   });
-
-  // Reset alpha
-  ctx.globalAlpha = 1.0;
 }
 
 /**

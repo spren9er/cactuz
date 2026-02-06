@@ -202,15 +202,15 @@
         zoom: config.zoom,
       }}
       styles={{
-        label: selectedDataset === 'mammals' ? 'transparent' : '#333333',
+        label: '#333333',
         labelFontFamily: 'monospace',
         labelMinFontSize: 9,
         labelMaxFontSize: 14,
         labelLimit: config.labelLimit,
-        labelLink: '#333333',
+        labelLink: '#aaaaaa',
         labelLinkWidth: 1,
         labelLinkLength: 5,
-        labelLinkPadding: 2,
+        labelLinkPadding: 1.5,
         labelPadding: 0.5,
         line: '#aaaaaa',
         edge: '#e2575a',

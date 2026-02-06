@@ -105,11 +105,18 @@ interface Styles {
   strokeOpacity?: number;   // Node stroke opacity (default: 1)
 
   // Labels
-  label?: string;           // Label color (default: '#333333')
-  labelFontFamily?: string; // Label font (default: 'monospace')
-  labelLimit?: number;      // Maximum number of labels to show (default: 50)
-                            // Shows labels for the N largest nodes by radius (all types)
-                            // Set to 0 to hide all labels (except when hovering)
+  label?: string;              // Label color (default: '#333333')
+  labelFontFamily?: string;    // Label font (default: 'monospace')
+  labelLink?: string;          // Label link line color (default: '#333333')
+  labelLinkWidth?: number;     // Label link line width (default: 1)
+  labelLinkPadding?: number;   // Gap between circle and link start in pixels (default: 1.5)
+  labelLinkLength?: number;    // Length of visible link line in pixels (default: 5)
+  labelPadding?: number;       // Padding around label text in pixels (default: 0.5)
+  labelMinFontSize?: number;   // Minimum label font size (default: 8)
+  labelMaxFontSize?: number;   // Maximum label font size (default: 14)
+  labelLimit?: number;         // Maximum number of labels to show (default: 50)
+                               // Shows labels for the N largest nodes by radius (all types)
+                               // Set to 0 to hide all labels (except when hovering)
 
   // Connections
   line?: string;            // Tree line color (default: '#333333')
