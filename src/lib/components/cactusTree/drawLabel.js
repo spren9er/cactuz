@@ -4,6 +4,7 @@
  */
 
 import { setCanvasStyles } from './canvasUtils.js';
+import { calculateLabelPositions } from './labelPositions.js';
 
 /**
  * Text padding constant for positioning labels outside node circles
@@ -56,7 +57,6 @@ export function getLabelStyle(
  * @param {Set<string>} leafNodes - Set of leaf node IDs
  * @param {string|null} hoveredNodeId - Currently hovered node ID
  * @param {any[] | Set<string>} visibleNodeIds - Set of visible node IDs from edges
- * @param {number} labelLimit - Maximum number of leaf labels to show
  * @returns {boolean} Whether the leaf label should be shown
  */
 export function shouldShowLeafLabel(
@@ -64,35 +64,39 @@ export function shouldShowLeafLabel(
   leafNodes,
   hoveredNodeId,
   visibleNodeIds,
-  labelLimit,
 ) {
   const isActualLeaf = leafNodes.has(nodeId);
   if (!isActualLeaf) return false;
 
-  // Only bypass 50-leaf limit when hovering specifically over leaf nodes
+  // When hovering over leaf nodes, show visible nodes
   const isHoveringLeafNode =
     hoveredNodeId !== null && leafNodes.has(hoveredNodeId);
 
-  return isHoveringLeafNode
-    ? Array.isArray(visibleNodeIds)
+  if (isHoveringLeafNode) {
+    return Array.isArray(visibleNodeIds)
       ? visibleNodeIds.includes(nodeId)
-      : visibleNodeIds.has(nodeId)
-    : leafNodes.size <= labelLimit;
+      : visibleNodeIds.has(nodeId);
+  }
+
+  // For normal display, this will be filtered by labelLimit in drawLabels
+  return true;
 }
 
 /**
  * Calculates font size based on node radius and label type
  * @param {number} radius - Node radius
  * @param {boolean} isLeafLabel - Whether this is a leaf label
+ * @param {number} minFontSize - Minimum font size (default 8)
+ * @param {number} maxFontSize - Maximum font size (default 14)
  * @returns {number} Calculated font size
  */
-export function calculateFontSize(radius, isLeafLabel = false) {
+export function calculateFontSize(radius, isLeafLabel = false, minFontSize = 8, maxFontSize = 14) {
   if (isLeafLabel) {
     // For leaf nodes: use font size based on screen radius
-    return Math.max(8, Math.min(12, radius * 0.3));
+    return Math.max(minFontSize, Math.min(maxFontSize, radius * 0.3));
   } else {
-    // For non-leaf nodes: use existing logic
-    return Math.min(14, Math.max(7, radius / 3));
+    // For non-leaf nodes: use radius-based calculation within range
+    return Math.min(maxFontSize, Math.max(minFontSize, radius / 3));
   }
 }
 
@@ -153,11 +157,13 @@ export function calculateLeafLabelPosition(centerX, centerY, radius, angle) {
  * @param {number} radius - Node radius
  * @param {number} angle - Node angle
  * @param {Object} labelStyle - Label style properties
+ * @param {number} minFontSize - Minimum font size (default 8)
+ * @param {number} maxFontSize - Maximum font size (default 14)
  */
-export function drawLeafLabel(ctx, text, x, y, radius, angle, labelStyle) {
+export function drawLeafLabel(ctx, text, x, y, radius, angle, labelStyle, minFontSize = 8, maxFontSize = 14) {
   if (!ctx || !text) return;
 
-  const fontSize = calculateFontSize(radius, true);
+  const fontSize = calculateFontSize(radius, true, minFontSize, maxFontSize);
   const position = calculateLeafLabelPosition(x, y, radius, angle);
 
   setCanvasStyles(ctx, {
@@ -204,11 +210,13 @@ export function drawLeafLabel(ctx, text, x, y, radius, angle, labelStyle) {
  * @param {number} y - Node Y coordinate
  * @param {number} radius - Node radius
  * @param {Object} labelStyle - Label style properties
+ * @param {number} minFontSize - Minimum font size (default 8)
+ * @param {number} maxFontSize - Maximum font size (default 14)
  */
-export function drawCenteredLabel(ctx, text, x, y, radius, labelStyle) {
+export function drawCenteredLabel(ctx, text, x, y, radius, labelStyle, minFontSize = 8, maxFontSize = 14) {
   if (!ctx || !text) return;
 
-  const fontSize = calculateFontSize(radius, false);
+  const fontSize = calculateFontSize(radius, false, minFontSize, maxFontSize);
 
   setCanvasStyles(ctx, {
     fillStyle: /** @type {any} */ (labelStyle).color,
@@ -224,7 +232,7 @@ export function drawCenteredLabel(ctx, text, x, y, radius, labelStyle) {
 }
 
 /**
- * Determines if a node should show a label
+ * Determines if a node should show a label (basic eligibility check)
  * @param {any} node - Node object
  * @param {number} radius - Node radius
  * @param {string} nodeId - Node ID
@@ -232,7 +240,6 @@ export function drawCenteredLabel(ctx, text, x, y, radius, labelStyle) {
  * @param {string|null} hoveredNodeId - Currently hovered node ID
  * @param {any[] | Set<string>} visibleNodeIds - Set of visible node IDs from edges
  * @param {any} labelStyle - Label style properties
- * @param {number} labelLimit - Maximum number of leaf labels
  * @returns {boolean} Whether the node should show a label
  */
 export function shouldShowLabel(
@@ -243,7 +250,6 @@ export function shouldShowLabel(
   hoveredNodeId,
   visibleNodeIds,
   labelStyle,
-  labelLimit,
 ) {
   // Skip labels for nodes with screen radius less than 1px for performance
   if (radius < 1) return false;
@@ -256,7 +262,6 @@ export function shouldShowLabel(
       leafNodes,
       hoveredNodeId,
       visibleNodeIds,
-      labelLimit,
     );
   } else {
     // For non-leaf nodes: show if radius is large enough and label style is valid
@@ -311,7 +316,6 @@ export function drawLabel(
       hoveredNodeId,
       visibleNodeIds,
       labelStyle,
-      mergedStyle.labelLimit,
     )
   ) {
     return;
@@ -319,11 +323,13 @@ export function drawLabel(
 
   const text = String(node.name || node.id);
   const isActualLeaf = leafNodes.has(nodeId);
+  const minFontSize = mergedStyle.labelMinFontSize || 8;
+  const maxFontSize = mergedStyle.labelMaxFontSize || 14;
 
   if (isActualLeaf) {
-    drawLeafLabel(ctx, text, x, y, radius, angle, labelStyle);
+    drawLeafLabel(ctx, text, x, y, radius, angle, labelStyle, minFontSize, maxFontSize);
   } else {
-    drawCenteredLabel(ctx, text, x, y, radius, labelStyle);
+    drawCenteredLabel(ctx, text, x, y, radius, labelStyle, minFontSize, maxFontSize);
   }
 }
 
@@ -337,6 +343,8 @@ export function drawLabel(
  * @param {any} mergedStyle - Merged styles object
  * @param {Map<number, any>} depthStyleCache - Cache for depth styles
  * @param {Map<number, Set<string>>} negativeDepthNodes - Map of negative depth nodes
+ * @param {number} panX - Current pan X offset
+ * @param {number} panY - Current pan Y offset
  */
 export function drawLabels(
   ctx,
@@ -347,19 +355,239 @@ export function drawLabels(
   mergedStyle,
   depthStyleCache,
   negativeDepthNodes,
+  panX = 0,
+  panY = 0,
 ) {
   if (!ctx || !renderedNodes.length) return;
 
-  renderedNodes.forEach((nodeData) => {
-    drawLabel(
-      ctx,
-      nodeData,
-      leafNodes,
-      hoveredNodeId,
-      visibleNodeIds,
+  // Get canvas dimensions
+  const width = ctx.canvas.width;
+  const height = ctx.canvas.height;
+
+  // Helper function to check if node is in viewport
+  const isInViewport = (nodeData) => {
+    const { x, y, radius } = nodeData;
+    const screenX = x + panX;
+    const screenY = y + panY;
+    const margin = radius * 2; // Add some margin for labels outside nodes
+    
+    return (
+      screenX + margin >= 0 &&
+      screenX - margin <= width &&
+      screenY + margin >= 0 &&
+      screenY - margin <= height
+    );
+  };
+
+  // Filter nodes that are in viewport first
+  const nodesInViewport = renderedNodes.filter(isInViewport);
+
+  // Filter nodes that should have labels (basic eligibility)
+  const eligibleNodes = nodesInViewport.filter((nodeData) => {
+    const { radius, node, depth } = nodeData;
+    const nodeId = node.id;
+
+    const labelStyle = getLabelStyle(
+      depth,
+      nodeId,
       mergedStyle,
       depthStyleCache,
       negativeDepthNodes,
     );
+
+    return shouldShowLabel(
+      node,
+      radius,
+      nodeId,
+      leafNodes,
+      hoveredNodeId,
+      visibleNodeIds,
+      labelStyle,
+    );
   });
+
+  // Apply labelLimit and hover logic
+  let nodesWithLabels;
+
+  // Check if we're hovering over a leaf node (which triggers edge bundling visualization)
+  const isHoveringLeafNode =
+    hoveredNodeId !== null && leafNodes.has(hoveredNodeId);
+
+  if (isHoveringLeafNode) {
+    // When hovering over leaf nodes, show labels for connected nodes and nodes with inside labels
+    nodesWithLabels = eligibleNodes.filter((nodeData) => {
+      const nodeId = nodeData.node.id;
+      const isActualLeaf = leafNodes.has(nodeId);
+      const { radius, node } = nodeData;
+
+      // Always show inside labels (they fit inside circles)
+      const text = node.name || node.id;
+      const textWidth = ctx.measureText(text).width + 8; // approximate width
+      const textHeight = 12 + 4; // approximate height
+      const diagonal = Math.sqrt(textWidth * textWidth + textHeight * textHeight);
+      const fitsInside = diagonal <= 2 * radius * 0.9;
+
+      if (fitsInside) {
+        // Keep inside labels always visible during hover
+        return true;
+      }
+
+      if (isActualLeaf) {
+        // For leaf nodes, check if they're in visibleNodeIds (connected via edges)
+        return Array.isArray(visibleNodeIds)
+          ? visibleNodeIds.includes(nodeId)
+          : visibleNodeIds.has(nodeId);
+      } else {
+        // For non-leaf nodes with outside labels, show if in visibleNodeIds
+        return Array.isArray(visibleNodeIds)
+          ? visibleNodeIds.includes(nodeId)
+          : visibleNodeIds.has(nodeId);
+      }
+    });
+  } else if (mergedStyle.labelLimit === 0) {
+    // When labelLimit is 0 and not hovering over leaf nodes, show no labels
+    nodesWithLabels = [];
+  } else {
+    // Normal case: sort all eligible nodes by radius (largest first) and take top labelLimit
+    const sortedByRadius = eligibleNodes.sort((a, b) => b.radius - a.radius);
+    nodesWithLabels = sortedByRadius.slice(0, mergedStyle.labelLimit);
+  }
+
+  if (nodesWithLabels.length === 0) return;
+
+  // Calculate optimal label positions
+  const { labels, links } = calculateLabelPositions(
+    nodesWithLabels,
+    width,
+    height,
+    {
+      fontFamily: mergedStyle.labelFontFamily || 'monospace',
+      fontSize: mergedStyle.labelMinFontSize || 8,  // All outside labels use min font size
+      minRadius: 2,  // Lower threshold to show labels for smaller nodes
+      labelPadding: 2,  // 2px padding to keep labels close to links
+    },
+  );
+
+  // Draw connecting lines first (behind labels)
+  if (links.length > 0) {
+    drawLabelConnectors(ctx, links, mergedStyle);
+  }
+
+  // Draw positioned labels
+  labels.forEach((labelData) => {
+    const nodeData = nodesWithLabels.find(
+      (n) => n.node.id === labelData.nodeId,
+    );
+    if (nodeData) {
+      // For inside labels, render centered text (no link connector)
+      // For outside labels, render positioned text with link
+      if (labelData.isInside) {
+        // Inside label - render centered in circle
+        const { node, depth, radius } = nodeData;
+        const labelStyle = getLabelStyle(
+          depth,
+          node.id,
+          mergedStyle,
+          depthStyleCache,
+          negativeDepthNodes,
+        );
+        const text = String(node.name || node.id);
+        const minFontSize = mergedStyle.labelMinFontSize || 8;
+        const maxFontSize = mergedStyle.labelMaxFontSize || 14;
+        drawCenteredLabel(ctx, text, nodeData.x, nodeData.y, radius, labelStyle, minFontSize, maxFontSize);
+      } else {
+        // Outside label - render positioned with link
+        drawPositionedLabel(
+          ctx,
+          labelData,
+          nodeData,
+          leafNodes,
+          mergedStyle,
+          depthStyleCache,
+          negativeDepthNodes,
+        );
+      }
+    }
+  });
+}
+
+/**
+ * Draws connecting lines from nodes to positioned labels (only for outside labels)
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {any[]} links - Array of link data
+ * @param {any} mergedStyle - Merged styles object
+ */
+function drawLabelConnectors(ctx, links, mergedStyle) {
+  const lineColor = mergedStyle.labelLink || mergedStyle.label || '#333333';
+  const lineWidth = mergedStyle.labelLinkWidth ?? 1;
+  const lineOpacity = 0.3;
+
+  setCanvasStyles(ctx, {
+    strokeStyle: lineColor,
+    lineWidth: lineWidth,
+    globalAlpha: lineOpacity,
+  });
+
+  links.forEach((/** @type {any} */ link) => {
+    // Draw connecting line for outside labels
+    ctx.beginPath();
+    ctx.moveTo(link.x1, link.y1);
+    ctx.lineTo(link.x2, link.y2);
+    ctx.stroke();
+  });
+
+  // Reset alpha
+  ctx.globalAlpha = 1.0;
+}
+
+/**
+ * Draws a label at its optimally positioned location
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {any} labelData - Positioned label data
+ * @param {any} nodeData - Original node data
+ * @param {Set<string>} leafNodes - Set of leaf node IDs
+ * @param {any} mergedStyle - Merged styles object
+ * @param {Map<number, any>} depthStyleCache - Cache for depth styles
+ * @param {Map<number, Set<string>>} negativeDepthNodes - Map of negative depth nodes
+ */
+function drawPositionedLabel(
+  ctx,
+  /** @type {any} */ labelData,
+  /** @type {any} */ nodeData,
+  leafNodes,
+  mergedStyle,
+  depthStyleCache,
+  negativeDepthNodes,
+) {
+  const { node, depth } = nodeData;
+  const { text, x, y } = labelData;
+  const nodeId = node.id;
+
+  const labelStyle = getLabelStyle(
+    depth,
+    nodeId,
+    mergedStyle,
+    depthStyleCache,
+    negativeDepthNodes,
+  );
+
+  // All outside labels use labelMinFontSize
+  const fontSize = mergedStyle.labelMinFontSize || 8;
+  const { isInside } = labelData;
+
+  setCanvasStyles(ctx, {
+    fillStyle: labelStyle.color,
+    font: `${fontSize}px ${labelStyle.fontFamily}`,
+    textAlign: isInside ? 'center' : 'left',
+    textBaseline: isInside ? 'middle' : 'top',
+  });
+
+  if (isInside) {
+    // For inside labels, center the text
+    ctx.fillText(text, x + labelData.width / 2, y + labelData.height / 2);
+  } else {
+    // For outside labels, text is already positioned with padding included in bounding box
+    // The labelPadding (2px on each side) is already included in label dimensions
+    ctx.fillText(text, x + 2, y + 2);  // Use labelPadding amount for consistent spacing
+  }
 }

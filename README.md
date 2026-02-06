@@ -107,7 +107,9 @@ interface Styles {
   // Labels
   label?: string;           // Label color (default: '#333333')
   labelFontFamily?: string; // Label font (default: 'monospace')
-  labelLimit?: number;      // Threshold for showing labels (default: 50)
+  labelLimit?: number;      // Maximum number of labels to show (default: 50)
+                            // Shows labels for the N largest nodes by radius (all types)
+                            // Set to 0 to hide all labels (except when hovering)
 
   // Connections
   line?: string;            // Tree line color (default: '#333333')

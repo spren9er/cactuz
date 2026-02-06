@@ -16,7 +16,7 @@
     buildLookupMaps,
   } from '$lib/components/cactusTree/layoutUtils.js';
 
-  /** @type {{ width: number, height: number, nodes: Array<{id: string, name: string, parent: string|null, weight?: number}>, links?: Array<{source: string, target: string}>, options?: {overlap?: number, arcSpan?: number, sizeGrowthRate?: number, orientation?: number, zoom?: number}, styles?: {fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, edge?: string, edgeWidth?: number, edgeOpacity?: number, highlightFill?: string, highlightStroke?: string, highlight?: boolean, labelLimit?: number, depths?: Array<{depth: number, fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, lineWidth?: number, line?: string, highlightFill?: string, highlightStroke?: string, highlight?: boolean}>}, pannable?: boolean, zoomable?: boolean }} */
+  /** @type {{ width: number, height: number, nodes: Array<{id: string, name: string, parent: string|null, weight?: number}>, links?: Array<{source: string, target: string}>, options?: {overlap?: number, arcSpan?: number, sizeGrowthRate?: number, orientation?: number, zoom?: number}, styles?: {fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, labelLink?: string, labelLinkWidth?: number, labelMinFontSize?: number, labelMaxFontSize?: number, lineWidth?: number, line?: string, edge?: string, edgeWidth?: number, edgeOpacity?: number, highlightFill?: string, highlightStroke?: string, highlight?: boolean, labelLimit?: number, depths?: Array<{depth: number, fill?: string, fillOpacity?: number, stroke?: string, strokeWidth?: number, strokeOpacity?: number, label?: string, labelFontFamily?: string, labelLink?: string, labelLinkWidth?: number, lineWidth?: number, line?: string, highlightFill?: string, highlightStroke?: string, highlight?: boolean}>}, pannable?: boolean, zoomable?: boolean }} */
   let {
     width,
     height,
@@ -44,6 +44,10 @@
     strokeOpacity: 1,
     label: '#333333',
     labelFontFamily: 'monospace',
+    labelLink: '#333333',
+    labelLinkWidth: 1,
+    labelMinFontSize: 8,
+    labelMaxFontSize: 14,
     lineWidth: 1,
     line: '#333333',
     edge: '#ff6b6b',
@@ -203,6 +207,8 @@
       mergedStyle,
       depthStyleCache,
       negativeDepthNodes,
+      panX,
+      panY,
     );
 
     ctx.restore();

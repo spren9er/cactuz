@@ -21,6 +21,7 @@
     sizeGrowthRate: 0.8,
     orientation: 90,
     zoom: 1.0,
+    labelLimit: 30,
   };
 
   let showEdgeBundling = true;
@@ -166,6 +167,20 @@
           />
         </label>
       </div>
+
+      <div class="control-group">
+        <label for="labelLimit">
+          Label Limit: {config.labelLimit}
+          <input
+            id="labelLimit"
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            bind:value={config.labelLimit}
+          />
+        </label>
+      </div>
     </div>
   </div>
 
@@ -189,7 +204,11 @@
       styles={{
         label: selectedDataset === 'mammals' ? 'transparent' : '#333333',
         labelFontFamily: 'monospace',
-        labelLimit: 50,
+        labelMinFontSize: 9,
+        labelMaxFontSize: 14,
+        labelLimit: config.labelLimit,
+        labelLink: '#333333',
+        labelLinkWidth: 1,
         line: '#aaaaaa',
         edge: '#e2575a',
         edgeOpacity: 0.1,
@@ -203,8 +222,7 @@
           {
             depth: -1,
             label: '#333333',
-            fill: '#333333',
-            stroke: '#333333',
+            fill: '#999999',
             strokeWidth: 0,
             highlightFill: '#e2575a',
           },
@@ -281,7 +299,7 @@
   .control-grid {
     font-size: 11px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 25px;
   }
 
@@ -345,7 +363,7 @@
 
   .edge-bundling-control {
     text-align: center;
-    margin: 20px auto;
+    margin: 20px auto 40px auto;
     font-family: monospace;
   }
 
