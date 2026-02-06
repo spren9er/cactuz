@@ -3,7 +3,7 @@
 A modern Svelte library for visualizing hierarchical data structures using the *CactusTree* algorithm with hierarchical edge bundling.
 
 <div align="center">
-  <img src="https://github.com/spren9er/cactus-tree/blob/main/docs/images/cactus-tree.png?raw=true" alt="cactus-tree" width="50%" height="50%">
+  <img src="https://github.com/spren9er/cactus-tree/blob/main/docs/images/cactus_tree_simple.png?raw=true" alt="cactus-tree-simple" width="50%" height="50%">
 </div>
 
 ## Overview
@@ -305,7 +305,8 @@ The component provides several interactive features:
 />
 ```
 
-### Custom Layout
+### Negative Overlap and Link Filtering
+
 
 ```svelte
 <CactusTree
@@ -313,10 +314,14 @@ The component provides several interactive features:
   height={800}
   {nodes}
   options={{
-    overlap: -0.5,           // Gaps between nodes
-    arcSpan: Math.PI,        // Half circle layout
-    orientation: Math.PI,    // Leftward growth (180°)
+    overlap: -1.1,                // Gaps between nodes
+    arcSpan: 2 * Math.PI,         // Full circle layout
+    orientation: 7 / 9 * Math.PI, // Leftward growth
     zoom: 1.5,
   }}
 />
 ```
+
+<div align="center">
+  <img src="https://github.com/spren9er/cactus-tree/blob/main/docs/images/cactus_tree_advanced.png?raw=true" alt="cactus-tree-advanced" width="50%" height="50%">
+</div>
