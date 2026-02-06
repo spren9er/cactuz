@@ -71,7 +71,7 @@
   </p>
 
   <p>
-    This modern implementation of <i>CactusTree</i> provides several
+    This modern, interactive visualization of <i>CactusTree</i> provides several
     configurable parameters that allow you to control the visual appearance and
     layout behavior of the tree. The source code for the Svelte library
     <b>cactus-tree</b> is available on

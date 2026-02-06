@@ -90,7 +90,12 @@ export function shouldShowLeafLabel(
  * @param {number} maxFontSize - Maximum font size (default 14)
  * @returns {number} Calculated font size
  */
-export function calculateFontSize(radius, isLeafLabel = false, minFontSize = 8, maxFontSize = 14) {
+export function calculateFontSize(
+  radius,
+  isLeafLabel = false,
+  minFontSize = 8,
+  maxFontSize = 14,
+) {
   if (isLeafLabel) {
     // For leaf nodes: use font size based on screen radius
     return Math.max(minFontSize, Math.min(maxFontSize, radius * 0.3));
@@ -160,7 +165,17 @@ export function calculateLeafLabelPosition(centerX, centerY, radius, angle) {
  * @param {number} minFontSize - Minimum font size (default 8)
  * @param {number} maxFontSize - Maximum font size (default 14)
  */
-export function drawLeafLabel(ctx, text, x, y, radius, angle, labelStyle, minFontSize = 8, maxFontSize = 14) {
+export function drawLeafLabel(
+  ctx,
+  text,
+  x,
+  y,
+  radius,
+  angle,
+  labelStyle,
+  minFontSize = 8,
+  maxFontSize = 14,
+) {
   if (!ctx || !text) return;
 
   const fontSize = calculateFontSize(radius, true, minFontSize, maxFontSize);
@@ -213,7 +228,16 @@ export function drawLeafLabel(ctx, text, x, y, radius, angle, labelStyle, minFon
  * @param {number} minFontSize - Minimum font size (default 8)
  * @param {number} maxFontSize - Maximum font size (default 14)
  */
-export function drawCenteredLabel(ctx, text, x, y, radius, labelStyle, minFontSize = 8, maxFontSize = 14) {
+export function drawCenteredLabel(
+  ctx,
+  text,
+  x,
+  y,
+  radius,
+  labelStyle,
+  minFontSize = 8,
+  maxFontSize = 14,
+) {
   if (!ctx || !text) return;
 
   const fontSize = calculateFontSize(radius, false, minFontSize, maxFontSize);
@@ -327,9 +351,28 @@ export function drawLabel(
   const maxFontSize = mergedStyle.labelMaxFontSize || 14;
 
   if (isActualLeaf) {
-    drawLeafLabel(ctx, text, x, y, radius, angle, labelStyle, minFontSize, maxFontSize);
+    drawLeafLabel(
+      ctx,
+      text,
+      x,
+      y,
+      radius,
+      angle,
+      labelStyle,
+      minFontSize,
+      maxFontSize,
+    );
   } else {
-    drawCenteredLabel(ctx, text, x, y, radius, labelStyle, minFontSize, maxFontSize);
+    drawCenteredLabel(
+      ctx,
+      text,
+      x,
+      y,
+      radius,
+      labelStyle,
+      minFontSize,
+      maxFontSize,
+    );
   }
 }
 
@@ -365,19 +408,23 @@ export function drawLabels(
   const height = ctx.canvas.height;
 
   // Helper function to check if node is in viewport
-  const isInViewport = (nodeData) => {
-    const { x, y, radius } = nodeData;
-    const screenX = x + panX;
-    const screenY = y + panY;
-    const margin = radius * 2; // Add some margin for labels outside nodes
-    
-    return (
-      screenX + margin >= 0 &&
-      screenX - margin <= width &&
-      screenY + margin >= 0 &&
-      screenY - margin <= height
-    );
-  };
+  const isInViewport =
+    /** @param {{x:number,y:number,radius:number, node?:any, depth?:number}} nodeData */ (
+      nodeData,
+    ) => {
+      const { x, y, radius } =
+        /** @type {{x:number,y:number,radius:number}} */ (nodeData);
+      const screenX = x + panX;
+      const screenY = y + panY;
+      const margin = radius * 2; // Add some margin for labels outside nodes
+
+      return (
+        screenX + margin >= 0 &&
+        screenX - margin <= width &&
+        screenY + margin >= 0 &&
+        screenY - margin <= height
+      );
+    };
 
   // Filter nodes that are in viewport first
   const nodesInViewport = renderedNodes.filter(isInViewport);
@@ -424,7 +471,9 @@ export function drawLabels(
       const text = node.name || node.id;
       const textWidth = ctx.measureText(text).width + 8; // approximate width
       const textHeight = 12 + 4; // approximate height
-      const diagonal = Math.sqrt(textWidth * textWidth + textHeight * textHeight);
+      const diagonal = Math.sqrt(
+        textWidth * textWidth + textHeight * textHeight,
+      );
       const fitsInside = diagonal <= 2 * radius * 0.9;
 
       if (fitsInside) {
@@ -462,9 +511,9 @@ export function drawLabels(
     height,
     {
       fontFamily: mergedStyle.labelFontFamily || 'monospace',
-      fontSize: mergedStyle.labelMinFontSize || 8,  // All outside labels use min font size
-      minRadius: 2,  // Lower threshold to show labels for smaller nodes
-      labelPadding: 2,  // 2px padding to keep labels close to links
+      fontSize: mergedStyle.labelMinFontSize || 8, // All outside labels use min font size
+      minRadius: 2, // Lower threshold to show labels for smaller nodes
+      labelPadding: 2, // 2px padding to keep labels close to links
     },
   );
 
@@ -494,7 +543,16 @@ export function drawLabels(
         const text = String(node.name || node.id);
         const minFontSize = mergedStyle.labelMinFontSize || 8;
         const maxFontSize = mergedStyle.labelMaxFontSize || 14;
-        drawCenteredLabel(ctx, text, nodeData.x, nodeData.y, radius, labelStyle, minFontSize, maxFontSize);
+        drawCenteredLabel(
+          ctx,
+          text,
+          nodeData.x,
+          nodeData.y,
+          radius,
+          labelStyle,
+          minFontSize,
+          maxFontSize,
+        );
       } else {
         // Outside label - render positioned with link
         drawPositionedLabel(
@@ -588,6 +646,6 @@ function drawPositionedLabel(
   } else {
     // For outside labels, text is already positioned with padding included in bounding box
     // The labelPadding (2px on each side) is already included in label dimensions
-    ctx.fillText(text, x + 2, y + 2);  // Use labelPadding amount for consistent spacing
+    ctx.fillText(text, x + 2, y + 2); // Use labelPadding amount for consistent spacing
   }
 }

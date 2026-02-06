@@ -161,8 +161,15 @@ export class CircleAwareLabeler {
 
   /**
    * Get label anchor point (where link connects to label)
+   * Accepts either an Anchor instance or a plain object with { x, y, radius }.
+   * @param {Label} label
+   * @param {{x:number,y:number,radius:number}|Anchor} anchor
+   * @returns {{x:number,y:number}}
    */
-  getLabelAnchorPoint(label, anchor) {
+  getLabelAnchorPoint(
+    /** @type {Label} */ label,
+    /** @type {{x:number,y:number,radius:number}|Anchor} */ anchor,
+  ) {
     return calculateLabelAnchorPoint(
       label.x,
       label.y,
@@ -176,7 +183,7 @@ export class CircleAwareLabeler {
   /**
    * Get x anchor type for a label relative to its anchor
    */
-  getXAnchor(label, anchor) {
+  getXAnchor(/** @type {Label} */ label, /** @type {Anchor} */ anchor) {
     if (anchor.x < label.x) {
       return 'left';
     } else if (anchor.x > label.x + label.width) {
@@ -188,7 +195,7 @@ export class CircleAwareLabeler {
   /**
    * Get y anchor type for a label relative to its anchor
    */
-  getYAnchor(label, anchor) {
+  getYAnchor(/** @type {Label} */ label, /** @type {Anchor} */ anchor) {
     if (anchor.y < label.y) {
       return 'bottom';
     } else if (anchor.y > label.y + label.height) {
@@ -200,7 +207,7 @@ export class CircleAwareLabeler {
   /**
    * Calculate distance from label to anchor using anchor point
    */
-  distanceTo(label, anchor) {
+  distanceTo(/** @type {Label} */ label, /** @type {Anchor} */ anchor) {
     const anchorPoint = this.getLabelAnchorPoint(label, anchor);
     return Math.hypot(anchorPoint.x - anchor.x, anchorPoint.y - anchor.y);
   }
@@ -208,7 +215,16 @@ export class CircleAwareLabeler {
   /**
    * Check if two line segments intersect
    */
-  intersect(x1, x2, x3, x4, y1, y2, y3, y4) {
+  intersect(
+    /** @type {number} */ x1,
+    /** @type {number} */ x2,
+    /** @type {number} */ x3,
+    /** @type {number} */ x4,
+    /** @type {number} */ y1,
+    /** @type {number} */ y2,
+    /** @type {number} */ y3,
+    /** @type {number} */ y4,
+  ) {
     const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
     const numerA = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
     const numerB = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3);
@@ -223,13 +239,13 @@ export class CircleAwareLabeler {
    * Check if label overlaps with a circle using proper circle-rectangle collision
    */
   labelOverlapsCircle(
-    rectX,
-    rectY,
-    rectWidth,
-    rectHeight,
-    circleX,
-    circleY,
-    circleRadius,
+    /** @type {number} */ rectX,
+    /** @type {number} */ rectY,
+    /** @type {number} */ rectWidth,
+    /** @type {number} */ rectHeight,
+    /** @type {number} */ circleX,
+    /** @type {number} */ circleY,
+    /** @type {number} */ circleRadius,
   ) {
     const closestX = Math.max(rectX, Math.min(circleX, rectX + rectWidth));
     const closestY = Math.max(rectY, Math.min(circleY, rectY + rectHeight));
@@ -242,7 +258,7 @@ export class CircleAwareLabeler {
   /**
    * Calculate energy for a label (lower is better)
    */
-  energy(index) {
+  energy(/** @type {number} */ index) {
     const currentLabel = this.labels[index];
     const currentAnchor = this.anchors[index];
 
@@ -348,11 +364,11 @@ export class CircleAwareLabeler {
   /**
    * Monte Carlo move: randomly move a label
    */
-  monteCarloMove(currentTemperature) {
+  monteCarloMove(/** @type {number} */ currentTemperature) {
     const i = Math.floor(this.rand.next() * this.labels.length);
 
     const label = this.labels[i];
-    const { x, y, width, height } = label;
+    const { x, y } = label;
 
     const xOld = x;
     const yOld = y;
@@ -378,12 +394,12 @@ export class CircleAwareLabeler {
   /**
    * Monte Carlo rotate: rotate a label around its anchor
    */
-  monteCarloRotate(currentTemperature) {
+  monteCarloRotate(/** @type {number} */ currentTemperature) {
     const i = Math.floor(this.rand.next() * this.labels.length);
 
     const anchor = this.anchors[i];
     const label = this.labels[i];
-    const { x, y, width, height } = label;
+    const { x, y } = label;
 
     const xOld = x;
     const yOld = y;
@@ -434,7 +450,11 @@ export class CircleAwareLabeler {
   /**
    * Linear cooling schedule for simulated annealing
    */
-  coolingSchedule(currentTemperature, initialTemperature, nSweeps) {
+  coolingSchedule(
+    /** @type {number} */ currentTemperature,
+    /** @type {number} */ initialTemperature,
+    /** @type {number} */ nSweeps,
+  ) {
     return currentTemperature - initialTemperature / nSweeps;
   }
 }
@@ -860,9 +880,6 @@ export class LabelPositioner {
       const distance = minDistance + Math.max(labelWidth, labelHeight) / 2;
       const centerX = nodeX + Math.cos(angle) * distance;
       const centerY = nodeY + Math.sin(angle) * distance;
-
-      const labelX = centerX - labelWidth / 2;
-      const labelY = centerY - labelHeight / 2;
 
       // Calculate score = minimum distance to nearby circles
       // Only consider circles within canvas dimensions to avoid coordinate space issues
