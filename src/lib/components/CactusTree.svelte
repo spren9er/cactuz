@@ -87,6 +87,7 @@
   let lastMouseY = $state(0);
 
   // Touch state
+  /** @type {Touch[]} */
   let touches = $state([]);
   let lastTouchDistance = $state(0);
 
