@@ -455,7 +455,10 @@ export function drawLabels(
   const labelMaxFontSize = globalLabel.maxFontSize ?? 14;
   const labelPadding = globalLabel.padding ?? 1;
   const linkPadding = (globalLabel.link && globalLabel.link.padding) ?? 0;
-  const linkLength = (globalLabel.link && globalLabel.link.strokeWidth) ?? 5;
+  const linkLength =
+    (globalLabel.link &&
+      (globalLabel.link.length ?? globalLabel.link.strokeWidth)) ??
+    5;
 
   // build inputs for positioning algorithm
   const { labels, links } = calculateLabelPositions(

@@ -219,19 +219,6 @@
             strokeColor: '#e2575a',
           },
         },
-        label: {
-          textColor: '#333333',
-          fontFamily: 'monospace',
-          minFontSize: 9,
-          maxFontSize: 14,
-          padding: 1,
-          link: {
-            strokeColor: '#aaaaaa',
-            strokeWidth: 0.5,
-            strokeOpacity: 1,
-            padding: 0,
-          },
-        },
         edge: {
           strokeColor: '#e2575a',
           strokeOpacity: 0.1,
@@ -239,6 +226,20 @@
           highlight: {
             strokeColor: '#e2575a',
             strokeOpacity: 0.2,
+          },
+        },
+        label: {
+          textColor: '#333333',
+          fontFamily: 'monospace',
+          minFontSize: 9,
+          maxFontSize: 14,
+          padding: 1,
+          link: {
+            length: 5,
+            strokeColor: '#aaaaaa',
+            strokeWidth: 0.5,
+            strokeOpacity: 1,
+            padding: 0,
           },
         },
         depths: [
