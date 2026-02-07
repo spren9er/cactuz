@@ -246,13 +246,20 @@ export class CircleAwareLabeler {
     /** @type {number} */ circleX,
     /** @type {number} */ circleY,
     /** @type {number} */ circleRadius,
+    /** @type {number=} */ anchorPadding,
   ) {
     const closestX = Math.max(rectX, Math.min(circleX, rectX + rectWidth));
     const closestY = Math.max(rectY, Math.min(circleY, rectY + rectHeight));
     const distance = Math.sqrt(
       (circleX - closestX) ** 2 + (circleY - closestY) ** 2,
     );
-    return distance < circleRadius + this.labelAnchorPadding;
+
+    const pad =
+      typeof anchorPadding === 'number'
+        ? anchorPadding
+        : this.labelAnchorPadding;
+
+    return distance < circleRadius + pad;
   }
 
   /**
@@ -340,6 +347,9 @@ export class CircleAwareLabeler {
           circleX,
           circleY,
           circleRadius,
+          typeof currentLabel.anchorPadding === 'number'
+            ? currentLabel.anchorPadding
+            : this.labelAnchorPadding,
         )
       ) {
         // Heavy penalty for overlapping with any circle
@@ -351,7 +361,11 @@ export class CircleAwareLabeler {
         );
         const penetration = Math.max(
           0,
-          circleRadius + this.labelAnchorPadding - distToCircle,
+          circleRadius +
+            (typeof currentLabel.anchorPadding === 'number'
+              ? currentLabel.anchorPadding
+              : this.labelAnchorPadding) -
+            distToCircle,
         );
         // Use a very high weight for circle overlaps to strongly discourage them
         energy += penetration * penetration * this.wLabelAnchorOverlap * 10;
@@ -955,22 +969,24 @@ export class LabelPositioner {
     const nodesWithLabels = this.renderedNodes;
 
     // Use Monte Carlo algorithm for placing outside labels
-    // labelAnchorPadding creates a virtual extended circle for overlap detection
+    // labelAnchorPadding creates a virtual extended circle for overlap
+    // detection
     // It should include all three padding values to maintain proper spacing.
-    // Compute the maximum anchor padding across outsideLabels (fall back to defaults)
+    // Rather than using a single max anchor padding for all labels (which
+    // forces the largest configured link length/padding onto every label),
+    // attach a per-label anchorPadding value to each Label instance so the
+    // CircleAwareLabeler can respect individual node settings during
+    // energy computations.
     const defaultAnchorPadding =
       (this.options.linkPadding || 0) +
       (this.options.linkLength || 0) +
       (this.options.labelPadding || 0);
-    const maxAnchorPadding = labels.length
-      ? outsideLabels.reduce((acc, d) => {
-          const ap = d && d.anchorPadding;
-          return Math.max(
-            acc,
-            typeof ap === 'number' ? ap : defaultAnchorPadding,
-          );
-        }, defaultAnchorPadding)
-      : defaultAnchorPadding;
+
+    // Attach per-label anchorPadding onto each Label instance (fall back to default)
+    labels.forEach((lbl, i) => {
+      const ap = outsideLabels[i] && outsideLabels[i].anchorPadding;
+      lbl.anchorPadding = typeof ap === 'number' ? ap : defaultAnchorPadding;
+    });
 
     const labeler = new CircleAwareLabeler(
       labels,
@@ -986,7 +1002,6 @@ export class LabelPositioner {
         wOrientation: 3.0,
         maxMove: 15.0,
         maxAngle: Math.PI / 4,
-        labelAnchorPadding: maxAnchorPadding,
       },
     );
 

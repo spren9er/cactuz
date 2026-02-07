@@ -235,9 +235,9 @@
           maxFontSize: 14,
           padding: 1,
           link: {
-            length: 5,
-            strokeColor: 'green',
-            strokeOpacity: 0.1,
+            length: 8,
+            strokeColor: '#aaaaaa',
+            strokeOpacity: 1,
             strokeWidth: 1,
             padding: 0,
           },
@@ -264,14 +264,6 @@
             },
             label: {
               textColor: '#333333',
-              padding: 20,
-              link: {
-                length: 40,
-                strokeColor: 'blue',
-                strokeOpacity: 1,
-                strokeWidth: 5,
-                padding: 10,
-              },
             },
           },
           {
