@@ -143,6 +143,7 @@ interface Styles {
       strokeOpacity?: number;
       strokeWidth?: number;
       padding?: number;
+      length?: number;
     };
   };
   line?: {
@@ -167,6 +168,13 @@ interface DepthStyle {
     strokeColor?: string;
     strokeOpacity?: number;
     strokeWidth?: number;
+    highlight?: {
+      fillColor?: string;
+      fillOpacity?: number;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWidth?: number;
+    };
   };
   label?: {
     textColor?: string;
@@ -181,6 +189,7 @@ interface DepthStyle {
       strokeOpacity?: number;
       strokeWidth?: number;
       padding?: number;
+      length?: number;
     };
   };
   line?: {
