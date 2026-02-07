@@ -57,11 +57,11 @@
 </script>
 
 <svelte:head>
-  <title>cactus-tree</title>
+  <title>cactuz</title>
 </svelte:head>
 
 <main class="container">
-  <h1>cactus-tree</h1>
+  <h1>cactuz</h1>
 
   <p>
     <i>CactusTree</i> is an advanced visualization technique designed to
@@ -79,7 +79,7 @@
     This modern, interactive visualization of <i>CactusTree</i> provides several
     configurable parameters that allow you to control the visual appearance and
     layout behavior of the tree. The source code for the Svelte library
-    <b>cactus-tree</b> is available on
+    <b>cactuz</b> is available on
     <a href="https://github.com/spren9er/cactus">GitHub</a>.
   </p>
 

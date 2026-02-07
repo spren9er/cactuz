@@ -1,14 +1,14 @@
-# cactus-tree
+# cactuz
 
 A modern Svelte library for visualizing hierarchical data structures using the *CactusTree* algorithm with hierarchical edge bundling.
 
 <div align="center">
-  <img src="https://github.com/spren9er/cactus-tree/blob/main/docs/images/cactus_tree_simple.png?raw=true" alt="cactus-tree-simple" width="75%" height="75%">
+  <img src="https://github.com/spren9er/cactuz/blob/main/docs/images/cactus_tree_simple.png?raw=true" alt="cactus-tree-simple" width="75%" height="75%">
 </div>
 
 ## Overview
 
-The library **cactus-tree** is based on the research paper *[CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling](https://ieeexplore.ieee.org/document/8031596)* by Tommy Dang and Angus Forbes. This implementation provides both a ready-to-use Svelte component and a standalone layout algorithm for creating interactive tree visualizations.
+The library **cactuz** is based on the research paper *[CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling](https://ieeexplore.ieee.org/document/8031596)* by Tommy Dang and Angus Forbes. This implementation provides both a ready-to-use Svelte component and a standalone layout algorithm for creating interactive tree visualizations.
 
 See [cactus.spren9er.de](https://cactus.spren9er.de) for a live demo and interactive playground.
 
@@ -23,14 +23,14 @@ See [cactus.spren9er.de](https://cactus.spren9er.de) for a live demo and interac
 ## Installation
 
 ```bash
-npm install cactus-tree
+npm install cactuz
 ```
 
 ## Quick Start
 
 ```svelte
 <script>
-  import { CactusTree } from 'cactus-tree';
+  import { CactusTree } from 'cactuz';
 
   const nodes = [
     { id: 'root', name: 'Root', parent: null },
@@ -162,7 +162,7 @@ interface DepthStyle {
 For custom implementations or non-Svelte environments, you can use the layout algorithm directly:
 
 ```javascript
-import { CactusLayout } from 'cactus-tree';
+import { CactusLayout } from 'cactuz';
 
 const layout = new CactusLayout(
   800,       // width
@@ -228,7 +228,7 @@ interface NodeData {
 
 ```svelte
 <script>
-  import { CactusTree } from 'cactus-tree';
+  import { CactusTree } from 'cactuz';
 
   const styles = {
     fill: '#f0f8ff',
@@ -324,7 +324,7 @@ The component provides several interactive features:
 ```
 
 <div align="center">
-  <img src="https://github.com/spren9er/cactus-tree/blob/main/docs/images/cactus_tree_advanced.png?raw=true" alt="cactus-tree-advanced" width="75%" height="75%">
+  <img src="https://github.com/spren9er/cactuz/blob/main/docs/images/cactus_tree_advanced.png?raw=true" alt="cactus-tree-advanced" width="75%" height="75%">
 </div>
 
 For a negative overlap parameter, nodes are connected by links.
