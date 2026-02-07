@@ -340,6 +340,7 @@ export function drawEdge(
  * @param {any} mergedStyle - Merged styles object
  * @param {Map<number, any>} depthStyleCache - Cache for depth styles
  * @param {number} overlap - Overlap setting from options
+ * @param {Map<number, Set<string>>} negativeDepthNodes - Map of negative depth (e.g. -1, -2) to a Set of node IDs
  */
 export function drawConnectingLines(
   ctx,
@@ -368,10 +369,21 @@ export function drawConnectingLines(
             depthStyle = ds;
             break;
           } else if (ds.depth < 0) {
+            // For negative depths, only apply the depth style when the
+            // parent -> child pair crosses the negative levels. Concretely:
+            //   - the parent must be in depth -N (ds.depth)
+            //   - the child must be in depth -(N-1) (ds.depth + 1)
+            // This ensures a style for -2 only affects the direct parent->leaf
+            // line, not other child subtrees of that parent.
             const nodesAtThisNegativeDepth = negativeDepthNodes?.get(ds.depth);
+            const childNodesAtNextNegativeDepth = negativeDepthNodes?.get(
+              ds.depth + 1,
+            );
             if (
               nodesAtThisNegativeDepth &&
-              nodesAtThisNegativeDepth.has(node.id)
+              nodesAtThisNegativeDepth.has(node.id) &&
+              childNodesAtNextNegativeDepth &&
+              childNodesAtNextNegativeDepth.has(child?.node?.id)
             ) {
               depthStyle = ds;
               break;

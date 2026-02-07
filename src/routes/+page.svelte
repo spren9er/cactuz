@@ -243,6 +243,14 @@
         },
         depths: [
           {
+            depth: -2,
+            line: {
+              strokeColor: '#e2575a',
+              strokeWidth: 1,
+              strokeOpacity: 1,
+            },
+          },
+          {
             depth: -1,
             node: {
               fillColor: '#e2575a',

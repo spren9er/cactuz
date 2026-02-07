@@ -234,32 +234,9 @@ export function buildLookupMaps(renderedNodes, mergedStyle) {
 
     if (nextLevelNodes.size === 0) break;
 
-    const filteredNodes = new SvelteSet();
+    negativeDepthNodes.set(depthLevel, new SvelteSet(nextLevelNodes));
 
-    // Build parent-child relationships efficiently for this level
-    const levelParentMap = new SvelteMap();
-    nextLevelNodes.forEach((nodeId) => {
-      const nodeData = nodeIdToNodeMap.get(nodeId);
-      if (nodeData && nodeData.parent) {
-        if (!levelParentMap.has(nodeData.parent)) {
-          levelParentMap.set(nodeData.parent, []);
-        }
-        levelParentMap.get(nodeData.parent).push(nodeId);
-      }
-    });
-
-    // Filter nodes that don't have children in the same level
-    nextLevelNodes.forEach((nodeId) => {
-      const hasChildInSameLevel = levelParentMap.has(nodeId);
-      if (!hasChildInSameLevel) {
-        filteredNodes.add(nodeId);
-      }
-    });
-
-    if (filteredNodes.size > 0) {
-      negativeDepthNodes.set(depthLevel, filteredNodes);
-    }
-
+    // Move upward for next iteration
     currentLevelNodes = nextLevelNodes;
     depthLevel--;
   }
