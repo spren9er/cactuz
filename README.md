@@ -10,8 +10,6 @@ A modern Svelte library for visualizing hierarchical data structures using the *
 
 The library **cactuz** is based on the research paper *[CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling](https://ieeexplore.ieee.org/document/8031596)* by Tommy Dang and Angus Forbes. This implementation provides both a ready-to-use Svelte component and a standalone layout algorithm for creating interactive tree visualizations.
 
-See [cactuz.spren9er.de](https://cactuz.spren9er.de) for a live demo and interactive playground.
-
 ## Features
 
 - **Fractal-based Tree Layout** - Recursively stacks child nodes on parent nodes
@@ -46,7 +44,7 @@ npm install cactuz
 <CactusTree width={800} height={600} {nodes} {links} />
 ```
 
----
+See [cactuz.spren9er.de](https://cactuz.spren9er.de) for a live demo and interactive playground.
 
 ## API Reference
 
@@ -98,7 +96,7 @@ interface Options {
 }
 ```
 
-**Note:** Negative values create gaps and connect nodes with links.
+**Note:** Negative values for `overlap` create gaps and connect nodes with links.
 
 #### Styles
 
@@ -157,11 +155,23 @@ interface Styles {
 
 #### Depth-Specific Styling
 
-Each item in `styles.depths` must include a `depth` integer.
+Each item in `styles.depths` must include a `depth` integer. Possible values for `depth` are:
+
+- 0 = root node.
+- Positive integers (1, 2, 3, ...) refer to deeper levels away from the root:
+  - 1 = direct children of the root,
+  - 2 = grandchildren of the root,
+  - and so on.
+  Use positive-depth overrides to style internal levels progressively (for example, a different node color for level 2).
+- Negative integers are supported as a convenience for leaf-oriented overrides:
+  - -1 = set of all leaves (nodes with no children),
+  - -2 = set of parents of leaves (one level up from leaves),
+  - and so on.
+  These negative-depth entries are not absolute numeric depths in the tree; instead the implementation maps them to groups of nodes computed from the layout. This is useful when you want to style leaves or near-leaf levels without knowing their positive depth value.
 
 ```typescript
 interface DepthStyle {
-  depth: number; // 0 = root, positive = deeper levels, negative values may be used for leaf-oriented overrides (implementation uses mapping for negative depths)
+  depth: number;
   node?: {
     fillColor?: string;
     fillOpacity?: number;
