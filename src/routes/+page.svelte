@@ -175,7 +175,7 @@
 
       <div class="control-group">
         <label for="numLabels">
-          Num Labels: {config.numLabels}
+          Number of Labels: {config.numLabels}
           <input
             id="numLabels"
             type="range"
