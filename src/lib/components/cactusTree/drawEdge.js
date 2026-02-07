@@ -38,16 +38,6 @@ export function buildHierarchicalPath(
       current = current.parentRef;
     }
 
-    // Debug: Check if we have valid paths
-    if (sourcePath.length === 1 && targetPath.length === 1) {
-      console.log('DEBUG: No parent refs found!', {
-        source: sourceNode.node.id,
-        target: targetNode.node.id,
-        sourceHasParentRef: !!sourceNode.node.parentRef,
-        targetHasParentRef: !!targetNode.node.parentRef,
-      });
-    }
-
     // Find lowest common ancestor (closest to leaves)
     for (let i = 0; i < Math.min(sourcePath.length, targetPath.length); i++) {
       const sourceAncestor = sourcePath[sourcePath.length - 1 - i];
@@ -204,7 +194,7 @@ export function drawEdge(
     return false;
   }
 
-  // Read values strictly from the global `mergedStyle.edge`.
+  // Edge styles are global-only: read from mergedStyle.edge
   const currentEdgeColor =
     mergedStyle && mergedStyle.edge && mergedStyle.edge.strokeColor
       ? mergedStyle.edge.strokeColor
@@ -358,6 +348,7 @@ export function drawConnectingLines(
   mergedStyle,
   depthStyleCache,
   overlap,
+  negativeDepthNodes,
 ) {
   if (overlap >= 0 || !ctx) return;
 
@@ -366,27 +357,56 @@ export function drawConnectingLines(
     const children = parentToChildrenNodeMap.get(node.id) || [];
 
     children.forEach((/** @type {any} */ child) => {
-      const depthStyle = depthStyleCache.get(depth);
+      // Resolve depthStyle: prefer cached exact depth, else check mergedStyle.depths
+      // including negative-depth membership via negativeDepthNodes map.
+      let depthStyle = null;
+      if (depthStyleCache && depthStyleCache.has(depth)) {
+        depthStyle = depthStyleCache.get(depth);
+      } else if (mergedStyle?.depths) {
+        for (const ds of mergedStyle.depths) {
+          if (ds.depth === depth) {
+            depthStyle = ds;
+            break;
+          } else if (ds.depth < 0) {
+            const nodesAtThisNegativeDepth = negativeDepthNodes?.get(ds.depth);
+            if (
+              nodesAtThisNegativeDepth &&
+              nodesAtThisNegativeDepth.has(node.id)
+            ) {
+              depthStyle = ds;
+              break;
+            }
+          }
+        }
+      }
+
       // Support nested `line` object (strokeColor, strokeOpacity, strokeWidth)
       const currentLineWidth =
-        depthStyle?.line?.strokeWidth ??
-        mergedStyle?.line?.strokeWidth ??
-        mergedStyle.lineWidth;
+        depthStyle?.line?.strokeWidth ?? mergedStyle?.line?.strokeWidth ?? 0;
       const currentLineColor =
         depthStyle?.line?.strokeColor ??
         mergedStyle?.line?.strokeColor ??
-        mergedStyle.line;
+        'none';
+      const currentLineOpacity =
+        depthStyle?.line?.strokeOpacity ??
+        mergedStyle?.line?.strokeOpacity ??
+        1;
 
       if (currentLineWidth > 0 && currentLineColor !== 'none') {
+        const prevAlpha = ctx.globalAlpha;
         setCanvasStyles(ctx, {
           strokeStyle: currentLineColor,
           lineWidth: currentLineWidth,
+          globalAlpha: currentLineOpacity,
         });
 
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(child.x, child.y);
         ctx.stroke();
+
+        // restore alpha if changed
+        if (ctx.globalAlpha !== prevAlpha) ctx.globalAlpha = prevAlpha;
       }
     });
   });

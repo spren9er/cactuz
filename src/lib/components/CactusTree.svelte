@@ -233,6 +233,7 @@
       mergedStyle,
       depthStyleCache,
       mergedOptions.overlap,
+      negativeDepthNodes,
     );
 
     // Draw nodes
