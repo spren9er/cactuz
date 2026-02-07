@@ -10,7 +10,7 @@ A modern Svelte library for visualizing hierarchical data structures using the *
 
 The library **cactuz** is based on the research paper *[CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling](https://ieeexplore.ieee.org/document/8031596)* by Tommy Dang and Angus Forbes. This implementation provides both a ready-to-use Svelte component and a standalone layout algorithm for creating interactive tree visualizations.
 
-See [cactus.spren9er.de](https://cactus.spren9er.de) for a live demo and interactive playground.
+See [cactuz.spren9er.de](https://cactuz.spren9er.de) for a live demo and interactive playground.
 
 ## Features
 
