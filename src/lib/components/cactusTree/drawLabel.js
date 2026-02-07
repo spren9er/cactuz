@@ -1,6 +1,6 @@
 /**
  * Label drawing utilities for CactusTree component (refactored)
- * - Uses nested label styles: mergedStyle.label.{textColor,textOpacity,fontFamily,minFontSize,maxFontSize,padding,link:{strokeColor,strokeOpacity,strokeWidth,padding}}
+ * - Uses nested label styles: mergedStyle.label.{textColor,textOpacity,fontFamily,minFontSize,maxFontSize,padding,link:{strokeColor,strokeOpacity,strokeWidth,padding,length}}
  */
 
 import { setCanvasStyles } from './canvasUtils.js';
@@ -70,6 +70,7 @@ export function getLabelStyle(
       linkFromDepth?.strokeOpacity ?? globalLink?.strokeOpacity ?? 1.0,
     strokeWidth: linkFromDepth?.strokeWidth ?? globalLink?.strokeWidth ?? 0.5,
     padding: linkFromDepth?.padding ?? globalLink?.padding ?? 0,
+    length: linkFromDepth?.length ?? globalLink?.length ?? 5,
   };
 
   return {

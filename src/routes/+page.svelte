@@ -237,8 +237,8 @@
           link: {
             length: 5,
             strokeColor: '#aaaaaa',
-            strokeWidth: 0.5,
             strokeOpacity: 1,
+            strokeWidth: 0.5,
             padding: 0,
           },
         },
@@ -267,8 +267,8 @@
               padding: 1,
               link: {
                 strokeColor: '#aaaaaa',
-                strokeWidth: 0.5,
                 strokeOpacity: 1,
+                strokeWidth: 0.5,
                 padding: 0,
               },
             },

@@ -372,7 +372,7 @@ export function drawConnectingLines(
             // For negative depths, only apply the depth style when the
             // parent -> child pair crosses the negative levels. Concretely:
             //   - the parent must be in depth -N (ds.depth)
-            //   - the child must be in depth -(N-1) (ds.depth + 1)
+            //   - the child must be in depth -(N - 1) (ds.depth + 1)
             // This ensures a style for -2 only affects the direct parent->leaf
             // line, not other child subtrees of that parent.
             const nodesAtThisNegativeDepth = negativeDepthNodes?.get(ds.depth);
