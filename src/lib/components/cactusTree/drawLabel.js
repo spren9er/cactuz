@@ -241,34 +241,98 @@ export function shouldShowLabel(
 
 /**
  * Draw connectors (leader lines) between node anchor and outside label positions
+ * Uses depth-based/per-node label.link styles when available.
  * @param {CanvasRenderingContext2D} ctx
- * @param {Array<any>} links - calculated link segments with x1,y1,x2,y2
+ * @param {Array<any>} links - calculated link segments with x1,y1,x2,y2,nodeId
  * @param {any} mergedStyle
+ * @param {Array<any>} nodesWithLabels - the nodes that were passed to the positioner (contains node & depth)
+ * @param {Map<number, any>} depthStyleCache - optional cache used by getLabelStyle
+ * @param {Map<number, Set<string>>} negativeDepthNodes - optional mapping for negative depth styles
  */
-export function drawLabelConnectors(ctx, links, mergedStyle) {
+export function drawLabelConnectors(
+  ctx,
+  links,
+  mergedStyle,
+  nodesWithLabels = [],
+  depthStyleCache = new Map(),
+  negativeDepthNodes = new Map(),
+) {
   if (!ctx || !links || links.length === 0) return;
 
-  // Read global link style
-  const link = mergedStyle?.label?.link ?? {};
-  const color = link.strokeColor ?? mergedStyle?.label?.textColor ?? '#333333';
-  const width = link.strokeWidth ?? 1;
-  const alpha = link.strokeOpacity ?? 1;
-
-  setCanvasStyles(ctx, {
-    strokeStyle: color,
-    lineWidth: width,
-    globalAlpha: alpha,
-  });
-
+  // Draw each link using node-level -> depth-level -> global link style precedence.
+  // Draw each link using resolved per-node linkStyle (attached to nodeData) when available,
+  // otherwise fall back to depth/global merge.
   links.forEach((linkSeg) => {
+    // Resolve per-node / depth / global style chain
+    const nodeId = linkSeg.nodeId;
+    const globalLabel = mergedStyle?.label ?? {};
+    const globalLink = globalLabel.link ?? {};
+
+    // Try to find the node data for this link (nodesWithLabels contains the rendered nodeData)
+    const nodeData =
+      nodesWithLabels &&
+      nodesWithLabels.find((n) => n && n.node && n.node.id === nodeId);
+
+    // If a resolved linkStyle was attached earlier to nodeData, prefer it.
+    let linkStyle = null;
+    if (nodeData && nodeData.linkStyle) {
+      linkStyle = nodeData.linkStyle;
+    } else {
+      // Depth-derived link style (if any)
+      let depthLink = {};
+      if (nodeData) {
+        const depth = nodeData.depth;
+        const labelStyle = getLabelStyle(
+          depth,
+          nodeId,
+          mergedStyle,
+          depthStyleCache,
+          negativeDepthNodes,
+        );
+        depthLink = (labelStyle && labelStyle.link) || {};
+      }
+
+      // Node-level link style (explicit node.label.link on the node object)
+      const nodeLink =
+        nodeData &&
+        nodeData.node &&
+        nodeData.node.label &&
+        nodeData.node.label.link
+          ? nodeData.node.label.link
+          : {};
+
+      // Merge styles with precedence: global <- depth <- node (node overrides depth and global)
+      linkStyle = {
+        ...(globalLink || {}),
+        ...(depthLink || {}),
+        ...(nodeLink || {}),
+      };
+    }
+
+    const color = linkStyle.strokeColor ?? globalLabel.textColor ?? '#333333';
+    const width =
+      typeof linkStyle.strokeWidth === 'number'
+        ? linkStyle.strokeWidth
+        : (globalLink.strokeWidth ?? 1);
+    const alpha =
+      typeof linkStyle.strokeOpacity === 'number'
+        ? linkStyle.strokeOpacity
+        : (globalLink.strokeOpacity ?? 1);
+
+    // Apply styles and draw this connector
+    setCanvasStyles(ctx, {
+      strokeStyle: color,
+      lineWidth: width,
+      globalAlpha: alpha,
+    });
+
     ctx.beginPath();
     ctx.moveTo(linkSeg.x1, linkSeg.y1);
     ctx.lineTo(linkSeg.x2, linkSeg.y2);
     ctx.stroke();
+    // Reset alpha if changed (do per-link to be safe)
+    if (ctx.globalAlpha !== 1.0) ctx.globalAlpha = 1.0;
   });
-
-  // Reset alpha if changed
-  if (ctx.globalAlpha !== 1.0) ctx.globalAlpha = 1.0;
 }
 
 /**
@@ -454,11 +518,66 @@ export function drawLabels(
   const labelFontFamily = globalLabel.fontFamily ?? 'monospace';
   const labelMinFontSize = globalLabel.minFontSize ?? 8;
   const labelMaxFontSize = globalLabel.maxFontSize ?? 14;
-  const labelPadding = globalLabel.padding ?? 1;
-  const linkPadding = (globalLabel.link && globalLabel.link.padding) ?? 0;
-  const linkLength = (globalLabel.link && globalLabel.link.length) ?? 5;
+  const globalLabelPadding = globalLabel.padding ?? 1;
+  const globalLinkPadding = (globalLabel.link && globalLabel.link.padding) ?? 0;
+  const globalLinkLength = (globalLabel.link && globalLabel.link.length) ?? 5;
 
-  // build inputs for positioning algorithm
+  // Attach depth-based / per-node label padding and link settings onto node objects
+  // so the positioning code can consume per-node values (depth-based overrides)
+  nodesWithLabels.forEach((nodeData) => {
+    const node = nodeData.node;
+    const depth = nodeData.depth;
+    // Resolve depth-based label style for this node
+    const perNodeStyle = getLabelStyle(
+      depth,
+      node.id,
+      mergedStyle,
+      depthStyleCache,
+      negativeDepthNodes,
+    );
+
+    // Ensure node.label exists and populate padding
+    node.label = node.label ?? {};
+    node.label.padding =
+      perNodeStyle?.padding ??
+      (typeof node.label.padding === 'number'
+        ? node.label.padding
+        : undefined) ??
+      globalLabelPadding;
+
+    // Ensure node.label.link exists and populate link paddings/lengths
+    node.label.link = node.label.link ?? {};
+    node.label.link.padding =
+      perNodeStyle?.link?.padding ??
+      (typeof node.label.link.padding === 'number'
+        ? node.label.link.padding
+        : undefined) ??
+      globalLinkPadding;
+    node.label.link.length =
+      perNodeStyle?.link?.length ??
+      (typeof node.label.link.length === 'number'
+        ? node.label.link.length
+        : undefined) ??
+      globalLinkLength;
+
+    // Also attach flat properties used by the label positioner for convenience
+    nodeData.labelPadding = node.label.padding;
+    nodeData.linkPadding = node.label.link.padding;
+    nodeData.linkLength = node.label.link.length;
+
+    // Compute and attach a resolved per-node link style object using precedence:
+    // global <- depth <- node (node-level overrides depth and global).
+    const globalLink = mergedStyle?.label?.link ?? {};
+    const depthLink = perNodeStyle?.link ?? {};
+    const nodeLink = node.label && node.label.link ? node.label.link : {};
+    nodeData.linkStyle = {
+      ...(globalLink || {}),
+      ...(depthLink || {}),
+      ...(nodeLink || {}),
+    };
+  });
+
+  // build inputs for positioning algorithm (global defaults are still passed)
   const { labels, links } = calculateLabelPositions(
     nodesWithLabels,
     width,
@@ -467,15 +586,23 @@ export function drawLabels(
       fontFamily: labelFontFamily,
       fontSize: labelMinFontSize,
       minRadius: 2,
-      labelPadding,
-      linkPadding,
-      linkLength,
+      labelPadding: globalLabelPadding,
+      linkPadding: globalLinkPadding,
+      linkLength: globalLinkLength,
     },
   );
 
   // draw connectors first (behind labels)
   if (links && links.length > 0) {
-    drawLabelConnectors(ctx, links, mergedStyle);
+    // Pass the nodesWithLabels and depth maps so connectors use depth-based/per-node link styles
+    drawLabelConnectors(
+      ctx,
+      links,
+      mergedStyle,
+      nodesWithLabels,
+      depthStyleCache,
+      negativeDepthNodes,
+    );
   }
 
   // draw labels

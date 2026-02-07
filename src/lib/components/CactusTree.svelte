@@ -19,15 +19,100 @@
   /** @type {{
       width: number,
       height: number,
-      nodes: Array<{id: string, name: string, parent: string|null, weight?: number}>,
-      links?: Array<{source: string, target: string}>,
-      options?: {overlap?: number, arcSpan?: number, sizeGrowthRate?: number, orientation?: number, zoom?: number, numLabels?: number},
+      nodes: Array<{ id: string, name: string, parent: string | null, weight?: number }>,
+      links?: Array<{ source: string, target: string }>,
+      options?: {
+        overlap?: number,
+        arcSpan?: number,
+        sizeGrowthRate?: number,
+        orientation?: number,
+        zoom?: number,
+        numLabels?: number
+      },
       styles?: {
-        node?: any,
-        edge?: any,
-        label?: any,
-        line?: any,
-        depths?: Array<{ depth: number, node?: any, label?: any, line?: any }>,
+        node?: {
+          fillColor?: string,
+          fillOpacity?: number,
+          strokeColor?: string,
+          strokeOpacity?: number,
+          strokeWidth?: number,
+          highlight?: {
+            fillColor?: string,
+            fillOpacity?: number,
+            strokeColor?: string,
+            strokeOpacity?: number,
+            strokeWidth?: number,
+          }
+        },
+        edge?: {
+          strokeColor?: string,
+          strokeOpacity?: number,
+          strokeWidth?: number,
+          highlight?: {
+            strokeColor?: string,
+            strokeOpacity?: number,
+            strokeWidth?: number
+          }
+        },
+        label?: {
+          textColor?: string,
+          textOpacity?: number,
+          fontFamily?: string,
+          minFontSize?: number,
+          maxFontSize?: number,
+          fontWeight?: string,
+          padding?: number,
+          link?: {
+            strokeColor?: string,
+            strokeOpacity?: number,
+            strokeWidth?: number,
+            padding?: number,
+            length?: number
+          }
+        },
+        line?: {
+          strokeColor?: string,
+          strokeOpacity?: number,
+          strokeWidth?: number
+        },
+        depths?: Array<{
+          depth: number,
+          node?: {
+            fillColor?: string,
+            fillOpacity?: number,
+            strokeColor?: string,
+            strokeOpacity?: number,
+            strokeWidth?: number,
+            highlight?: {
+              fillColor?: string,
+              fillOpacity?: number,
+              strokeColor?: string,
+              strokeOpacity?: number,
+              strokeWidth?: number,
+            }
+          },
+          label?: {
+            textColor?: string,
+            textOpacity?: number,
+            fontFamily?: string,
+            minFontSize?: number,
+            maxFontSize?: number,
+            fontWeight?: string,
+            padding?: number,
+            link?: {
+              strokeColor?: string,
+              strokeOpacity?: number,
+              strokeWidth?: number,
+              padding?: number,
+              length?: number
+            }
+          },
+          line?: {
+            strokeColor?: string,
+            strokeOpacity?: number,
+            strokeWidth?: number
+          }
+        }>
       },
       pannable?: boolean,
       zoomable?: boolean

@@ -591,8 +591,43 @@ export class LabelPositioner {
 
           // Measure text dimensions
           const text = node.name || node.id;
-          const textWidth = this.measureTextWidth(text);
-          const textHeight = this.fontSize + this.options.labelPadding * 2;
+
+          // Allow per-node label padding and per-node link settings (fall back to options)
+          // Use explicit typeof/ternary fallbacks to avoid mixing ?? and || operators,
+          // and to ensure defaults are explicit numeric values.
+          const nodeLabelPadding =
+            node && node.label && typeof node.label.padding === 'number'
+              ? node.label.padding
+              : node && typeof node.labelPadding === 'number'
+                ? node.labelPadding
+                : typeof this.options.labelPadding === 'number'
+                  ? this.options.labelPadding
+                  : 2;
+          const nodeLinkPadding =
+            node &&
+            node.label &&
+            node.label.link &&
+            typeof node.label.link.padding === 'number'
+              ? node.label.link.padding
+              : node && typeof node.linkPadding === 'number'
+                ? node.linkPadding
+                : typeof this.options.linkPadding === 'number'
+                  ? this.options.linkPadding
+                  : 0;
+          const nodeLinkLength =
+            node &&
+            node.label &&
+            node.label.link &&
+            typeof node.label.link.length === 'number'
+              ? node.label.link.length
+              : node && typeof node.linkLength === 'number'
+                ? node.linkLength
+                : typeof this.options.linkLength === 'number'
+                  ? this.options.linkLength
+                  : 0;
+
+          const textWidth = this.measureTextWidth(text, nodeLabelPadding);
+          const textHeight = this.fontSize + nodeLabelPadding * 2;
 
           // Check if label fits inside the circle
           const fitsInside = this.canFitInsideCircle(
@@ -618,6 +653,11 @@ export class LabelPositioner {
               radius,
               textWidth,
               textHeight,
+              {
+                labelPadding: nodeLabelPadding,
+                linkPadding: nodeLinkPadding,
+                linkLength: nodeLinkLength,
+              },
             );
             isInside = false;
           }
@@ -633,7 +673,19 @@ export class LabelPositioner {
 
           const anchor = new Anchor(x, y, radius);
 
-          return { label, anchor, isInside };
+          // Include per-label padding/link info so overlap resolver can compute max anchor padding
+          const anchorPadding =
+            nodeLabelPadding + nodeLinkPadding + nodeLinkLength;
+
+          return {
+            label,
+            anchor,
+            isInside,
+            labelPadding: nodeLabelPadding,
+            linkPadding: nodeLinkPadding,
+            linkLength: nodeLinkLength,
+            anchorPadding,
+          };
         },
       );
   }
@@ -665,14 +717,49 @@ export class LabelPositioner {
    * @param {number} labelHeight - Label height
    * @returns {{ x: number, y: number }} Position for label
    */
-  findOutsidePosition(nodeX, nodeY, nodeRadius, labelWidth, labelHeight) {
+  /**
+   * Find optimal initial position outside circle - deterministic based on available space
+   * Places label in the direction with most free space from circles
+   * MC algorithm will only handle label-label overlaps
+   * @param {number} nodeX - Node center X
+   * @param {number} nodeY - Node center Y
+   * @param {number} nodeRadius - Node radius
+   * @param {number} labelWidth - Label width
+   * @param {number} labelHeight - Label height
+   * @param {any} [opts] - Per-node options (labelPadding, linkPadding, linkLength)
+   * @returns {{ x: number, y: number }} Position for label
+   */
+  findOutsidePosition(
+    nodeX,
+    nodeY,
+    nodeRadius,
+    labelWidth,
+    labelHeight,
+    opts = {},
+  ) {
     // Total distance from circle center to label position:
     // - linkPadding: gap between circle and link start
     // - linkLength: length of visible link
     // - labelPadding: gap between link end and label
-    const linkPadding = this.options.linkPadding || 0;
-    const linkLength = this.options.linkLength || 0;
-    const labelPadding = this.options.labelPadding || 0;
+    // Use dot-access and explicit typeof checks to avoid TypeScript index signature errors
+    const linkPadding =
+      typeof opts.linkPadding === 'number'
+        ? opts.linkPadding
+        : typeof this.options.linkPadding === 'number'
+          ? this.options.linkPadding
+          : 0;
+    const linkLength =
+      typeof opts.linkLength === 'number'
+        ? opts.linkLength
+        : typeof this.options.linkLength === 'number'
+          ? this.options.linkLength
+          : 0;
+    const labelPadding =
+      typeof opts.labelPadding === 'number'
+        ? opts.labelPadding
+        : typeof this.options.labelPadding === 'number'
+          ? this.options.labelPadding
+          : 0;
     const minDistance = nodeRadius + linkPadding + linkLength + labelPadding;
 
     // All 8 directions to try
@@ -840,11 +927,13 @@ export class LabelPositioner {
    * @param {string} text - Text to measure
    * @returns {number} Text width in pixels
    */
-  measureTextWidth(/** @type {string} */ text) {
+  measureTextWidth(/** @type {string} */ text, /** @type {number} */ padding) {
+    const p =
+      typeof padding === 'number' ? padding : (this.options.labelPadding ?? 0);
     return (
       /** @type {CanvasRenderingContext2D} */ (this.ctx).measureText(text)
         .width +
-      this.options.labelPadding * 2
+      p * 2
     );
   }
 
@@ -867,7 +956,22 @@ export class LabelPositioner {
 
     // Use Monte Carlo algorithm for placing outside labels
     // labelAnchorPadding creates a virtual extended circle for overlap detection
-    // It should include all three padding values to maintain proper spacing
+    // It should include all three padding values to maintain proper spacing.
+    // Compute the maximum anchor padding across outsideLabels (fall back to defaults)
+    const defaultAnchorPadding =
+      (this.options.linkPadding || 0) +
+      (this.options.linkLength || 0) +
+      (this.options.labelPadding || 0);
+    const maxAnchorPadding = labels.length
+      ? outsideLabels.reduce((acc, d) => {
+          const ap = d && d.anchorPadding;
+          return Math.max(
+            acc,
+            typeof ap === 'number' ? ap : defaultAnchorPadding,
+          );
+        }, defaultAnchorPadding)
+      : defaultAnchorPadding;
+
     const labeler = new CircleAwareLabeler(
       labels,
       anchors,
@@ -882,10 +986,7 @@ export class LabelPositioner {
         wOrientation: 3.0,
         maxMove: 15.0,
         maxAngle: Math.PI / 4,
-        labelAnchorPadding:
-          (this.options.linkPadding || 0) +
-          (this.options.linkLength || 0) +
-          (this.options.labelPadding || 0),
+        labelAnchorPadding: maxAnchorPadding,
       },
     );
 
@@ -954,8 +1055,12 @@ export class LabelPositioner {
         labelAnchorPoint.x - anchor.x,
       );
 
-      // Start link from circle perimeter + linkPadding
-      const linkPadding = this.options.linkPadding || 0;
+      // Use per-label linkPadding / linkLength when available (fall back to global options)
+      const linkPadding =
+        labelData.linkPadding ?? this.options.linkPadding ?? 0;
+      const linkLength = labelData.linkLength ?? this.options.linkLength ?? 0;
+
+      // Start link from circle perimeter + per-label linkPadding
       const startDistance = anchor.radius + linkPadding;
       const perimeterX = anchor.x + Math.cos(angle) * startDistance;
       const perimeterY = anchor.y + Math.sin(angle) * startDistance;
@@ -966,10 +1071,13 @@ export class LabelPositioner {
         y1: perimeterY,
         x2: labelAnchorPoint.x,
         y2: labelAnchorPoint.y,
+        // actual drawn length (distance between computed perimeter point and label anchor)
         length: Math.sqrt(
           (labelAnchorPoint.x - perimeterX) ** 2 +
             (labelAnchorPoint.y - perimeterY) ** 2,
         ),
+        // expose configured per-label linkLength for callers that need it
+        configuredLinkLength: linkLength,
       };
     });
 
