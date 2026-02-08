@@ -32,6 +32,13 @@ import { calculateLabelPositions } from './labelPositions.js';
  */
 
 /**
+ * @typedef {Object} HighlightStyle
+ * @property {string} [textColor]
+ * @property {number} [textOpacity]
+ * @property {string} [fontWeight]
+ */
+
+/**
  * @typedef {Object} LabelStyle
  * @property {string} [textColor]
  * @property {number} [textOpacity]
@@ -41,8 +48,9 @@ import { calculateLabelPositions } from './labelPositions.js';
  * @property {string} [fontWeight]
  * @property {number} [padding]
  * @property {LabelLinkStyle} [link]
- * @property {Object} [highlight]
+ * @property {HighlightStyle} [highlight]
  * @property {number} [insideFitFactor] // optional override for inside-fit threshold (0..1)
+ * @property {number} [estimatedCharWidth] // heuristic used as fallback when ctx.measureText isn't available
  */
 
 /**
@@ -209,7 +217,7 @@ export function truncateText(ctx, text, maxWidth) {
  * @param {number} [minFontSize]
  * @param {number} [maxFontSize]
  * @param {boolean} [highlightActive]
- * @param {Object} [highlightStyle]
+ * @param {HighlightStyle} [highlightStyle]
  */
 export function drawCenteredLabel(
   ctx,
@@ -226,8 +234,10 @@ export function drawCenteredLabel(
   if (!ctx || !text) return;
 
   const fontSize = calculateFontSize(radius, minFontSize, maxFontSize);
-  const h = highlightStyle || {};
-  const ls = labelStyle || {};
+  /** @type {HighlightStyle} */
+  const h = /** @type {HighlightStyle} */ (highlightStyle || {});
+  /** @type {LabelStyle} */
+  const ls = /** @type {LabelStyle} */ (labelStyle || {});
   const fillColor =
     highlightActive && h && h.textColor !== undefined
       ? h.textColor
@@ -480,7 +490,11 @@ export function computeLabelLayout(
   const width = ctx.canvas.width / devicePixelRatio;
   const height = ctx.canvas.height / devicePixelRatio;
 
-  const isInViewport = (nodeData) => {
+  /**
+   * @param {{x:number,y:number,radius:number}} nodeData
+   * @returns {boolean}
+   */
+  function isInViewport(nodeData) {
     const { x, y, radius } = nodeData;
     const screenX = x + panX;
     const screenY = y + panY;
@@ -490,7 +504,7 @@ export function computeLabelLayout(
       screenY + radius >= 0 &&
       screenY - radius <= height
     );
-  };
+  }
 
   const nodesInViewport = renderedNodes.filter(isInViewport);
 
