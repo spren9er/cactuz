@@ -1,10 +1,8 @@
 /**
  * Label drawing utilities for CactusTree component
  *
- * Rewritten to:
  * - Use measured font metrics (via ctx.measureText and actualBoundingBox*)
- * - Replace hardcoded heuristics with style-driven values
- * - Provide JSDoc types instead of disabling TS checks
+ * - Style-driven values and per-depth overrides
  *
  * Exports:
  * - getLabelStyle
@@ -49,8 +47,8 @@ import { calculateLabelPositions } from './labelPositions.js';
  * @property {number} [padding]
  * @property {LabelLinkStyle} [link]
  * @property {HighlightStyle} [highlight]
- * @property {number} [insideFitFactor] // optional override for inside-fit threshold (0..1)
- * @property {number} [estimatedCharWidth] // heuristic used as fallback when ctx.measureText isn't available
+ * @property {number} [insideFitFactor]
+ * @property {number} [estimatedCharWidth]
  */
 
 /**
@@ -168,6 +166,7 @@ export function shouldShowLeafLabel(
   const isHoveringLeafNode =
     hoveredNodeId !== null && leafNodes.has(hoveredNodeId);
   if (isHoveringLeafNode) {
+    // When hovering a leaf, only show leaf labels that are part of visibleNodeIds
     return Array.isArray(visibleNodeIds)
       ? visibleNodeIds.includes(nodeId)
       : visibleNodeIds.has(nodeId);
@@ -218,6 +217,7 @@ export function truncateText(ctx, text, maxWidth) {
  * @param {number} [maxFontSize]
  * @param {boolean} [highlightActive]
  * @param {HighlightStyle} [highlightStyle]
+ * @returns {void}
  */
 export function drawCenteredLabel(
   ctx,
@@ -234,10 +234,8 @@ export function drawCenteredLabel(
   if (!ctx || !text) return;
 
   const fontSize = calculateFontSize(radius, minFontSize, maxFontSize);
-  /** @type {HighlightStyle} */
-  const h = /** @type {HighlightStyle} */ (highlightStyle || {});
-  /** @type {LabelStyle} */
-  const ls = /** @type {LabelStyle} */ (labelStyle || {});
+  const h = highlightStyle || {};
+  const ls = labelStyle || {};
   const fillColor =
     highlightActive && h && h.textColor !== undefined
       ? h.textColor
@@ -300,21 +298,20 @@ export function shouldShowLabel(
       hoveredNodeId,
       visibleNodeIds,
     );
-  const col = labelStyleWrapper.textColor;
+  const col = labelStyleWrapper && labelStyleWrapper.textColor;
   return col !== undefined && col !== 'none' && col !== 'transparent';
 }
 
 /**
  * Draw connectors (leader lines) between node anchor and outside label positions.
- * Renders connectors behind existing canvas content using destination-over so node circles remain on top.
  *
  * @param {CanvasRenderingContext2D} ctx
  * @param {Array<{x1:number,y1:number,x2:number,y2:number,nodeId:string}>} links
  * @param {any} mergedStyle
  * @param {Array<any>} nodesWithLabels
  * @param {Map<number, any>} depthStyleCache
- * @param {Map<number, Set<string>>
-} negativeDepthNodes
+ * @param {Map<number, Set<string>>} negativeDepthNodes
+ * @returns {void}
  */
 export function drawLabelConnectors(
   ctx,
@@ -407,6 +404,7 @@ export function drawLabelConnectors(
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
+ * @returns {void}
  */
 export function drawPositionedLabel(
   ctx,
@@ -456,7 +454,11 @@ export function drawPositionedLabel(
 
 /**
  * Compute label layout (labels + connector segments + nodesWithLabels) but do not draw anything.
- * Accepts a drawing `ctx` so measurements and canvas size are accurate.
+ *
+ * Behavior changes applied:
+ * - If numLabels === 0 -> no labels (return null)
+ * - When hovered (hoveredNodeId !== null): only consider nodes that are in visibleNodeIds
+ *   and limit total shown to numLabels largest nodes. Do NOT special-case inside-fitting labels.
  *
  * @param {CanvasRenderingContext2D} ctx
  * @param {any[]} renderedNodes
@@ -530,87 +532,36 @@ export function computeLabelLayout(
     );
   });
 
+  // If numLabels == 0, show no labels at all
+  const labelLimit = Number(numLabels ?? 30);
+  if (labelLimit === 0) return null;
+
   // Determine nodes to show labels for (hover vs normal)
   let nodesWithLabels;
-  const isHoveringLeafNode =
-    hoveredNodeId !== null && leafNodes.has(hoveredNodeId);
 
-  if (isHoveringLeafNode) {
-    nodesWithLabels = eligibleNodes.filter((nodeData) => {
-      const nodeId = nodeData.node.id;
-      const isActualLeaf = leafNodes.has(nodeId);
-      const { radius, node, depth } = nodeData;
+  // When any node is hovered, restrict to nodes that are associated via visibleNodeIds.
+  // Limit total to labelLimit largest by radius. Do NOT automatically include
+  // nodes because they fit inside when hovering.
+  if (hoveredNodeId !== null) {
+    const visibleSet = Array.isArray(visibleNodeIds)
+      ? new Set(visibleNodeIds)
+      : visibleNodeIds || new Set();
 
-      // Prepare label style and font for accurate measurement
-      const labelStyle = getLabelStyle(
-        depth,
-        nodeId,
-        mergedStyle,
-        depthStyleCache,
-        negativeDepthNodes,
-      );
-      const fontFamily = labelStyle.fontFamily ?? 'monospace';
-      const fontSize = labelStyle.minFontSize ?? 12;
-      const fontWeightPrefix = labelStyle.fontWeight
-        ? `${labelStyle.fontWeight} `
-        : '';
+    const connectedCandidates = eligibleNodes.filter((nd) =>
+      visibleSet.has(nd.node.id),
+    );
 
-      // ensure ctx.font matches what we'll draw (for accurate measurement)
-      ctx.save();
-      ctx.font = `${fontWeightPrefix}${fontSize}px ${fontFamily}`;
+    if (!connectedCandidates || connectedCandidates.length === 0) return null;
 
-      const text = String(node.name || node.id);
-      const m = ctx.measureText(text);
-      // width: use measured width; fallback to characters heuristic
-      const measuredWidth =
-        m && m.width
-          ? m.width
-          : text.length * (labelStyle.estimatedCharWidth ?? 8);
-      // height: prefer bounding box metrics if available
-      let measuredHeight;
-      if (
-        typeof m.actualBoundingBoxAscent === 'number' &&
-        typeof m.actualBoundingBoxDescent === 'number'
-      ) {
-        measuredHeight = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
-      } else {
-        // fallback: assume fontSize (approx)
-        measuredHeight = fontSize;
-      }
-      // restore ctx state
-      ctx.restore();
-
-      // use padding from style (fallbacks provided)
-      const paddingX =
-        typeof labelStyle.padding === 'number' ? labelStyle.padding : 4;
-      const paddingY = paddingX;
-
-      const textWidth = measuredWidth + paddingX * 2;
-      const textHeight = measuredHeight + paddingY * 2;
-      const diagonal = Math.hypot(textWidth, textHeight);
-
-      const insideFitFactor =
-        typeof labelStyle.insideFitFactor === 'number'
-          ? labelStyle.insideFitFactor
-          : (mergedStyle?.label?.insideFitFactor ?? 0.9);
-      const fitsInside = diagonal <= 2 * radius * insideFitFactor;
-
-      if (fitsInside) return true;
-      if (isActualLeaf)
-        return Array.isArray(visibleNodeIds)
-          ? visibleNodeIds.includes(nodeId)
-          : visibleNodeIds.has(nodeId);
-      return Array.isArray(visibleNodeIds)
-        ? visibleNodeIds.includes(nodeId)
-        : visibleNodeIds.has(nodeId);
-    });
-  } else if ((numLabels ?? 30) === 0) {
-    nodesWithLabels = [];
+    const sorted = connectedCandidates
+      .slice()
+      .sort((a, b) => b.radius - a.radius);
+    nodesWithLabels = sorted.slice(0, labelLimit);
   } else {
     const sortedByRadius = eligibleNodes
       .slice()
       .sort((a, b) => b.radius - a.radius);
-    nodesWithLabels = sortedByRadius.slice(0, numLabels ?? 30);
+    nodesWithLabels = sortedByRadius.slice(0, labelLimit);
   }
 
   if (!nodesWithLabels || nodesWithLabels.length === 0) return null;
@@ -724,6 +675,7 @@ export function computeLabelLayout(
  * @param {number} [numLabels=30]
  * @param {number} [panX=0]
  * @param {number} [panY=0]
+ * @returns {void}
  */
 export function drawLabels(
   ctx,
