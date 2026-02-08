@@ -244,6 +244,9 @@
             padding: 0,
           },
         },
+        line: {
+          strokeColor: '#aaaaaa',
+        },
         depths: [
           {
             depth: -2,
@@ -258,10 +261,15 @@
             node: {
               fillColor: '#e2575a',
               strokeColor: 'transparent',
-              strokeWidth: 2,
               highlight: {
-                fillColor: '#e2575a',
+                fillColor: '#777777',
                 strokeColor: '#333333',
+                strokeWidth: 2,
+              },
+            },
+            label: {
+              highlight: {
+                textColor: '#333333',
               },
             },
           },
@@ -334,7 +342,7 @@
   }
 
   h1 {
-    color: #333;
+    color: #333333;
     text-align: center;
     margin-bottom: 10px;
   }
@@ -369,7 +377,7 @@
   .control-group label {
     display: block;
     font-weight: 500;
-    color: #555;
+    color: #333333;
     margin-bottom: 5px;
   }
 
@@ -393,7 +401,7 @@
     gap: 10px;
     font-size: 12px;
     font-weight: 500;
-    color: #555;
+    color: #333333;
   }
 
   .dataset-selector select {
@@ -403,7 +411,7 @@
     font-family: monospace;
     font-size: 11px;
     background-color: white;
-    color: #333;
+    color: #333333;
   }
 
   .dataset-summary {
@@ -435,7 +443,7 @@
     align-items: center;
     gap: 4px;
     font-size: 11px;
-    color: #555;
+    color: #333333;
     cursor: pointer;
   }
 
@@ -446,7 +454,7 @@
   .edge-bundling-text {
     margin-left: 4px;
     font-weight: 500;
-    color: #555;
+    color: #333333;
   }
 
   .bundling-inline {
@@ -471,7 +479,7 @@
     min-width: 40px;
     text-align: right;
     font-size: 11px;
-    color: #333;
+    color: #333333;
   }
 
   .footer {

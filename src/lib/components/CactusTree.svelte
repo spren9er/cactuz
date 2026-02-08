@@ -67,8 +67,13 @@
             strokeColor?: string,
             strokeOpacity?: number,
             strokeWidth?: number,
-            length?: number
+            length?: number,
             padding?: number,
+          },
+          highlight?: {
+            textColor?: string,
+            textOpacity?: number,
+            fontWeight?: string,
           }
         },
         line?: {
@@ -104,8 +109,13 @@
               strokeColor?: string,
               strokeOpacity?: number,
               strokeWidth?: number,
-              length?: number
+              length?: number,
               padding?: number,
+            },
+            highlight?: {
+              textColor?: string,
+              textOpacity?: number,
+              fontWeight?: string,
             }
           },
           line?: {
@@ -178,6 +188,11 @@
         strokeOpacity: 1,
         strokeWidth: 0.5,
         padding: 0,
+      },
+      highlight: {
+        textColor: undefined,
+        textOpacity: undefined,
+        fontWeight: undefined,
       },
     },
     line: {
@@ -342,9 +357,10 @@
       parentToChildrenNodeMap,
       Number(mergedOptions?.bundlingStrength ?? 0.97),
     );
-    const visibleNodeIds = new SvelteSet(edgeNodeIds);
+    // Only expose visible node ids while hovering; otherwise keep empty so styles reset on unhover.
+    const visibleNodeIds = hoveredNodeId ? new Set(edgeNodeIds) : new Set();
 
-    // Draw labels
+    // Draw labels (pass hover + visible nodes so labels/links can apply highlight & filtering)
     drawLabels(
       ctx,
       renderedNodes,

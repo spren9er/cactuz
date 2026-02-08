@@ -1,6 +1,6 @@
 /**
  * Label drawing utilities for CactusTree component (refactored)
- * - Uses nested label styles: mergedStyle.label.{textColor,textOpacity,fontFamily,minFontSize,maxFontSize,padding,link:{strokeColor,strokeOpacity,strokeWidth,padding,length}}
+ * - Uses nested label styles: mergedStyle.label.{textColor,textOpacity,fontFamily,minFontSize,maxFontSize,padding,link:{strokeColor,strokeOpacity,strokeWidth,padding,length},highlight:{textColor,textOpacity,fontWeight}}
  */
 
 import { setCanvasStyles } from './canvasUtils.js';
@@ -13,7 +13,7 @@ import { calculateLabelPositions } from './labelPositions.js';
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
- * @returns {{ textColor?: string, textOpacity?: number, fontFamily?: string, minFontSize?: number, maxFontSize?: number, fontWeight?: string, padding?: number, link?: any }}
+ * @returns {{ textColor?: string, textOpacity?: number, fontFamily?: string, minFontSize?: number, maxFontSize?: number, fontWeight?: string, padding?: number, link?: any, highlight?: any }}
  */
 export function getLabelStyle(
   depth,
@@ -73,6 +73,22 @@ export function getLabelStyle(
     length: linkFromDepth?.length ?? globalLink?.length ?? 5,
   };
 
+  // Highlight block (depth overrides global)
+  const highlightFromDepth = labelFromDepth?.highlight ?? null;
+  const globalHighlight = globalLabel?.highlight ?? {};
+  const highlight = {
+    textColor:
+      highlightFromDepth?.textColor ?? globalHighlight?.textColor ?? undefined,
+    textOpacity:
+      highlightFromDepth?.textOpacity ??
+      globalHighlight?.textOpacity ??
+      undefined,
+    fontWeight:
+      highlightFromDepth?.fontWeight ??
+      globalHighlight?.fontWeight ??
+      undefined,
+  };
+
   return {
     textColor,
     textOpacity,
@@ -82,6 +98,7 @@ export function getLabelStyle(
     fontWeight,
     padding,
     link,
+    highlight,
   };
 }
 
@@ -167,6 +184,8 @@ export function truncateText(ctx, text, maxWidth) {
  * @param {Object} labelStyle
  * @param {number} minFontSize
  * @param {number} maxFontSize
+ * @param {boolean} highlightActive
+ * @param {Object} highlightStyle
  */
 export function drawCenteredLabel(
   ctx,
@@ -177,18 +196,34 @@ export function drawCenteredLabel(
   labelStyle,
   minFontSize = 8,
   maxFontSize = 14,
+  highlightActive = false,
+  highlightStyle = {},
 ) {
   if (!ctx || !text) return;
 
   const fontSize = calculateFontSize(radius, false, minFontSize, maxFontSize);
 
-  // Build font string including optional fontWeight
-  const fontWeightPrefix = /** @type {any} */ (labelStyle)?.fontWeight
-    ? `${/** @type {any} */ (labelStyle).fontWeight} `
-    : '';
+  // Choose style values, preferring highlight (when active) and falling back to normal
+  const h = /** @type {any} */ (highlightStyle);
+  const ls = /** @type {any} */ (labelStyle);
+  const fillColor =
+    highlightActive && h && h.textColor !== undefined
+      ? h.textColor
+      : ls.textColor;
+  const alpha =
+    highlightActive && h && h.textOpacity !== undefined
+      ? h.textOpacity
+      : (ls.textOpacity ?? 1);
+  const fontWeightPrefix =
+    highlightActive && h && h.fontWeight
+      ? `${h.fontWeight} `
+      : ls.fontWeight
+        ? `${ls.fontWeight} `
+        : '';
+
   setCanvasStyles(ctx, {
-    fillStyle: /** @type {any} */ (labelStyle).textColor,
-    globalAlpha: /** @type {any} */ (labelStyle).textOpacity ?? 1,
+    fillStyle: fillColor,
+    globalAlpha: alpha,
     font: `${fontWeightPrefix}${fontSize}px ${/** @type {any} */ (labelStyle).fontFamily}`,
     textAlign: 'center',
     textBaseline: 'middle',
@@ -198,6 +233,9 @@ export function drawCenteredLabel(
   const displayText = truncateText(ctx, text, maxWidth);
 
   ctx.fillText(displayText, x, y);
+
+  // Reset alpha if changed
+  if (ctx.globalAlpha !== 1.0) ctx.globalAlpha = 1.0;
 }
 
 /**
@@ -240,6 +278,8 @@ export function shouldShowLabel(
 }
 
 /**
+ * Draw connectors (leader lines) between node anchor and outside label positions
+ * Uses depth-based/per-node label.link styles when available.
  * Draw connectors (leader lines) between node anchor and outside label positions
  * Uses depth-based/per-node label.link styles when available.
  * @param {CanvasRenderingContext2D} ctx
@@ -330,6 +370,7 @@ export function drawLabelConnectors(
     ctx.moveTo(linkSeg.x1, linkSeg.y1);
     ctx.lineTo(linkSeg.x2, linkSeg.y2);
     ctx.stroke();
+
     // Reset alpha if changed (do per-link to be safe)
     if (ctx.globalAlpha !== 1.0) ctx.globalAlpha = 1.0;
   });
@@ -575,6 +616,18 @@ export function drawLabels(
       ...(depthLink || {}),
       ...(nodeLink || {}),
     };
+
+    // Compute and attach a resolved per-node highlight style object using precedence:
+    // global <- depth <- node-level label.highlight
+    const globalHighlight = mergedStyle?.label?.highlight ?? {};
+    const depthHighlight = perNodeStyle?.highlight ?? {};
+    const nodeHighlight =
+      node.label && node.label.highlight ? node.label.highlight : {};
+    nodeData.highlightStyle = {
+      ...(globalHighlight || {}),
+      ...(depthHighlight || {}),
+      ...(nodeHighlight || {}),
+    };
   });
 
   // build inputs for positioning algorithm (global defaults are still passed)
@@ -627,6 +680,8 @@ export function drawLabels(
       const text = String(node.name || node.id);
       const minFS = labelStyle.minFontSize ?? labelMinFontSize;
       const maxFS = labelStyle.maxFontSize ?? labelMaxFontSize;
+
+      const isHighlighted = hoveredNodeId !== null && hoveredNodeId === node.id;
       drawCenteredLabel(
         ctx,
         text,
@@ -636,6 +691,8 @@ export function drawLabels(
         labelStyle,
         minFS,
         maxFS,
+        isHighlighted,
+        nodeData.highlightStyle,
       );
     } else {
       drawPositionedLabel(

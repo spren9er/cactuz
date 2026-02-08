@@ -67,10 +67,10 @@ See [cactuz.spren9er.de](https://cactuz.spren9er.de) for a live demo and interac
 
 ```typescript
 interface Node {
-  id: string;            // Unique identifier
-  name: string;          // Display name
-  parent: string | null; // Parent node ID
-  weight?: number;       // Optional explicit weight
+  id: string;                // Unique identifier
+  name: string;              // Display name
+  parent: string | null;     // Parent node ID
+  weight?: number;           // Optional explicit weight
 }
 ```
 
@@ -78,8 +78,8 @@ interface Node {
 
 ```typescript
 interface Link {
-  source: string; // Source node ID
-  target: string; // Target node ID
+  source: string;            // Source node ID
+  target: string;            // Target node ID
 }
 ```
 
@@ -87,12 +87,13 @@ interface Link {
 
 ```typescript
 interface Options {
-  overlap?: number;        // Node overlap factor (-inf to 1, default: 0.5)
-  arcSpan?: number;        // Arc span in radians (default: 5π/4)
-  sizeGrowthRate?: number; // Size growth rate (default: 0.75)
-  orientation?: number;    // Root orientation in radians (default: π/2)
-  zoom?: number;           // Layout zoom factor (default: 1.0)
-  numLabels?: number;      // Number of labels (default: 30)
+  overlap?: number;          // Node overlap factor (-inf to 1, default: 0.5)
+  arcSpan?: number;          // Arc span in radians (default: 5π/4)
+  sizeGrowthRate?: number;   // Size growth rate (default: 0.75)
+  orientation?: number;      // Root orientation in radians (default: π/2)
+  zoom?: number;             // Layout zoom factor (default: 1.0)
+  numLabels?: number;        // Number of labels (default: 30)
+  bundlingStrength?: number; // Edge bundling strength (default: 0.97)
 }
 ```
 
@@ -143,6 +144,11 @@ interface Styles {
       padding?: number;
       length?: number;
     };
+    highlight?: {
+      textColor?: string;
+      textOpacity?: number;
+      fontWeight?: string;
+    };
   };
   line?: {
     strokeColor?: string;
@@ -155,19 +161,21 @@ interface Styles {
 
 #### Depth-Specific Styling
 
-Each item in `styles.depths` must include a `depth` integer. Possible values for `depth` are:
+Each item in `styles.depths` must include a `depth` integer. The node with `depth` 0 is the root of the tree.
 
-- 0 = root node.
-- Positive integers (1, 2, 3, ...) refer to deeper levels away from the root:
+Positive integers (1, 2, 3, ...) refer to deeper levels away from the root:
   - 1 = direct children of the root,
   - 2 = grandchildren of the root,
   - and so on.
-  Use positive-depth overrides to style internal levels progressively (for example, a different node color for level 2).
-- Negative integers are supported as a convenience for leaf-oriented overrides:
+
+Use positive-depth overrides to style internal levels progressively (for example, a different node color for level 2).
+
+Negative integers (-1, -2, -3, ...) are supported as a convenience for leaf-oriented overrides:
   - -1 = set of all leaves (nodes with no children),
   - -2 = set of parents of leaves (one level up from leaves),
   - and so on.
-  These negative-depth entries are not absolute numeric depths in the tree; instead the implementation maps them to groups of nodes computed from the layout. This is useful when you want to style leaves or near-leaf levels without knowing their positive depth value.
+
+These negative-depth entries are not absolute numeric depths in the tree; instead the implementation maps them to groups of nodes computed from the layout. This is useful when you want to style leaves or near-leaf levels without knowing their positive depth value.
 
 ```typescript
 interface DepthStyle {
@@ -200,6 +208,11 @@ interface DepthStyle {
       strokeWidth?: number;
       padding?: number;
       length?: number;
+    };
+    highlight?: {
+      textColor?: string;
+      textOpacity?: number;
+      fontWeight?: string;
     };
   };
   line?: {
