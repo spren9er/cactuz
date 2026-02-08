@@ -1,19 +1,59 @@
 /**
- * Label drawing utilities for CactusTree component (refactored)
- * - Uses nested label styles: mergedStyle.label.{textColor,textOpacity,fontFamily,minFontSize,maxFontSize,padding,link:{strokeColor,strokeOpacity,strokeWidth,padding,length},highlight:{textColor,textOpacity,fontWeight}}
+ * Label drawing utilities for CactusTree component
+ *
+ * Rewritten to:
+ * - Use measured font metrics (via ctx.measureText and actualBoundingBox*)
+ * - Replace hardcoded heuristics with style-driven values
+ * - Provide JSDoc types instead of disabling TS checks
+ *
+ * Exports:
+ * - getLabelStyle
+ * - shouldShowLeafLabel
+ * - calculateFontSize
+ * - truncateText
+ * - drawCenteredLabel
+ * - shouldShowLabel
+ * - drawLabelConnectors
+ * - drawPositionedLabel
+ * - computeLabelLayout
+ * - drawLabels
  */
 
 import { setCanvasStyles } from './canvasUtils.js';
 import { calculateLabelPositions } from './labelPositions.js';
 
 /**
+ * @typedef {Object} LabelLinkStyle
+ * @property {string} [strokeColor]
+ * @property {number} [strokeOpacity]
+ * @property {number} [strokeWidth]
+ * @property {number} [padding]
+ * @property {number} [length]
+ */
+
+/**
+ * @typedef {Object} LabelStyle
+ * @property {string} [textColor]
+ * @property {number} [textOpacity]
+ * @property {string} [fontFamily]
+ * @property {number} [minFontSize]
+ * @property {number} [maxFontSize]
+ * @property {string} [fontWeight]
+ * @property {number} [padding]
+ * @property {LabelLinkStyle} [link]
+ * @property {Object} [highlight]
+ * @property {number} [insideFitFactor] // optional override for inside-fit threshold (0..1)
+ */
+
+/**
  * Resolve label style for a node (consider per-depth override first, negative depth mapping, then global)
+ *
  * @param {number} depth
  * @param {string} nodeId
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
- * @returns {{ textColor?: string, textOpacity?: number, fontFamily?: string, minFontSize?: number, maxFontSize?: number, fontWeight?: string, padding?: number, link?: any, highlight?: any }}
+ * @returns {LabelStyle}
  */
 export function getLabelStyle(
   depth,
@@ -22,7 +62,6 @@ export function getLabelStyle(
   depthStyleCache,
   negativeDepthNodes,
 ) {
-  // find depth style (exact depth or negative-depth membership)
   let depthStyle = null;
   if (depthStyleCache && depthStyleCache.has(depth)) {
     depthStyle = depthStyleCache.get(depth);
@@ -32,7 +71,6 @@ export function getLabelStyle(
         depthStyle = ds;
         break;
       } else if (ds.depth < 0) {
-        // negative depth convention: ds.depth === -1 etc -> check mapping
         const nodesAtThisNegativeDepth = negativeDepthNodes.get(ds.depth);
         if (nodesAtThisNegativeDepth && nodesAtThisNegativeDepth.has(nodeId)) {
           depthStyle = ds;
@@ -43,8 +81,6 @@ export function getLabelStyle(
   }
 
   const globalLabel = mergedStyle?.label ?? {};
-
-  // Pull label properties from depth label group if present, else global label group
   const labelFromDepth = depthStyle?.label ?? null;
 
   const textColor =
@@ -58,7 +94,9 @@ export function getLabelStyle(
   const maxFontSize =
     labelFromDepth?.maxFontSize ?? globalLabel?.maxFontSize ?? 14;
   const fontWeight = labelFromDepth?.fontWeight ?? globalLabel?.fontWeight;
-  const padding = labelFromDepth?.padding ?? globalLabel?.padding ?? 1;
+  const padding = labelFromDepth?.padding ?? globalLabel?.padding ?? 4;
+  const insideFitFactor =
+    labelFromDepth?.insideFitFactor ?? globalLabel?.insideFitFactor ?? 0.9;
 
   const linkFromDepth = labelFromDepth?.link ?? null;
   const globalLink = globalLabel?.link ?? {};
@@ -73,7 +111,6 @@ export function getLabelStyle(
     length: linkFromDepth?.length ?? globalLink?.length ?? 5,
   };
 
-  // Highlight block (depth overrides global)
   const highlightFromDepth = labelFromDepth?.highlight ?? null;
   const globalHighlight = globalLabel?.highlight ?? {};
   const highlight = {
@@ -99,15 +136,17 @@ export function getLabelStyle(
     padding,
     link,
     highlight,
+    insideFitFactor,
   };
 }
 
 /**
  * Whether a leaf node's label should be shown (consider edge-bundling hover behavior)
+ *
  * @param {string} nodeId
  * @param {Set<string>} leafNodes
  * @param {string|null} hoveredNodeId
- * @param {any[] | Set<string>} visibleNodeIds
+ * @param {any[]|Set<string>} visibleNodeIds
  * @returns {boolean}
  */
 export function shouldShowLeafLabel(
@@ -118,44 +157,32 @@ export function shouldShowLeafLabel(
 ) {
   const isActualLeaf = leafNodes.has(nodeId);
   if (!isActualLeaf) return false;
-
-  // When hovering over leaf nodes, show visible nodes
   const isHoveringLeafNode =
     hoveredNodeId !== null && leafNodes.has(hoveredNodeId);
-
   if (isHoveringLeafNode) {
     return Array.isArray(visibleNodeIds)
       ? visibleNodeIds.includes(nodeId)
       : visibleNodeIds.has(nodeId);
   }
-
   return true;
 }
 
 /**
- * Choose font size based on radius and whether it's a leaf label.
+ * Choose font size based on radius.
  * Uses min/max font sizes from label config.
+ *
  * @param {number} radius
- * @param {boolean} isLeafLabel
- * @param {number} minFontSize
- * @param {number} maxFontSize
+ * @param {number} [minFontSize=8]
+ * @param {number} [maxFontSize=14]
  * @returns {number}
  */
-export function calculateFontSize(
-  radius,
-  isLeafLabel = false,
-  minFontSize = 8,
-  maxFontSize = 14,
-) {
-  if (isLeafLabel) {
-    return Math.max(minFontSize, Math.min(maxFontSize, radius * 0.3));
-  } else {
-    return Math.min(maxFontSize, Math.max(minFontSize, radius / 3));
-  }
+export function calculateFontSize(radius, minFontSize = 8, maxFontSize = 14) {
+  return Math.min(maxFontSize, Math.max(minFontSize, radius * 0.2));
 }
 
 /**
  * Truncate text to fit within max width using measured text width.
+ *
  * @param {CanvasRenderingContext2D} ctx
  * @param {string} text
  * @param {number} maxWidth
@@ -163,12 +190,8 @@ export function calculateFontSize(
  */
 export function truncateText(ctx, text, maxWidth) {
   if (!ctx) return text;
-
   const textWidth = ctx.measureText(text).width;
-  if (textWidth <= maxWidth || text.length <= 3) {
-    return text;
-  }
-
+  if (textWidth <= maxWidth || text.length <= 3) return text;
   const ratio = maxWidth / textWidth;
   const truncateLength = Math.floor(text.length * ratio);
   return text.substring(0, Math.max(1, truncateLength - 3)) + '…';
@@ -176,16 +199,17 @@ export function truncateText(ctx, text, maxWidth) {
 
 /**
  * Draw centered text inside a circle
+ *
  * @param {CanvasRenderingContext2D} ctx
  * @param {string} text
  * @param {number} x
  * @param {number} y
  * @param {number} radius
- * @param {Object} labelStyle
- * @param {number} minFontSize
- * @param {number} maxFontSize
- * @param {boolean} highlightActive
- * @param {Object} highlightStyle
+ * @param {LabelStyle} labelStyle
+ * @param {number} [minFontSize]
+ * @param {number} [maxFontSize]
+ * @param {boolean} [highlightActive]
+ * @param {Object} [highlightStyle]
  */
 export function drawCenteredLabel(
   ctx,
@@ -201,11 +225,9 @@ export function drawCenteredLabel(
 ) {
   if (!ctx || !text) return;
 
-  const fontSize = calculateFontSize(radius, false, minFontSize, maxFontSize);
-
-  // Choose style values, preferring highlight (when active) and falling back to normal
-  const h = /** @type {any} */ (highlightStyle);
-  const ls = /** @type {any} */ (labelStyle);
+  const fontSize = calculateFontSize(radius, minFontSize, maxFontSize);
+  const h = highlightStyle || {};
+  const ls = labelStyle || {};
   const fillColor =
     highlightActive && h && h.textColor !== undefined
       ? h.textColor
@@ -221,10 +243,11 @@ export function drawCenteredLabel(
         ? `${ls.fontWeight} `
         : '';
 
+  const fontFamily = ls.fontFamily ?? 'monospace';
   setCanvasStyles(ctx, {
     fillStyle: fillColor,
     globalAlpha: alpha,
-    font: `${fontWeightPrefix}${fontSize}px ${/** @type {any} */ (labelStyle).fontFamily}`,
+    font: `${fontWeightPrefix}${fontSize}px ${fontFamily}`,
     textAlign: 'center',
     textBaseline: 'middle',
   });
@@ -234,19 +257,19 @@ export function drawCenteredLabel(
 
   ctx.fillText(displayText, x, y);
 
-  // Reset alpha if changed
   if (ctx.globalAlpha !== 1.0) ctx.globalAlpha = 1.0;
 }
 
 /**
  * Basic eligibility for showing a label for a node (non-leaf)
+ *
  * @param {any} node
  * @param {number} radius
  * @param {string} nodeId
  * @param {Set<string>} leafNodes
  * @param {string|null} hoveredNodeId
  * @param {any[]|Set<string>} visibleNodeIds
- * @param {Object} labelStyle
+ * @param {{textColor?: string}} labelStyleWrapper
  * @returns {boolean}
  */
 export function shouldShowLabel(
@@ -256,38 +279,32 @@ export function shouldShowLabel(
   leafNodes,
   hoveredNodeId,
   visibleNodeIds,
-  labelStyle,
+  labelStyleWrapper,
 ) {
-  // Skip labels for nodes with screen radius less than 1px for performance
   if (radius < 1) return false;
-
   const isActualLeaf = leafNodes.has(nodeId);
-
-  if (isActualLeaf) {
+  if (isActualLeaf)
     return shouldShowLeafLabel(
       nodeId,
       leafNodes,
       hoveredNodeId,
       visibleNodeIds,
     );
-  } else {
-    // If textColor is not set or explicitly none/transparent -> don't show
-    const col = /** @type {any} */ (labelStyle).textColor;
-    return col !== undefined && col !== 'none' && col !== 'transparent';
-  }
+  const col = labelStyleWrapper.textColor;
+  return col !== undefined && col !== 'none' && col !== 'transparent';
 }
 
 /**
- * Draw connectors (leader lines) between node anchor and outside label positions
- * Uses depth-based/per-node label.link styles when available.
- * Draw connectors (leader lines) between node anchor and outside label positions
- * Uses depth-based/per-node label.link styles when available.
+ * Draw connectors (leader lines) between node anchor and outside label positions.
+ * Renders connectors behind existing canvas content using destination-over so node circles remain on top.
+ *
  * @param {CanvasRenderingContext2D} ctx
- * @param {Array<any>} links - calculated link segments with x1,y1,x2,y2,nodeId
+ * @param {Array<{x1:number,y1:number,x2:number,y2:number,nodeId:string}>} links
  * @param {any} mergedStyle
- * @param {Array<any>} nodesWithLabels - the nodes that were passed to the positioner (contains node & depth)
- * @param {Map<number, any>} depthStyleCache - optional cache used by getLabelStyle
- * @param {Map<number, Set<string>>} negativeDepthNodes - optional mapping for negative depth styles
+ * @param {Array<any>} nodesWithLabels
+ * @param {Map<number, any>} depthStyleCache
+ * @param {Map<number, Set<string>>
+} negativeDepthNodes
  */
 export function drawLabelConnectors(
   ctx,
@@ -299,88 +316,83 @@ export function drawLabelConnectors(
 ) {
   if (!ctx || !links || links.length === 0) return;
 
-  // Draw each link using node-level -> depth-level -> global link style precedence.
-  // Draw each link using resolved per-node linkStyle (attached to nodeData) when available,
-  // otherwise fall back to depth/global merge.
-  links.forEach((linkSeg) => {
-    // Resolve per-node / depth / global style chain
-    const nodeId = linkSeg.nodeId;
-    const globalLabel = mergedStyle?.label ?? {};
-    const globalLink = globalLabel.link ?? {};
+  ctx.save();
+  const prevComposite = ctx.globalCompositeOperation;
+  try {
+    ctx.globalCompositeOperation = 'destination-over';
 
-    // Try to find the node data for this link (nodesWithLabels contains the rendered nodeData)
-    const nodeData =
-      nodesWithLabels &&
-      nodesWithLabels.find((n) => n && n.node && n.node.id === nodeId);
+    for (const linkSeg of links) {
+      const nodeId = linkSeg.nodeId;
+      const globalLabel = mergedStyle?.label ?? {};
+      const globalLink = globalLabel.link ?? {};
 
-    // If a resolved linkStyle was attached earlier to nodeData, prefer it.
-    let linkStyle = null;
-    if (nodeData && nodeData.linkStyle) {
-      linkStyle = nodeData.linkStyle;
-    } else {
-      // Depth-derived link style (if any)
-      let depthLink = {};
-      if (nodeData) {
-        const depth = nodeData.depth;
-        const labelStyle = getLabelStyle(
-          depth,
-          nodeId,
-          mergedStyle,
-          depthStyleCache,
-          negativeDepthNodes,
-        );
-        depthLink = (labelStyle && labelStyle.link) || {};
+      const nodeData =
+        nodesWithLabels &&
+        nodesWithLabels.find((n) => n && n.node && n.node.id === nodeId);
+
+      let linkStyle = null;
+      if (nodeData && nodeData.linkStyle) {
+        linkStyle = nodeData.linkStyle;
+      } else {
+        let depthLink = {};
+        if (nodeData) {
+          const depth = nodeData.depth;
+          const labelStyle = getLabelStyle(
+            depth,
+            nodeId,
+            mergedStyle,
+            depthStyleCache,
+            negativeDepthNodes,
+          );
+          depthLink = (labelStyle && labelStyle.link) || {};
+        }
+        const nodeLink =
+          nodeData &&
+          nodeData.node &&
+          nodeData.node.label &&
+          nodeData.node.label.link
+            ? nodeData.node.label.link
+            : {};
+        linkStyle = {
+          ...(globalLink || {}),
+          ...(depthLink || {}),
+          ...(nodeLink || {}),
+        };
       }
 
-      // Node-level link style (explicit node.label.link on the node object)
-      const nodeLink =
-        nodeData &&
-        nodeData.node &&
-        nodeData.node.label &&
-        nodeData.node.label.link
-          ? nodeData.node.label.link
-          : {};
+      const color = linkStyle.strokeColor ?? globalLabel.textColor ?? '#333333';
+      const width =
+        typeof linkStyle.strokeWidth === 'number'
+          ? linkStyle.strokeWidth
+          : (globalLink.strokeWidth ?? 1);
+      const alpha =
+        typeof linkStyle.strokeOpacity === 'number'
+          ? linkStyle.strokeOpacity
+          : (globalLink.strokeOpacity ?? 1);
 
-      // Merge styles with precedence: global <- depth <- node (node overrides depth and global)
-      linkStyle = {
-        ...(globalLink || {}),
-        ...(depthLink || {}),
-        ...(nodeLink || {}),
-      };
+      setCanvasStyles(ctx, {
+        strokeStyle: color,
+        lineWidth: width,
+        globalAlpha: alpha,
+      });
+      ctx.beginPath();
+      ctx.moveTo(linkSeg.x1, linkSeg.y1);
+      ctx.lineTo(linkSeg.x2, linkSeg.y2);
+      ctx.stroke();
+      if (ctx.globalAlpha !== 1.0) ctx.globalAlpha = 1.0;
     }
-
-    const color = linkStyle.strokeColor ?? globalLabel.textColor ?? '#333333';
-    const width =
-      typeof linkStyle.strokeWidth === 'number'
-        ? linkStyle.strokeWidth
-        : (globalLink.strokeWidth ?? 1);
-    const alpha =
-      typeof linkStyle.strokeOpacity === 'number'
-        ? linkStyle.strokeOpacity
-        : (globalLink.strokeOpacity ?? 1);
-
-    // Apply styles and draw this connector
-    setCanvasStyles(ctx, {
-      strokeStyle: color,
-      lineWidth: width,
-      globalAlpha: alpha,
-    });
-
-    ctx.beginPath();
-    ctx.moveTo(linkSeg.x1, linkSeg.y1);
-    ctx.lineTo(linkSeg.x2, linkSeg.y2);
-    ctx.stroke();
-
-    // Reset alpha if changed (do per-link to be safe)
-    if (ctx.globalAlpha !== 1.0) ctx.globalAlpha = 1.0;
-  });
+  } finally {
+    ctx.globalCompositeOperation = prevComposite;
+    ctx.restore();
+  }
 }
 
 /**
  * Draw a single outside positioned label (with optional connector)
+ *
  * @param {CanvasRenderingContext2D} ctx
- * @param {any} labelData - { nodeId, x, y, width, height, isInside }
- * @param {any} nodeData - full nodeData from layout (includes node, x, y, radius, depth)
+ * @param {any} labelData
+ * @param {any} nodeData
  * @param {Set<string>} leafNodes
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
@@ -399,45 +411,43 @@ export function drawPositionedLabel(
   const { text, x, y } = labelData;
   const nodeId = node.id;
 
-  const labelStyle = getLabelStyle(
-    depth,
-    nodeId,
-    mergedStyle,
-    depthStyleCache,
-    negativeDepthNodes,
-  );
-
-  // Use labelMinFontSize for outside labels (consistent with previous behavior)
+  const labelStyle =
+    getLabelStyle(
+      depth,
+      nodeId,
+      mergedStyle,
+      depthStyleCache,
+      negativeDepthNodes,
+    ) || {};
   const fontSize = labelStyle.minFontSize ?? 8;
-  const { isInside } = labelData;
-
-  // Build font string including optional fontWeight
-  const fontWeightPrefix = /** @type {any} */ (labelStyle)?.fontWeight
-    ? `${/** @type {any} */ (labelStyle).fontWeight} `
+  const fontWeightPrefix = labelStyle.fontWeight
+    ? `${labelStyle.fontWeight} `
     : '';
+  const fontFamily = labelStyle.fontFamily ?? 'monospace';
 
   setCanvasStyles(ctx, {
-    fillStyle: /** @type {any} */ (labelStyle).textColor,
-    globalAlpha: /** @type {any} */ (labelStyle).textOpacity ?? 1,
-    font: `${fontWeightPrefix}${fontSize}px ${/** @type {any} */ (labelStyle).fontFamily}`,
-    textAlign: isInside ? 'center' : 'left',
-    textBaseline: isInside ? 'middle' : 'top',
+    fillStyle: labelStyle.textColor,
+    globalAlpha: labelStyle.textOpacity ?? 1,
+    font: `${fontWeightPrefix}${fontSize}px ${fontFamily}`,
+    textAlign: labelData.isInside ? 'center' : 'left',
+    textBaseline: labelData.isInside ? 'middle' : 'top',
   });
 
-  if (isInside) {
-    // centered inside
+  if (labelData.isInside) {
     ctx.fillText(text, x + labelData.width / 2, y + labelData.height / 2);
   } else {
-    const labelPadding = /** @type {any} */ (labelStyle).padding ?? 2;
+    const labelPadding =
+      typeof labelStyle.padding === 'number' ? labelStyle.padding : 4;
     ctx.fillText(text, x + labelPadding, y + labelPadding);
   }
 
-  // Reset alpha if changed
   if (ctx.globalAlpha !== 1.0) ctx.globalAlpha = 1.0;
 }
 
 /**
- * Draw labels for visible/rendered nodes
+ * Compute label layout (labels + connector segments + nodesWithLabels) but do not draw anything.
+ * Accepts a drawing `ctx` so measurements and canvas size are accurate.
+ *
  * @param {CanvasRenderingContext2D} ctx
  * @param {any[]} renderedNodes
  * @param {Set<string>} leafNodes
@@ -446,11 +456,12 @@ export function drawPositionedLabel(
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
- * @param {number} numLabels
- * @param {number} panX
- * @param {number} panY
+ * @param {number} [numLabels=30]
+ * @param {number} [panX=0]
+ * @param {number} [panY=0]
+ * @returns {{labels:any[],links:any[],nodesWithLabels:any[],labelMinFontSize:number,labelMaxFontSize:number}|null}
  */
-export function drawLabels(
+export function computeLabelLayout(
   ctx,
   renderedNodes,
   leafNodes,
@@ -463,17 +474,14 @@ export function drawLabels(
   panX = 0,
   panY = 0,
 ) {
-  if (!ctx || !renderedNodes || renderedNodes.length === 0) return;
+  if (!ctx || !renderedNodes || renderedNodes.length === 0) return null;
 
-  // helper to check viewport intersection
   const devicePixelRatio = window.devicePixelRatio || 1;
   const width = ctx.canvas.width / devicePixelRatio;
   const height = ctx.canvas.height / devicePixelRatio;
 
-  // helper to check viewport intersection
-  /** @param {any} nodeData */
   const isInViewport = (nodeData) => {
-    const { x, y, radius } = /** @type {any} */ (nodeData);
+    const { x, y, radius } = nodeData;
     const screenX = x + panX;
     const screenY = y + panY;
     return (
@@ -487,7 +495,6 @@ export function drawLabels(
   const nodesInViewport = renderedNodes.filter(isInViewport);
 
   // filter by basic label eligibility
-  /** @param {any} nodeData */
   const eligibleNodes = nodesInViewport.filter((nodeData) => {
     const { radius, node, depth } = nodeData;
     const nodeId = node.id;
@@ -505,70 +512,113 @@ export function drawLabels(
       leafNodes,
       hoveredNodeId,
       visibleNodeIds,
-      // Normalize to shape used by shouldShowLabel
-      { textColor: /** @type {any} */ (labelStyle).textColor },
+      { textColor: labelStyle.textColor },
     );
   });
 
   // Determine nodes to show labels for (hover vs normal)
   let nodesWithLabels;
-
   const isHoveringLeafNode =
     hoveredNodeId !== null && leafNodes.has(hoveredNodeId);
 
   if (isHoveringLeafNode) {
-    // show labels for connected and inside-fitting labels
-    /** @param {any} nodeData */
     nodesWithLabels = eligibleNodes.filter((nodeData) => {
       const nodeId = nodeData.node.id;
       const isActualLeaf = leafNodes.has(nodeId);
-      const { radius, node } = nodeData;
+      const { radius, node, depth } = nodeData;
 
-      // measure if inside label fits
-      const text = String(node.name || node.id);
-      const textWidth = ctx.measureText(text).width + 8;
-      const textHeight = 12 + 4;
-      const diagonal = Math.sqrt(
-        textWidth * textWidth + textHeight * textHeight,
+      // Prepare label style and font for accurate measurement
+      const labelStyle = getLabelStyle(
+        depth,
+        nodeId,
+        mergedStyle,
+        depthStyleCache,
+        negativeDepthNodes,
       );
-      const fitsInside = diagonal <= 2 * radius * 0.9;
+      const fontFamily = labelStyle.fontFamily ?? 'monospace';
+      const fontSize = labelStyle.minFontSize ?? 12;
+      const fontWeightPrefix = labelStyle.fontWeight
+        ? `${labelStyle.fontWeight} `
+        : '';
+
+      // ensure ctx.font matches what we'll draw (for accurate measurement)
+      ctx.save();
+      ctx.font = `${fontWeightPrefix}${fontSize}px ${fontFamily}`;
+
+      const text = String(node.name || node.id);
+      const m = ctx.measureText(text);
+      // width: use measured width; fallback to characters heuristic
+      const measuredWidth =
+        m && m.width
+          ? m.width
+          : text.length * (labelStyle.estimatedCharWidth ?? 8);
+      // height: prefer bounding box metrics if available
+      let measuredHeight;
+      if (
+        typeof m.actualBoundingBoxAscent === 'number' &&
+        typeof m.actualBoundingBoxDescent === 'number'
+      ) {
+        measuredHeight = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+      } else {
+        // fallback: assume fontSize (approx)
+        measuredHeight = fontSize;
+      }
+      // restore ctx state
+      ctx.restore();
+
+      // use padding from style (fallbacks provided)
+      const paddingX =
+        typeof labelStyle.padding === 'number' ? labelStyle.padding : 4;
+      const paddingY = paddingX;
+
+      const textWidth = measuredWidth + paddingX * 2;
+      const textHeight = measuredHeight + paddingY * 2;
+      const diagonal = Math.hypot(textWidth, textHeight);
+
+      const insideFitFactor =
+        typeof labelStyle.insideFitFactor === 'number'
+          ? labelStyle.insideFitFactor
+          : (mergedStyle?.label?.insideFitFactor ?? 0.9);
+      const fitsInside = diagonal <= 2 * radius * insideFitFactor;
 
       if (fitsInside) return true;
-
-      if (isActualLeaf) {
+      if (isActualLeaf)
         return Array.isArray(visibleNodeIds)
           ? visibleNodeIds.includes(nodeId)
           : visibleNodeIds.has(nodeId);
-      } else {
-        return Array.isArray(visibleNodeIds)
-          ? visibleNodeIds.includes(nodeId)
-          : visibleNodeIds.has(nodeId);
-      }
+      return Array.isArray(visibleNodeIds)
+        ? visibleNodeIds.includes(nodeId)
+        : visibleNodeIds.has(nodeId);
     });
   } else if ((numLabels ?? 30) === 0) {
     nodesWithLabels = [];
   } else {
-    const sortedByRadius = eligibleNodes.sort((a, b) => b.radius - a.radius);
+    const sortedByRadius = eligibleNodes
+      .slice()
+      .sort((a, b) => b.radius - a.radius);
     nodesWithLabels = sortedByRadius.slice(0, numLabels ?? 30);
   }
 
-  if (!nodesWithLabels || nodesWithLabels.length === 0) return;
+  if (!nodesWithLabels || nodesWithLabels.length === 0) return null;
 
-  // prepare calculateLabelPositions options from new nested label style
   const globalLabel = mergedStyle?.label ?? {};
   const labelFontFamily = globalLabel.fontFamily ?? 'monospace';
   const labelMinFontSize = globalLabel.minFontSize ?? 8;
   const labelMaxFontSize = globalLabel.maxFontSize ?? 14;
-  const globalLabelPadding = globalLabel.padding ?? 1;
-  const globalLinkPadding = (globalLabel.link && globalLabel.link.padding) ?? 0;
-  const globalLinkLength = (globalLabel.link && globalLabel.link.length) ?? 5;
+  const globalLabelPadding = globalLabel.padding ?? 4;
+  const globalLinkPadding =
+    globalLabel.link && typeof globalLabel.link.padding === 'number'
+      ? globalLabel.link.padding
+      : 0;
+  const globalLinkLength =
+    globalLabel.link && typeof globalLabel.link.length === 'number'
+      ? globalLabel.link.length
+      : 5;
 
-  // Attach depth-based / per-node label padding and link settings onto node objects
-  // so the positioning code can consume per-node values (depth-based overrides)
+  // Attach per-node resolved properties for the positioner
   nodesWithLabels.forEach((nodeData) => {
     const node = nodeData.node;
     const depth = nodeData.depth;
-    // Resolve depth-based label style for this node
     const perNodeStyle = getLabelStyle(
       depth,
       node.id,
@@ -577,7 +627,6 @@ export function drawLabels(
       negativeDepthNodes,
     );
 
-    // Ensure node.label exists and populate padding
     node.label = node.label ?? {};
     node.label.padding =
       perNodeStyle?.padding ??
@@ -586,7 +635,6 @@ export function drawLabels(
         : undefined) ??
       globalLabelPadding;
 
-    // Ensure node.label.link exists and populate link paddings/lengths
     node.label.link = node.label.link ?? {};
     node.label.link.padding =
       perNodeStyle?.link?.padding ??
@@ -601,13 +649,10 @@ export function drawLabels(
         : undefined) ??
       globalLinkLength;
 
-    // Also attach flat properties used by the label positioner for convenience
     nodeData.labelPadding = node.label.padding;
     nodeData.linkPadding = node.label.link.padding;
     nodeData.linkLength = node.label.link.length;
 
-    // Compute and attach a resolved per-node link style object using precedence:
-    // global <- depth <- node (node-level overrides depth and global).
     const globalLink = mergedStyle?.label?.link ?? {};
     const depthLink = perNodeStyle?.link ?? {};
     const nodeLink = node.label && node.label.link ? node.label.link : {};
@@ -617,8 +662,6 @@ export function drawLabels(
       ...(nodeLink || {}),
     };
 
-    // Compute and attach a resolved per-node highlight style object using precedence:
-    // global <- depth <- node-level label.highlight
     const globalHighlight = mergedStyle?.label?.highlight ?? {};
     const depthHighlight = perNodeStyle?.highlight ?? {};
     const nodeHighlight =
@@ -630,7 +673,6 @@ export function drawLabels(
     };
   });
 
-  // build inputs for positioning algorithm (global defaults are still passed)
   const { labels, links } = calculateLabelPositions(
     nodesWithLabels,
     width,
@@ -645,9 +687,64 @@ export function drawLabels(
     },
   );
 
-  // draw connectors first (behind labels)
+  return {
+    labels,
+    links,
+    nodesWithLabels,
+    labelMinFontSize,
+    labelMaxFontSize,
+  };
+}
+
+/**
+ * Draw labels for visible/rendered nodes
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {any[]} renderedNodes
+ * @param {Set<string>} leafNodes
+ * @param {string|null} hoveredNodeId
+ * @param {any[]|Set<string>} visibleNodeIds
+ * @param {any} mergedStyle
+ * @param {Map<number, any>} depthStyleCache
+ * @param {Map<number, Set<string>>} negativeDepthNodes
+ * @param {number} [numLabels=30]
+ * @param {number} [panX=0]
+ * @param {number} [panY=0]
+ */
+export function drawLabels(
+  ctx,
+  renderedNodes,
+  leafNodes,
+  hoveredNodeId,
+  visibleNodeIds,
+  mergedStyle,
+  depthStyleCache,
+  negativeDepthNodes,
+  numLabels = 30,
+  panX = 0,
+  panY = 0,
+) {
+  if (!ctx || !renderedNodes || renderedNodes.length === 0) return;
+
+  const layout = computeLabelLayout(
+    ctx,
+    renderedNodes,
+    leafNodes,
+    hoveredNodeId,
+    visibleNodeIds,
+    mergedStyle,
+    depthStyleCache,
+    negativeDepthNodes,
+    numLabels,
+    panX,
+    panY,
+  );
+  if (!layout) return;
+
+  const { labels, links, nodesWithLabels, labelMinFontSize, labelMaxFontSize } =
+    layout;
+
   if (links && links.length > 0) {
-    // Pass the nodesWithLabels and depth maps so connectors use depth-based/per-node link styles
     drawLabelConnectors(
       ctx,
       links,
@@ -658,15 +755,12 @@ export function drawLabels(
     );
   }
 
-  // draw labels
-  /** @param {any} labelData */
-  labels.forEach((labelData) => {
-    const nodeData = /** @type {any} */ (
-      nodesWithLabels.find(
-        (/** @type {any} */ n) => n.node.id === labelData.nodeId,
-      )
+  // draw labels on top
+  for (const labelData of labels) {
+    const nodeData = nodesWithLabels.find(
+      (n) => n.node.id === labelData.nodeId,
     );
-    if (!nodeData) return;
+    if (!nodeData) continue;
 
     if (labelData.isInside) {
       const { node, depth, radius } = nodeData;
@@ -680,7 +774,6 @@ export function drawLabels(
       const text = String(node.name || node.id);
       const minFS = labelStyle.minFontSize ?? labelMinFontSize;
       const maxFS = labelStyle.maxFontSize ?? labelMaxFontSize;
-
       const isHighlighted = hoveredNodeId !== null && hoveredNodeId === node.id;
       drawCenteredLabel(
         ctx,
@@ -705,5 +798,5 @@ export function drawLabels(
         negativeDepthNodes,
       );
     }
-  });
+  }
 }
