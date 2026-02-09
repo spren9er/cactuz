@@ -467,6 +467,81 @@ export function drawConnectingLines(
 }
 
 /**
+ * Compute visible node IDs for links without performing any drawing.
+ *
+ * This helper lets callers determine which nodes are connected via visible edges
+ * (respecting the existing edge-filtering behavior such as leaf-only hover filtering)
+ * without actually rendering the edges. This is useful when the caller needs the
+ * set of connected nodes to decide highlight behavior for nodes/labels, while the
+ * actual edge drawing can be performed later.
+ *
+ * NOTE: this function now uses a Set internally to avoid duplicates and will
+ * ensure that, when hovering, if any edge connects to the hovered node we also
+ * include the hovered node id itself in the returned set. This helps label
+ * layout code include the hovered node's label when appropriate.
+ *
+ * @param {any[]} links - Array of link objects
+ * @param {Map<string, any>} nodeIdToRenderedNodeMap - Map from node ID to rendered node data
+ * @param {string|null} hoveredNodeId - Currently hovered node ID
+ * @param {Map<string, any[]>} parentToChildrenNodeMap - Map from parent to children nodes
+ * @returns {string[]} Array of visible node IDs from links
+ */
+export function computeVisibleEdgeNodeIds(
+  links,
+  nodeIdToRenderedNodeMap,
+  hoveredNodeId,
+  parentToChildrenNodeMap,
+) {
+  if (!links?.length) return [];
+
+  // Use a set to deduplicate node ids
+  const visibleSet = new Set();
+
+  links.forEach((link) => {
+    const sourceNode = nodeIdToRenderedNodeMap.get(link.source);
+    const targetNode = nodeIdToRenderedNodeMap.get(link.target);
+
+    if (sourceNode && targetNode) {
+      // Reuse existing filtering logic to determine visibility. `shouldFilterEdge`
+      // returns true when the edge should be hidden (for example when hovering a leaf
+      // node and the edge isn't attached to that leaf). We include the edge when it's
+      // not filtered.
+      if (!shouldFilterEdge(link, hoveredNodeId, parentToChildrenNodeMap)) {
+        visibleSet.add(link.source);
+        visibleSet.add(link.target);
+      }
+    }
+  });
+
+  // If hovering and at least one visible edge involves the hovered node, ensure
+  // the hovered node id is included so label layout can pick up the hovered node's label.
+  if (hoveredNodeId) {
+    // Check whether hovered node appears in any visible edge we discovered
+    if (visibleSet.has(hoveredNodeId)) {
+      visibleSet.add(hoveredNodeId);
+    } else {
+      // Also check for edges that would be visible if the hovered node were attached.
+      // This covers cases where logic elsewhere filtered edges prematurely.
+      for (const link of links || []) {
+        if (
+          (link.source === hoveredNodeId || link.target === hoveredNodeId) &&
+          nodeIdToRenderedNodeMap.get(link.source) &&
+          nodeIdToRenderedNodeMap.get(link.target) &&
+          !shouldFilterEdge(link, hoveredNodeId, parentToChildrenNodeMap)
+        ) {
+          visibleSet.add(link.source);
+          visibleSet.add(link.target);
+          visibleSet.add(hoveredNodeId);
+          break;
+        }
+      }
+    }
+  }
+
+  return Array.from(visibleSet);
+}
+
+/**
  * Draws all edges in batch for better performance
  * @param {CanvasRenderingContext2D} ctx - Canvas context
  * @param {any[]} links - Array of link objects
@@ -490,12 +565,15 @@ export function drawEdges(
   if (!ctx || !links?.length) return [];
 
   const visibleNodeIds = /** @type {string[]} */ ([]);
+  // Keep a set to avoid duplicate pushes
+  const visibleSet = new Set();
 
   links.forEach((link) => {
     const sourceNode = nodeIdToRenderedNodeMap.get(link.source);
     const targetNode = nodeIdToRenderedNodeMap.get(link.target);
 
     if (sourceNode && targetNode) {
+      // Try normal drawing path first
       const wasDrawn = drawEdge(
         ctx,
         link,
@@ -510,10 +588,55 @@ export function drawEdges(
       );
 
       if (wasDrawn) {
-        visibleNodeIds.push(link.source, link.target);
+        visibleSet.add(link.source);
+        visibleSet.add(link.target);
+      } else {
+        // If the edge wasn't drawn but it connects to the hovered node,
+        // draw a fallback visible line using highlight or base edge styles.
+        if (
+          hoveredNodeId !== null &&
+          (link.source === hoveredNodeId || link.target === hoveredNodeId)
+        ) {
+          // Resolve highlight vs base edge styles (prefer edge.highlight when present)
+          const edgeHighlight = mergedStyle?.edge?.highlight ?? {};
+          const baseEdge = mergedStyle?.edge ?? {};
+          const fallbackColor =
+            edgeHighlight.strokeColor ?? baseEdge.strokeColor ?? '#ff6b6b';
+          const fallbackOpacity =
+            edgeHighlight.strokeOpacity ?? baseEdge.strokeOpacity ?? 1;
+          const fallbackWidth =
+            edgeHighlight.strokeWidth ?? baseEdge.strokeWidth ?? 1;
+
+          const prevStroke = ctx.strokeStyle;
+          const prevAlpha = ctx.globalAlpha;
+          const prevWidth = ctx.lineWidth;
+
+          setCanvasStyles(ctx, {
+            strokeStyle: fallbackColor,
+            globalAlpha: fallbackOpacity,
+            lineWidth: fallbackWidth,
+          });
+
+          ctx.beginPath();
+          ctx.moveTo(sourceNode.x, sourceNode.y);
+          ctx.lineTo(targetNode.x, targetNode.y);
+          ctx.stroke();
+
+          // restore previous context state
+          if (ctx.globalAlpha !== prevAlpha) ctx.globalAlpha = prevAlpha;
+          if (ctx.lineWidth !== prevWidth) ctx.lineWidth = prevWidth;
+          if (ctx.strokeStyle !== prevStroke) ctx.strokeStyle = prevStroke;
+
+          // Mark nodes as visible so labels/highlight logic can pick them up
+          visibleSet.add(link.source);
+          visibleSet.add(link.target);
+        }
       }
     }
   });
+
+  // convert set back into array (keeps unique ids)
+  for (const id of visibleSet) visibleNodeIds.push(id);
 
   return visibleNodeIds;
 }

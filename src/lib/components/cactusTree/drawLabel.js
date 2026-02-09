@@ -166,7 +166,9 @@ export function shouldShowLeafLabel(
   const isHoveringLeafNode =
     hoveredNodeId !== null && leafNodes.has(hoveredNodeId);
   if (isHoveringLeafNode) {
-    // When hovering a leaf, only show leaf labels that are part of visibleNodeIds
+    // Always show the label for the currently hovered leaf node itself.
+    if (nodeId === hoveredNodeId) return true;
+    // When hovering a leaf, for other leaves only show labels that are part of visibleNodeIds
     return Array.isArray(visibleNodeIds)
       ? visibleNodeIds.includes(nodeId)
       : visibleNodeIds.has(nodeId);
@@ -457,14 +459,14 @@ export function drawPositionedLabel(
  *
  * Behavior changes applied:
  * - If numLabels === 0 -> no labels (return null)
- * - When hovered (hoveredNodeId !== null): only consider nodes that are in visibleNodeIds
+ * - When hovered (hoveredNodeId !== null): only consider nodes that are in highlightedNodeIds
  *   and limit total shown to numLabels largest nodes. Do NOT special-case inside-fitting labels.
  *
  * @param {CanvasRenderingContext2D} ctx
  * @param {any[]} renderedNodes
  * @param {Set<string>} leafNodes
  * @param {string|null} hoveredNodeId
- * @param {any[]|Set<string>} visibleNodeIds
+ * @param {any[]|Set<string>} highlightedNodeIds - Set/array of node IDs that are considered highlighted due to link association (direct neighbors of hovered node)
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
@@ -478,7 +480,7 @@ export function computeLabelLayout(
   renderedNodes,
   leafNodes,
   hoveredNodeId,
-  visibleNodeIds,
+  highlightedNodeIds,
   mergedStyle,
   depthStyleCache,
   negativeDepthNodes,
@@ -527,7 +529,7 @@ export function computeLabelLayout(
       nodeId,
       leafNodes,
       hoveredNodeId,
-      visibleNodeIds,
+      highlightedNodeIds,
       { textColor: labelStyle.textColor },
     );
   });
@@ -539,17 +541,29 @@ export function computeLabelLayout(
   // Determine nodes to show labels for (hover vs normal)
   let nodesWithLabels;
 
-  // When hovering a leaf node, restrict to nodes that are associated via visibleNodeIds.
-  // Limit total to labelLimit largest by radius. Do NOT automatically include
-  // nodes because they fit inside when hovering.
+  // When hovering a leaf node, restrict to nodes that are associated via highlightedNodeIds.
+  // Limit total to labelLimit largest by radius. Ensure the currently hovered node's label
+  // is always included if it is eligible and in the viewport.
   if (hoveredNodeId !== null && leafNodes.has(hoveredNodeId)) {
-    const visibleSet = Array.isArray(visibleNodeIds)
-      ? new Set(visibleNodeIds)
-      : visibleNodeIds || new Set();
+    const visibleSet = Array.isArray(highlightedNodeIds)
+      ? new Set(highlightedNodeIds)
+      : highlightedNodeIds || new Set();
 
-    const connectedCandidates = eligibleNodes.filter((nd) =>
+    // Candidates directly connected to hovered node.
+    let connectedCandidates = eligibleNodes.filter((nd) =>
       visibleSet.has(nd.node.id),
     );
+
+    // Ensure the hovered node itself is present if eligible (may not be in visibleSet)
+    const hoveredCandidate = eligibleNodes.find(
+      (nd) => nd.node.id === hoveredNodeId,
+    );
+    if (
+      hoveredCandidate &&
+      !connectedCandidates.some((nd) => nd.node.id === hoveredNodeId)
+    ) {
+      connectedCandidates.push(hoveredCandidate);
+    }
 
     if (!connectedCandidates || connectedCandidates.length === 0) return null;
 
@@ -669,7 +683,7 @@ export function computeLabelLayout(
  * @param {any[]} renderedNodes
  * @param {Set<string>} leafNodes
  * @param {string|null} hoveredNodeId
- * @param {any[]|Set<string>} visibleNodeIds
+ * @param {any[]|Set<string>} highlightedNodeIds - Set/array of node IDs that are considered highlighted due to link association (direct neighbors of hovered node)
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
@@ -683,7 +697,7 @@ export function drawLabels(
   renderedNodes,
   leafNodes,
   hoveredNodeId,
-  visibleNodeIds,
+  highlightedNodeIds,
   mergedStyle,
   depthStyleCache,
   negativeDepthNodes,
@@ -698,7 +712,7 @@ export function drawLabels(
     renderedNodes,
     leafNodes,
     hoveredNodeId,
-    visibleNodeIds,
+    highlightedNodeIds,
     mergedStyle,
     depthStyleCache,
     negativeDepthNodes,
@@ -741,7 +755,13 @@ export function drawLabels(
       const text = String(node.name || node.id);
       const minFS = labelStyle.minFontSize ?? labelMinFontSize;
       const maxFS = labelStyle.maxFontSize ?? labelMaxFontSize;
-      const isHighlighted = hoveredNodeId !== null && hoveredNodeId === node.id;
+      // Highlight only when directly hovered or explicitly present in highlightedNodeIds
+      const isHighlighted =
+        (hoveredNodeId !== null && hoveredNodeId === node.id) ||
+        (highlightedNodeIds &&
+          (Array.isArray(highlightedNodeIds)
+            ? highlightedNodeIds.includes(node.id)
+            : highlightedNodeIds.has(node.id)));
       drawCenteredLabel(
         ctx,
         text,

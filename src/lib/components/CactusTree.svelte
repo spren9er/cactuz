@@ -7,6 +7,7 @@
   import {
     drawEdges,
     drawConnectingLines,
+    computeVisibleEdgeNodeIds,
   } from '$lib/components/cactusTree/drawEdge.js';
   import { drawLabels } from '$lib/components/cactusTree/drawLabel.js';
   import { createMouseHandlers } from '$lib/components/cactusTree/mouseHandlers.js';
@@ -336,7 +337,46 @@
       negativeDepthNodes,
     );
 
-    // Draw nodes
+    // Compute which nodes are part of visible edges (without drawing them).
+    // We use this to identify direct neighbors of the hovered node for highlighting.
+    const edgeNodeIds = computeVisibleEdgeNodeIds(
+      links,
+      nodeIdToRenderedNodeMap,
+      hoveredNodeId,
+      parentToChildrenNodeMap,
+    );
+
+    // Build a set and compute highlighted node ids (include hovered node itself + direct neighbors
+    // only if that neighbor is part of the visible edges). This prevents broad highlighting on
+    // non-leaf hovers while ensuring the hovered node's own label can be shown.
+    // Use SvelteSet for persistent reactive collections elsewhere in the component,
+    // but here we need an ephemeral set that supports standard Set semantics for the
+    // drawing/label logic, so we populate a SvelteSet via .add instead of using
+    // the constructor with arrays.
+    const edgeNodeIdSet = new SvelteSet();
+    if (edgeNodeIds && edgeNodeIds.length) {
+      for (const id of edgeNodeIds) {
+        edgeNodeIdSet.add(id);
+      }
+    }
+    const highlightedNodeIds = (() => {
+      const neighbors = new SvelteSet();
+      if (!hoveredNodeId) return neighbors;
+      neighbors.add(hoveredNodeId); // include hovered node itself
+      for (const link of links || []) {
+        if (link.source === hoveredNodeId && edgeNodeIdSet.has(link.target)) {
+          neighbors.add(link.target);
+        } else if (
+          link.target === hoveredNodeId &&
+          edgeNodeIdSet.has(link.source)
+        ) {
+          neighbors.add(link.source);
+        }
+      }
+      return neighbors;
+    })();
+
+    // Draw nodes first (apply highlight styles to hovered node + direct neighbors)
     drawNodes(
       ctx,
       renderedNodes,
@@ -344,10 +384,11 @@
       mergedStyle,
       depthStyleCache,
       negativeDepthNodes,
+      highlightedNodeIds,
     );
 
-    // Draw edges
-    const edgeNodeIds = drawEdges(
+    // Now draw edges (actual rendering) so they appear on top of nodes
+    drawEdges(
       ctx,
       links,
       nodeIdToRenderedNodeMap,
@@ -357,16 +398,14 @@
       parentToChildrenNodeMap,
       Number(mergedOptions?.bundlingStrength ?? 0.97),
     );
-    // Only expose visible node ids while hovering; otherwise keep empty so styles reset on unhover.
-    const visibleNodeIds = hoveredNodeId ? new Set(edgeNodeIds) : new Set();
 
-    // Draw labels (pass hover + visible nodes so labels/links can apply highlight & filtering)
+    // Draw labels (pass hover + highlighted nodes so labels/links can apply highlight & filtering)
     drawLabels(
       ctx,
       renderedNodes,
       leafNodes,
       hoveredNodeId,
-      visibleNodeIds,
+      highlightedNodeIds,
       mergedStyle,
       depthStyleCache,
       negativeDepthNodes,

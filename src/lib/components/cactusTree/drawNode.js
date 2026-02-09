@@ -118,6 +118,7 @@ export function getDepthStyle(
  * @param {any} mergedStyle - Merged styles object (global groups and depths array)
  * @param {Map<any, any>} depthStyleCache
  * @param {Map<any, any>} negativeDepthNodes
+ * @param {Set<string>|null} highlightedNodeIds - Set of node ids considered highlighted due to link association (may be null)
  * @returns {any} Style properties for the node: { fill, fillOpacity, stroke, strokeWidth, strokeOpacity, isHovered }
  */
 export function calculateNodeStyle(
@@ -127,6 +128,7 @@ export function calculateNodeStyle(
   mergedStyle,
   depthStyleCache,
   negativeDepthNodes,
+  highlightedNodeIds,
 ) {
   const depthStyle = getDepthStyle(
     depth,
@@ -194,11 +196,18 @@ export function calculateNodeStyle(
         ? globalHighlight.enabled
         : true;
 
-  // Check if this node is hovered and highlighting is enabled
-  const isHovered = hoveredNodeId === node.id && !!highlightEnabled;
+  // Check if this node is hovered or is associated with the hovered node (via highlightedNodeIds)
+  // Highlighting only applies if the highlight feature is enabled.
+  const isDirectlyHovered = hoveredNodeId === node.id;
+  const isLinkedHovered =
+    highlightedNodeIds && typeof highlightedNodeIds.has === 'function'
+      ? highlightedNodeIds.has(node.id)
+      : false;
+  const isHovered =
+    (isDirectlyHovered || isLinkedHovered) && !!highlightEnabled;
 
-  // If hovered, use highlight styles if provided; otherwise fall back to node styles
-  // Highlight properties are now nested under `node.highlight`
+  // If hovered (directly or via links), use highlight styles if provided; otherwise fall back to node styles
+  // Highlight properties are nested under `node.highlight`
   const highlightFill = readNestedStyleProp(
     depthStyle,
     mergedStyle,
@@ -281,6 +290,7 @@ export function calculateNodeStyle(
  * @param {any} mergedStyle
  * @param {Map<any, any>} depthStyleCache
  * @param {Map<any, any>} negativeDepthNodes
+ * @param {Set<string>|null} highlightedNodeIds - Set of node ids considered highlighted due to link association (may be null)
  * @returns {boolean} Whether the node was rendered
  */
 export function drawNode(
@@ -294,6 +304,7 @@ export function drawNode(
   mergedStyle,
   depthStyleCache,
   negativeDepthNodes,
+  highlightedNodeIds,
 ) {
   if (!ctx) return false;
 
@@ -308,6 +319,7 @@ export function drawNode(
       mergedStyle,
       depthStyleCache,
       negativeDepthNodes,
+      highlightedNodeIds,
     )
   );
 
@@ -350,6 +362,7 @@ export function drawNode(
  * @param {any} mergedStyle
  * @param {Map<any, any>} depthStyleCache
  * @param {Map<any, any>} negativeDepthNodes
+ * @param {Set<string>|null} highlightedNodeIds - Set of node ids considered highlighted due to link association (may be null)
  * @returns {{ rendered: number, filtered: number }}
  */
 export function drawNodes(
@@ -359,6 +372,7 @@ export function drawNodes(
   mergedStyle,
   depthStyleCache,
   negativeDepthNodes,
+  highlightedNodeIds,
 ) {
   if (!ctx || !renderedNodes || !renderedNodes.length) {
     return { rendered: 0, filtered: 0 };
@@ -379,6 +393,7 @@ export function drawNodes(
       mergedStyle,
       depthStyleCache,
       negativeDepthNodes,
+      highlightedNodeIds,
     );
 
     if (wasRendered) renderedCount++;
