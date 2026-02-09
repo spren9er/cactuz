@@ -136,7 +136,7 @@
           fontWeight: 'bold',
         },
         outer: {
-          textColor: '#ea575a',
+          textColor: '#333333',
           textOpacity: 1,
           fontWeight: 'normal',
         },
@@ -146,10 +146,15 @@
       {
         depth: -1,
         node: { fillColor: '#333333', strokeColor: '#333333' },
-        label: { inner: { textColor: '#efefef' } },
+        label: {
+          inner: { textColor: '#efefef' },
+        },
         highlight: {
           node: { fillColor: '#ffbbb7', strokeColor: '#ea575a' },
-          label: { inner: { strokeColor: '#ea575a' } },
+          label: {
+            inner: { strokeColor: '#ea575a' },
+            outer: { textColor: '#ea575a' },
+          },
         },
       },
     ],
@@ -192,7 +197,13 @@
     depths: styles.depths ?? defaultStyle.depths,
   });
 
-  // Canvas and context
+  $effect(() => {
+    if (!canvas) return;
+
+    void styles;
+
+    scheduleRender();
+  });
   /** @type {HTMLCanvasElement} */
   let canvas;
   /** @type {CanvasRenderingContext2D|null} */

@@ -1,0 +1,88 @@
+{
+  "node": {
+    "fillColor": "transparent",
+    "strokeColor": "transparent",
+    "strokeWidth": 0
+  },
+  "edge": {
+    "strokeColor": "transparent",
+    "strokeWidth": 0
+  },
+  "label": {
+    "inner": {
+      "textColor": "transparent"
+    },
+    "outer": {
+      "textColor": "transparent",
+      "padding": 0,
+      "link": {
+        "strokeColor": "transparent",
+        "length": 0,
+        "padding": 0
+      }
+    }
+  },
+  "line": {
+    "strokeColor": "transparent",
+    "strokeWidth": 0
+  },
+  "highlight": {
+    "node": {
+      "fillColor": "transparent",
+      "strokeColor": "transparent"
+    },
+    "edge": {
+      "strokeColor": "#333333",
+      "strokeOpacity": 0.5
+    },
+    "label": {
+      "inner": {
+        "strokeColor": "transparent"
+      },
+      "outer": {
+        "strokeColor": "transparent",
+        "padding": 0,
+        "link": {
+          "strokeColor": "transparent",
+          "length": 0,
+          "padding": 0
+        }
+      }
+    }
+  },
+  "depths": [
+    {
+      "depth": -1,
+      "node": {
+        "fillColor": "#333333",
+        "strokeColor": "#333333"
+      },
+      "label": {
+        "inner": {
+          "textColor": "transparent"
+        }
+      },
+      "highlight": {
+        "node": {
+          "fillColor": "#efefef",
+          "strokeColor": "#333333",
+          "strokeWidth": 1.5
+        },
+        "label": {
+          "inner": {
+            "strokeColor": "#333333"
+          },
+          "outer": {
+            "strokeColor": "#333333",
+            "padding": 1,
+            "link": {
+              "strokeColor": "#333333",
+              "length": 30,
+              "padding": 0
+            }
+          }
+        }
+      }
+    }
+  ]
+}

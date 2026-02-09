@@ -23,8 +23,7 @@
     zoom: 1.0,
     numLabels: 30,
     bundlingStrength: 0.97,
-    // Edge options
-    strategy: 'mute', // 'hide' | 'mute'
+    strategy: 'mute',
     muteOpacity: 0.25,
   };
 
@@ -40,14 +39,37 @@
 
   /** @param {string} dataset */
   async function loadDataset(dataset) {
-    const response = await fetch(`/${dataset}Nodes.json`);
+    const response = await fetch(`datasets/${dataset}Nodes.json`);
     nodes = await response.json();
 
     if (dataset === 'rill') {
       links = [];
     } else {
-      const linksResponse = await fetch(`/${dataset}Edges.json`);
+      const linksResponse = await fetch(`datasets/${dataset}Edges.json`);
       links = await linksResponse.json();
+    }
+  }
+
+  const availableStyles = [
+    { value: 'default.json', label: 'Default' },
+    { value: 'minimal.json', label: 'Minimal' },
+  ];
+
+  let selectedStyle = 'default.json';
+  let currentStyles = {};
+
+  /** @param {string} styleName */
+  async function loadStyle(styleName) {
+    try {
+      const res = await fetch(`/styles/${styleName}`);
+      if (!res.ok) {
+        currentStyles = {};
+        return;
+      }
+      currentStyles = await res.json();
+      console.log(`Loaded style: ${styleName}`);
+    } catch {
+      currentStyles = {};
     }
   }
 
@@ -57,6 +79,8 @@
 
   onMount(() => {
     loadDataset(selectedDataset);
+    // load default style on mount
+    loadStyle(selectedStyle);
   });
 </script>
 
@@ -101,9 +125,23 @@
           {/each}
         </select>
       </label>
+
       <div class="dataset-summary">
         {nodes.length} nodes, {links.length} edges
       </div>
+
+      <label for="style" style="margin-left:12px;">
+        Style:
+        <select
+          id="style"
+          bind:value={selectedStyle}
+          on:change={() => loadStyle(selectedStyle)}
+        >
+          {#each availableStyles as s (s.value)}
+            <option value={s.value}>{s.label}</option>
+          {/each}
+        </select>
+      </label>
     </div>
 
     <div class="control-grid">
@@ -216,6 +254,7 @@
           muteOpacity: config.muteOpacity,
         },
       }}
+      styles={currentStyles}
     />
   </div>
 
@@ -224,18 +263,6 @@
       <label class="edge-bundling-label">
         <input type="checkbox" bind:checked={showEdgeBundling} />
         <span class="edge-bundling-text">Hierarchical Edge Bundling</span>
-      </label>
-
-      <label class="strategy-label">
-        Strategy:
-        <select
-          bind:value={config.strategy}
-          disabled={!showEdgeBundling}
-          aria-disabled={!showEdgeBundling}
-        >
-          <option value="hide">hide</option>
-          <option value="mute">mute</option>
-        </select>
       </label>
     </div>
 
@@ -255,6 +282,18 @@
           />
         </label>
       </div>
+
+      <label class="strategy-label">
+        Highlight Strategy:
+        <select
+          bind:value={config.strategy}
+          disabled={!showEdgeBundling}
+          aria-disabled={!showEdgeBundling}
+        >
+          <option value="hide">hide</option>
+          <option value="mute">mute</option>
+        </select>
+      </label>
 
       <div class="control-group">
         <label for="muteOpacity">
@@ -333,6 +372,7 @@
   }
 
   .control-group label {
+    text-align: left;
     display: block;
     font-weight: 500;
     color: #333333;
@@ -392,7 +432,8 @@
 
   .edge-bundling-control {
     text-align: center;
-    margin: 20px auto 40px auto;
+    max-width: 750px;
+    margin: 20px auto 30px auto;
     font-family: monospace;
   }
 
@@ -404,6 +445,14 @@
     gap: 24px;
     margin: 24px 0;
     flex-wrap: wrap;
+  }
+
+  .bundle-row.row2 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 25px;
+    width: 100%;
+    align-items: start;
   }
 
   .edge-bundling-label {
@@ -426,8 +475,9 @@
   }
 
   .strategy-label {
-    display: inline-flex;
+    flex-direction: row;
     align-items: center;
+    justify-self: center;
     gap: 6px;
     font-size: 11px;
     color: #333333;

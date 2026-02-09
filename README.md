@@ -348,7 +348,7 @@ This example demonstrates styles and per-depth overrides. It shows a global styl
     },
     edge: {
       strokeColor: '#e74c3c',
-      strokeOpacity: 0.2,
+      strokeOpacity: 0.25,
       strokeWidth: 2,
     },
     label: {
