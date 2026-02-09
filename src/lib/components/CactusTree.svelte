@@ -376,18 +376,20 @@
       return neighbors;
     })();
 
-    // Draw nodes first (apply highlight styles to hovered node + direct neighbors)
+    // Draw non-leaf nodes first (so edges are drawn over non-leaf nodes)
     drawNodes(
       ctx,
       renderedNodes,
+      leafNodes,
       hoveredNodeId,
       mergedStyle,
       depthStyleCache,
       negativeDepthNodes,
       highlightedNodeIds,
+      'nonLeaf',
     );
 
-    // Now draw edges (actual rendering) so they appear on top of nodes
+    // Draw edges on top of non-leaf nodes
     drawEdges(
       ctx,
       links,
@@ -397,6 +399,19 @@
       hoveredNodeId,
       parentToChildrenNodeMap,
       Number(mergedOptions?.bundlingStrength ?? 0.97),
+    );
+
+    // Draw leaf nodes over edges (leaf nodes should appear on top of edges)
+    drawNodes(
+      ctx,
+      renderedNodes,
+      leafNodes,
+      hoveredNodeId,
+      mergedStyle,
+      depthStyleCache,
+      negativeDepthNodes,
+      highlightedNodeIds,
+      'leaf',
     );
 
     // Draw labels (pass hover + highlighted nodes so labels/links can apply highlight & filtering)

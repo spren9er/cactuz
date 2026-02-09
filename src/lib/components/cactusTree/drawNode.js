@@ -365,15 +365,36 @@ export function drawNode(
  * @param {Set<string>|null} highlightedNodeIds - Set of node ids considered highlighted due to link association (may be null)
  * @returns {{ rendered: number, filtered: number }}
  */
+/**
+ * Draws all nodes in the renderedNodes array.
+ *
+ * Notes:
+ * - `leafNodes` may be a SvelteSet or any Set-like object; we treat it as Set-like and test via `.has`.
+ * - `highlightedNodeIds` may be a SvelteSet or native Set; we only use the presence test `.has`.
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Array<any>} renderedNodes
+ * @param {Set<string>|null} leafNodes
+ * @param {string|null} hoveredNodeId
+ * @param {any} mergedStyle
+ * @param {Map<any, any>} depthStyleCache
+ * @param {Map<any, any>} negativeDepthNodes
+ * @param {Set<string>|null} highlightedNodeIds
+ * @param {'all'|'nonLeaf'|'leaf'} [mode='all']
+ * @returns {{ rendered: number, filtered: number }}
+ */
 export function drawNodes(
   ctx,
   renderedNodes,
+  leafNodes,
   hoveredNodeId,
   mergedStyle,
   depthStyleCache,
   negativeDepthNodes,
   highlightedNodeIds,
+  mode = 'all',
 ) {
+  // mode: 'all' | 'nonLeaf' | 'leaf'
   if (!ctx || !renderedNodes || !renderedNodes.length) {
     return { rendered: 0, filtered: 0 };
   }
@@ -381,7 +402,31 @@ export function drawNodes(
   let renderedCount = 0;
   let filteredCount = 0;
 
+  // Helper used to decide whether the current call should draw this node depending on mode.
+  /** @param {{id:string}} node */
+  function shouldDrawNode(node) {
+    if (!leafNodes) return true;
+    try {
+      if (mode === 'nonLeaf') {
+        return !leafNodes.has(node.id);
+      } else if (mode === 'leaf') {
+        return leafNodes.has(node.id);
+      }
+    } catch {
+      // leafNodes may not be a proper Set-like structure in some call-sites;
+      // fall back to drawing everything to avoid accidentally hiding nodes.
+      return true;
+    }
+    // default: draw everything
+    return true;
+  }
+
   for (const { x, y, radius, node, depth } of renderedNodes) {
+    if (!shouldDrawNode(node)) {
+      filteredCount++;
+      continue;
+    }
+
     const wasRendered = drawNode(
       ctx,
       x,
