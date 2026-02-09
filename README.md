@@ -67,10 +67,10 @@ See [cactuz.spren9er.de](https://cactuz.spren9er.de) for a live demo and interac
 
 ```typescript
 interface Node {
-  id: string;                // Unique identifier
-  name: string;              // Display name
-  parent: string | null;     // Parent node ID
-  weight?: number;           // Optional explicit weight
+  id: string;                 // Unique identifier
+  name: string;               // Display name
+  parent: string | null;      // Parent node ID
+  weight?: number;            // Optional explicit weight
 }
 ```
 
@@ -78,8 +78,8 @@ interface Node {
 
 ```typescript
 interface Link {
-  source: string;            // Source node ID
-  target: string;            // Target node ID
+  source: string;             // Source node ID
+  target: string;             // Target node ID
 }
 ```
 
@@ -87,19 +87,19 @@ interface Link {
 
 ```typescript
 interface Options {
-  overlap?: number;          // Node overlap factor (-inf to 1, default: 0.5)
-  arcSpan?: number;          // Arc span in radians (default: 5π/4)
-  sizeGrowthRate?: number;   // Size growth rate (default: 0.75)
-  orientation?: number;      // Root orientation in radians (default: π/2)
-  zoom?: number;             // Layout zoom factor (default: 1.0)
-  numLabels?: number;        // Number of labels (default: 30)
-  edgeOptions?: EdgeOptions; // Edge-specific interactive settings (bundling, hover behavior)
+  overlap?: number;           // Node overlap factor (-inf to 1, default: 0.5)
+  arcSpan?: number;           // Arc span in radians (default: 5π/4)
+  sizeGrowthRate?: number;    // Size growth rate (default: 0.75)
+  orientation?: number;       // Root orientation in radians (default: π/2)
+  zoom?: number;              // Layout zoom factor (default: 1.0)
+  numLabels?: number;         // Number of labels (default: 30)
+  edgeOptions?: EdgeOptions;  // Edge-specific interactive settings (bundling, hover behavior)
 }
 
 interface EdgeOptions {
-  bundlingStrength?: number; // Edge bundling strength (0..1, default: 0.97)
+  bundlingStrength?: number;  // Edge bundling strength (0..1, default: 0.97)
   strategy?: 'hide' | 'mute'; // Hover behavior when over a leaf: 'hide' hides unrelated edges, 'mute' shows them at reduced opacity (default: 'hide')
-  muteOpacity?: number;      // When strategy is 'mute', multiplier applied to unrelated edges (0..1, default: 0.25)
+  muteOpacity?: number;       // When strategy is 'mute', multiplier applied to unrelated edges (0..1, default: 0.25)
 }
 ```
 
@@ -381,12 +381,12 @@ This example demonstrates styles and per-depth overrides. It shows a global styl
     },
     depths: [
       {
-        depth: 0, // root
+        depth: 0,
         node: { fillColor: '#2c3e50', strokeColor: '#ecf0f1' },
         label: { inner: { textColor: '#ecf0f1' } },
       },
       {
-        depth: -1, // leaves
+        depth: -1,
         node: { fillColor: '#e74c3c', strokeColor: '#c0392b' },
         label: {
           inner: {

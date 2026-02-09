@@ -207,83 +207,31 @@
         orientation: (config.orientation * Math.PI) / 180,
         zoom: config.zoom,
         numLabels: config.numLabels,
-        bundlingStrength: config.bundlingStrength,
+        edgeOptions: {
+          bundlingStrength: config.bundlingStrength,
+          strategy: 'mute',
+          muteOpacity: 0.25,
+        },
       }}
       styles={{
-        node: {
-          fillColor: '#dedede',
-          strokeColor: '#aaaaaa',
-          strokeWidth: 1,
-          strokeOpacity: 1,
-          fillOpacity: 1,
-          highlight: {
-            fillColor: '#ffbbb7',
-            strokeColor: '#e2575a',
+        highlight: {
+          node: {
+            fillColor: '#dedede',
+            strokeColor: '#333333',
           },
-        },
-        edge: {
-          strokeColor: '#e2575a',
-          strokeOpacity: 0.1,
-          strokeWidth: 1,
-          highlight: {
-            strokeColor: '#e2575a',
-            strokeOpacity: 0.25,
+          label: {
+            inner: {
+              strokeColor: '#efefef',
+            },
           },
-        },
-        label: {
-          textColor: '#333333',
-          fontFamily: 'monospace',
-          minFontSize: 9,
-          maxFontSize: 14,
-          padding: 1,
-          link: {
-            length: 7,
-            strokeColor: '#aaaaaa',
-            strokeOpacity: 1,
-            strokeWidth: 1,
-            padding: 0,
-          },
-        },
-        line: {
-          strokeColor: '#aaaaaa',
         },
         depths: [
           {
-            depth: -2,
-            line: {
-              strokeColor: '#e2575a',
-              strokeWidth: 1,
-              strokeOpacity: 1,
-            },
-          },
-          {
             depth: -1,
-            node: {
-              fillColor: '#e2575a',
-              strokeColor: 'transparent',
-              highlight: {
-                fillColor: '#777777',
-                strokeColor: '#333333',
-                strokeWidth: 2,
-              },
-            },
-            label: {
-              highlight: {
-                textColor: '#333333',
-              },
-            },
-          },
-          {
-            depth: 0,
-            node: {
-              fillColor: '#333333',
-              strokeColor: '#333333',
-              highlight: {
-                fillColor: '#333333',
-              },
-            },
-            label: {
-              textColor: '#efefef',
+            node: { fillColor: '#333333', strokeColor: '#333333' },
+            highlight: {
+              node: { fillColor: '#ffbbb7', strokeColor: '#ea575a' },
+              label: { inner: { strokeColor: '#ea575a' } },
             },
           },
         ],
