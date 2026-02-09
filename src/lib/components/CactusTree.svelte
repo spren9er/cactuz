@@ -119,7 +119,7 @@
         fillOpacity: 1,
         strokeColor: '#ea575a',
         strokeOpacity: 1,
-        strokeWidth: 1.5,
+        strokeWidth: 1,
       },
       edge: {
         strokeColor: '#ea575a',
