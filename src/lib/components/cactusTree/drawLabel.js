@@ -921,34 +921,12 @@ export function computeLabelLayout(
       ...(globalHighlight || {}),
       ...(depthHighlight || {}),
     };
-    // Only derive flattened convenience fields from the depth-specific highlight
-    // (prefer inner -> outer -> flat) when a per-node depth highlight is actually provided.
-    let flattenedFromDepth = {
-      textColor: undefined,
-      textOpacity: undefined,
-      fontWeight: undefined,
-    };
+    // Only derive whether a depth-specific highlight exists for this node.
+    // We'll avoid precomputing a flattened object here to prevent unused-variable
+    // issues and type mismatches. Later code will consult `depthHighlight` and
+    // `hasDepthHighlight` as needed.
     const hasDepthHighlight =
       depthHighlight && Object.keys(depthHighlight).length > 0;
-    if (hasDepthHighlight) {
-      flattenedFromDepth = {
-        textColor:
-          depthHighlight?.inner?.textColor ??
-          depthHighlight?.outer?.textColor ??
-          depthHighlight?.textColor ??
-          undefined,
-        textOpacity:
-          depthHighlight?.inner?.textOpacity ??
-          depthHighlight?.outer?.textOpacity ??
-          depthHighlight?.textOpacity ??
-          undefined,
-        fontWeight:
-          depthHighlight?.inner?.fontWeight ??
-          depthHighlight?.outer?.fontWeight ??
-          depthHighlight?.fontWeight ??
-          undefined,
-      };
-    }
     // Compose final nodeData.highlightStyle:
     // - always include merged base (global + depth)
     // - include flattened convenience fields only when derived from a depth highlight
