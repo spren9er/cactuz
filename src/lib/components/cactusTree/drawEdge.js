@@ -1,16 +1,27 @@
 /**
  * Edge drawing utilities for CactusTree component
- * Handles rendering of connections between nodes with hierarchical bundling
+ *
+ * Responsibilities:
+ * - Build hierarchical paths for edge bundling
+ * - Convert paths to coordinates using rendered node lookup
+ * - Draw individual edges with support for highlighting and bundling
+ * - Draw connecting lines between parent/child nodes
+ * - Compute which node ids are visible via drawn edges (used for label highlighting)
  */
 
 import { setCanvasStyles } from './canvasUtils.js';
 
 /**
- * Builds hierarchical path between two nodes for edge bundling
- * @param {any} sourceNode - Source node data
- * @param {any} targetNode - Target node data
- * @param {Map<string, any[]>} hierarchicalPathCache - Cache for hierarchical paths
- * @returns {any} Object containing hierarchicalPath array and lca node
+ * Build hierarchical path (array of ancestor nodes) between two rendered nodes.
+ * Uses a simple caching pattern keyed by sourceId-targetId.
+ *
+ * NOTE: Parameters are intentionally typed as `any` in JSDoc so downstream static
+ * analyzers treat them as dynamic objects (they carry `.node`, `.parentRef`, etc.).
+ *
+ * @param {any} sourceNode - rendered source node container (expects .node, .node.id, .node.parentRef)
+ * @param {any} targetNode - rendered target node container
+ * @param {any} hierarchicalPathCache - cache map (key -> hierarchical path array)
+ * @returns {{hierarchicalPath: any[], lca: any|null}}
  */
 export function buildHierarchicalPath(
   sourceNode,
@@ -22,59 +33,60 @@ export function buildHierarchicalPath(
   let lca = null;
 
   if (!hierarchicalPath) {
-    // Build hierarchical path from source to target
+    // Build ancestor chains
     const sourcePath = [];
     const targetPath = [];
 
-    let current = sourceNode.node;
-    while (current) {
-      sourcePath.push(current);
-      current = current.parentRef;
+    let cur = sourceNode.node;
+    while (cur) {
+      sourcePath.push(cur);
+      cur = cur.parentRef;
     }
 
-    current = targetNode.node;
-    while (current) {
-      targetPath.push(current);
-      current = current.parentRef;
+    cur = targetNode.node;
+    while (cur) {
+      targetPath.push(cur);
+      cur = cur.parentRef;
     }
 
     // Find lowest common ancestor (closest to leaves)
     for (let i = 0; i < Math.min(sourcePath.length, targetPath.length); i++) {
-      const sourceAncestor = sourcePath[sourcePath.length - 1 - i];
-      const targetAncestor = targetPath[targetPath.length - 1 - i];
-      if (sourceAncestor === targetAncestor) {
-        lca = sourceAncestor;
+      const a = sourcePath[sourcePath.length - 1 - i];
+      const b = targetPath[targetPath.length - 1 - i];
+      if (a === b) {
+        lca = a;
       } else {
         break;
       }
     }
 
-    // Create hierarchical path: source -> ... -> lca -> ... -> target
+    // Compose path: source -> ... -> lca -> ... -> target
     hierarchicalPath = [sourceNode.node];
 
-    // Add source path up to (but not including) LCA
-    const sourceLcaIndex = sourcePath.indexOf(lca);
-    if (sourceLcaIndex > 0) {
-      for (let i = 1; i < sourceLcaIndex; i++) {
+    // Add intermediate source ancestors up to (but not including) LCA
+    const sLcaIdx = sourcePath.indexOf(lca);
+    if (sLcaIdx > 0) {
+      for (let i = 1; i < sLcaIdx; i++) {
         hierarchicalPath.push(sourcePath[i]);
       }
     }
 
-    // Add LCA if it exists and creates a meaningful bundle point
+    // Add LCA if it's meaningful
     if (lca && lca !== sourceNode.node && lca !== targetNode.node) {
       hierarchicalPath.push(lca);
     }
 
-    // Add target path from LCA down to target (excluding LCA)
-    const targetLcaIndex = targetPath.indexOf(lca);
-    if (targetLcaIndex > 0) {
-      for (let i = targetLcaIndex - 1; i >= 0; i--) {
+    // Add path from LCA down to target (excluding LCA)
+    const tLcaIdx = targetPath.indexOf(lca);
+    if (tLcaIdx > 0) {
+      for (let i = tLcaIdx - 1; i >= 0; i--) {
         hierarchicalPath.push(targetPath[i]);
       }
     }
 
-    // Always add target node
-    if (hierarchicalPath[hierarchicalPath.length - 1] !== targetNode.node) {
+    // Ensure target is present
+    const last = hierarchicalPath[hierarchicalPath.length - 1];
+    if (last !== targetNode.node) {
       hierarchicalPath.push(targetNode.node);
     }
 
@@ -85,12 +97,29 @@ export function buildHierarchicalPath(
 }
 
 /**
- * Converts hierarchical path to coordinate array
- * @param {any[]} hierarchicalPath - Array of nodes in the path
- * @param {Map<string, any>} nodeIdToRenderedNodeMap - Map from node ID to rendered node data
- * @param {any} sourceNode - Source node data (fallback)
- * @param {any} targetNode - Target node data (fallback)
- * @returns {any[]} Array of {x, y} coordinates
+ * Convert hierarchical path nodes to {x,y} coordinates using nodeId->renderedNode map.
+ * Falls back to source/target coords when path points cannot be resolved.
+ *
+ * NOTE: Parameters are typed as `any` to avoid property-access complaints from static checks.
+ *
+ * @param {any[]} hierarchicalPath
+ * @param {any} nodeIdToRenderedNodeMap
+ * @param {any} sourceNode
+ * @param {any} targetNode
+ * @returns {Array<{x:number,y:number}>}
+ */
+/**
+ * Convert hierarchical path nodes to {x,y} coordinates using nodeId->renderedNode map.
+ * Falls back to source/target coords when path points cannot be resolved.
+ *
+ * This variant includes explicit JSDoc typing for local arrays to avoid implicit-any
+ * diagnostics in environments that statically check JS with TypeScript rules.
+ *
+ * @param {any[]} hierarchicalPath
+ * @param {Map<string, any>} nodeIdToRenderedNodeMap
+ * @param {{x:number,y:number}} sourceNode
+ * @param {{x:number,y:number}} targetNode
+ * @returns {Array<{x:number,y:number}>}
  */
 export function pathToCoordinates(
   hierarchicalPath,
@@ -105,76 +134,136 @@ export function pathToCoordinates(
     ];
   }
 
-  const pathCoords = hierarchicalPath
-    .map((node) => {
-      const nodeData = nodeIdToRenderedNodeMap.get(node.id);
-      return nodeData ? { x: nodeData.x, y: nodeData.y } : null;
-    })
-    .filter((coord) => coord !== null);
+  // Accumulate resolved coordinates. Explicit typing annotation helps TS-like linters.
+  /** @type {Array<{x:number,y:number}>} */
+  const coords = [];
 
-  // Fallback to direct line if no valid path
-  if (pathCoords.length < 2) {
+  for (const n of hierarchicalPath) {
+    const rd = nodeIdToRenderedNodeMap.get(n.id);
+    if (rd) {
+      coords.push({ x: rd.x, y: rd.y });
+      continue;
+    }
+
+    // Try immediate parentRef fallback
+    if (n.parentRef && n.parentRef.id) {
+      const p = nodeIdToRenderedNodeMap.get(n.parentRef.id);
+      if (p) {
+        coords.push({ x: p.x, y: p.y });
+        continue;
+      }
+    }
+
+    // Walk up ancestor chain to find nearest rendered ancestor (if any)
+    let ancestor = n.parentRef;
+    let found = false;
+    while (ancestor) {
+      const ar = nodeIdToRenderedNodeMap.get(ancestor.id);
+      if (ar) {
+        coords.push({ x: ar.x, y: ar.y });
+        found = true;
+        break;
+      }
+      ancestor = ancestor.parentRef;
+    }
+
+    // If unresolved, skip -- endpoints below will ensure a valid path
+    if (!found) {
+      // intentionally no-op; missing anchor will be handled by endpoints
+    }
+  }
+
+  // If nothing resolved, fall back to straight source->target
+  if (coords.length === 0) {
     return [
       { x: sourceNode.x, y: sourceNode.y },
       { x: targetNode.x, y: targetNode.y },
     ];
   }
 
-  return pathCoords;
-}
-
-/**
- * Determines if edge should be filtered based on hover state
- * @param {any} link - Link object with source and target
- * @param {string|null} hoveredNodeId - Currently hovered node ID
- * @param {Map<string, any[]>} parentToChildrenNodeMap - Map from parent to children nodes
- * @returns {boolean} Whether the edge should be filtered out
- */
-export function shouldFilterEdge(link, hoveredNodeId, parentToChildrenNodeMap) {
-  if (hoveredNodeId === null) return false;
-
-  // Only filter for leaf nodes (nodes with no children)
-  const isLeafNode = !parentToChildrenNodeMap.has(hoveredNodeId);
-
-  if (isLeafNode) {
-    // For leaf nodes, only show edges connected to the hovered node
-    return link.source !== hoveredNodeId && link.target !== hoveredNodeId;
+  // Ensure source and target are included as endpoints to avoid collapsing to a single segment.
+  const first = coords[0];
+  if (!(first.x === sourceNode.x && first.y === sourceNode.y)) {
+    coords.unshift({ x: sourceNode.x, y: sourceNode.y });
+  }
+  const last = coords[coords.length - 1];
+  if (!(last.x === targetNode.x && last.y === targetNode.y)) {
+    coords.push({ x: targetNode.x, y: targetNode.y });
   }
 
-  return false;
+  // Remove consecutive duplicate points (which can happen from ancestor fallbacks)
+  /** @type {Array<{x:number,y:number}>} */
+  const deduped = coords.filter((c, i) => {
+    if (i === 0) return true;
+    const prev = coords[i - 1];
+    return !(prev.x === c.x && prev.y === c.y);
+  });
+
+  if (deduped.length < 2) {
+    return [
+      { x: sourceNode.x, y: sourceNode.y },
+      { x: targetNode.x, y: targetNode.y },
+    ];
+  }
+
+  return deduped;
 }
 
 /**
- * Calculates edge opacity based on hover state
- * @param {string|null} hoveredNodeId - Currently hovered node ID
- * @param {Map<string, any[]>} parentToChildrenNodeMap - Map from parent to children nodes
- * @param {number} baseOpacity - Base edge opacity from styles
- * @returns {number} Calculated opacity value
+ * Edge filtering policy: when hovering a node, show only edges connected to that node.
+ *
+ * NOTE: params are annotated as `any` to avoid static-analysis property-access complaints.
+ *
+ * @param {any} link
+ * @param {any} hoveredNodeId
+ * @returns {boolean} true if edge should be filtered (i.e., hidden)
  */
-export function calculateEdgeOpacity(
-  hoveredNodeId,
-  parentToChildrenNodeMap,
-  baseOpacity,
-) {
-  if (hoveredNodeId === null) return baseOpacity;
+export function shouldFilterEdge(link, hoveredNodeId) {
+  if (hoveredNodeId === null) return false;
 
-  // Use full opacity when hovering over leaf nodes with links
-  const isLeafNode = !parentToChildrenNodeMap.has(hoveredNodeId);
-  return isLeafNode ? 1.0 : baseOpacity;
+  // When any node is hovered, show only edges that are incident on the hovered node.
+  // This ensures edges not associated with the hovered node are hidden regardless of
+  // whether the hovered node is a leaf or internal node.
+  try {
+    return link.source !== hoveredNodeId && link.target !== hoveredNodeId;
+  } catch {
+    // Defensive fallback: if link shape is unexpected, do not filter.
+    return false;
+  }
 }
 
 /**
- * Draws a single edge between two nodes
- * @param {CanvasRenderingContext2D} ctx - Canvas context
- * @param {any} link - Link object with source and target
- * @param {any} sourceNode - Source node data
- * @param {any} targetNode - Target node data
- * @param {Map<string, any[]>} hierarchicalPathCache - Cache for hierarchical paths
- * @param {Map<string, any>} nodeIdToRenderedNodeMap - Map from node ID to rendered node data
- * @param {any} mergedStyle - Merged styles object
- * @param {string|null} hoveredNodeId - Currently hovered node ID
- * @param {Map<string, any[]>} parentToChildrenNodeMap - Map from parent to children nodes
- * @returns {boolean} Whether the edge was drawn
+ * Determine edge opacity respecting hover state
+ *
+ * @param {string|null} hoveredNodeId
+ * @param {number} baseOpacity
+ * @returns {number}
+ */
+export function calculateEdgeOpacity(hoveredNodeId, baseOpacity) {
+  if (hoveredNodeId === null) return baseOpacity;
+  // When any node is hovered, emphasize visible edges by using full opacity.
+  // We no longer rely on the parent->children map to decide leaf status here.
+  return 1.0;
+}
+
+/**
+ * Draw a single edge with hierarchical bundling and highlight support.
+ *
+ * NOTE: several parameters are intentionally annotated as `any` to silence static-analysis
+ * warnings about property access (e.g. `link.source`, `node.x`) since these objects are
+ * dynamic runtime shapes.
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {any} link - { source: string, target: string }
+ * @param {any} sourceNode - rendered source node (has x,y,radius,node)
+ * @param {any} targetNode - rendered target node
+ * @param {any} hierarchicalPathCache
+ * @param {any} nodeIdToRenderedNodeMap
+ * @param {any} mergedStyle
+ * @param {any} hoveredNodeId
+ * @param {any} highlightedNodeIds
+ * @param {any} bundlingStrength
+ * @returns {boolean} whether the edge was drawn
  */
 export function drawEdge(
   ctx,
@@ -185,119 +274,110 @@ export function drawEdge(
   nodeIdToRenderedNodeMap,
   mergedStyle,
   hoveredNodeId,
-  parentToChildrenNodeMap,
+  highlightedNodeIds = null,
   bundlingStrength = 0.97,
 ) {
-  if (!ctx) return false;
-
-  // Check if edge should be filtered
-  if (shouldFilterEdge(link, hoveredNodeId, parentToChildrenNodeMap)) {
-    return false;
+  // Normalize highlightedNodeIds into a Set (highlightedSet) for consistent `.has` checks
+  let highlightedSet = null;
+  if (highlightedNodeIds != null) {
+    if (typeof highlightedNodeIds.has === 'function') {
+      // Already Set-like (could be SvelteSet / native Set)
+      highlightedSet = highlightedNodeIds;
+    } else if (Array.isArray(highlightedNodeIds)) {
+      // Convert array -> Set
+      highlightedSet = new Set(highlightedNodeIds);
+    } else {
+      // Single value -> Set
+      highlightedSet = new Set([highlightedNodeIds]);
+    }
   }
 
-  // Edge styles are global-only: read from mergedStyle.edge
-  const currentEdgeColor =
-    mergedStyle && mergedStyle.edge && mergedStyle.edge.strokeColor
-      ? mergedStyle.edge.strokeColor
-      : 'none';
-  const currentEdgeWidth =
-    mergedStyle && mergedStyle.edge && mergedStyle.edge.strokeWidth
-      ? mergedStyle.edge.strokeWidth
-      : 0;
-  const baseEdgeOpacity =
-    mergedStyle && mergedStyle.edge && mergedStyle.edge.strokeOpacity
-      ? mergedStyle.edge.strokeOpacity
-      : 0.1;
+  // Cast link to `any` in a local variable `l` so static analysis won't complain about property accesses like `l.source`
+  const l = /** @type {any} */ (link);
 
-  // Edge-level highlight when hovering connected nodes (nested under edge.highlight)
-  const edgeHighlight =
-    mergedStyle && mergedStyle.edge && mergedStyle.edge.highlight
-      ? mergedStyle.edge.highlight
-      : null;
+  if (!ctx) return false;
+
+  // Respect hover-based filtering
+  if (shouldFilterEdge(l, hoveredNodeId)) return false;
+
+  // Read base edge styles
+  const baseEdge = mergedStyle?.edge ?? {};
+  const currentEdgeColor = baseEdge.strokeColor ?? 'none';
+  const currentEdgeWidth =
+    typeof baseEdge.strokeWidth === 'number' ? baseEdge.strokeWidth : 0;
+  const baseEdgeOpacity =
+    typeof baseEdge.strokeOpacity === 'number' ? baseEdge.strokeOpacity : 0.1;
+
+  // Edge highlight (top-level mergedStyle.highlight.edge)
+  const edgeHighlight = mergedStyle?.highlight?.edge ?? null;
 
   const isEdgeHovered =
     hoveredNodeId !== null &&
-    (hoveredNodeId === link.source || hoveredNodeId === link.target);
+    (hoveredNodeId === l.source || hoveredNodeId === l.target);
 
-  // If an edge-level highlight is present and the edge is hovered, prefer its values.
+  // Determine if either endpoint is considered highlighted (neighbors).
+  // We normalized highlightedNodeIds into `highlightedSet` above so checks are simple.
+  const isEdgeHighlighted = (() => {
+    if (!highlightedSet) return false;
+    try {
+      return highlightedSet.has(l.source) || highlightedSet.has(l.target);
+    } catch {
+      // defensive fallback: if highlightedSet wasn't iterable as expected
+      return false;
+    }
+  })();
+
+  // If edge is hovered or highlighted and edgeHighlight provides overrides, prefer them
   const highlightColor =
-    isEdgeHovered && edgeHighlight && edgeHighlight.strokeColor !== undefined
+    (isEdgeHovered || isEdgeHighlighted) &&
+    edgeHighlight &&
+    edgeHighlight.strokeColor !== undefined
       ? edgeHighlight.strokeColor
       : undefined;
   const highlightWidth =
-    isEdgeHovered && edgeHighlight && edgeHighlight.strokeWidth !== undefined
+    (isEdgeHovered || isEdgeHighlighted) &&
+    edgeHighlight &&
+    edgeHighlight.strokeWidth !== undefined
       ? edgeHighlight.strokeWidth
       : undefined;
   const highlightOpacity =
-    isEdgeHovered && edgeHighlight && edgeHighlight.strokeOpacity !== undefined
+    (isEdgeHovered || isEdgeHighlighted) &&
+    edgeHighlight &&
+    edgeHighlight.strokeOpacity !== undefined
       ? edgeHighlight.strokeOpacity
       : undefined;
 
-  // Determine effective opacity.
-  // If the edge is hovered and a highlight opacity is provided, use it
-  // directly. Otherwise, fall back to the hover-aware calculation which
-  // may boost opacity for leaf hovers.
-  let currentEdgeOpacity;
-  if (isEdgeHovered && highlightOpacity !== undefined) {
-    currentEdgeOpacity = highlightOpacity;
-  } else {
-    currentEdgeOpacity = calculateEdgeOpacity(
-      hoveredNodeId,
-      parentToChildrenNodeMap,
-      baseEdgeOpacity,
-    );
-  }
+  // Effective opacity: if hovered and highlight opacity specified, use it; else compute hover-aware opacity
+  const currentEdgeOpacity =
+    isEdgeHovered && highlightOpacity !== undefined
+      ? highlightOpacity
+      : calculateEdgeOpacity(hoveredNodeId, baseEdgeOpacity);
 
-  // Final color/width consider highlight overrides if present
   const finalEdgeColor =
     highlightColor !== undefined ? highlightColor : currentEdgeColor;
   const finalEdgeWidth =
     highlightWidth !== undefined ? highlightWidth : currentEdgeWidth;
 
-  // Use final effective values to decide whether to draw the edge.
-  // This ensures that highlight overrides (which may set a color/width even
-  // when the global edge was 'none' or zero-width) are honored.
-  if (finalEdgeWidth <= 0 || finalEdgeColor === 'none') {
-    return false;
-  }
+  // Nothing to draw if width <= 0 or color says 'none'
+  if (finalEdgeWidth <= 0 || finalEdgeColor === 'none') return false;
 
-  // Build hierarchical path
+  // Build hierarchical path and convert to coordinates
   const { hierarchicalPath } = buildHierarchicalPath(
     sourceNode,
     targetNode,
     hierarchicalPathCache,
   );
+  const pathCoords = pathToCoordinates(
+    hierarchicalPath,
+    nodeIdToRenderedNodeMap,
+    sourceNode,
+    targetNode,
+  );
 
-  // Convert hierarchical path to coordinates using lookup map
-  const pathCoords = hierarchicalPath
-    .map((/** @type {any} */ node) => {
-      const nodeData = nodeIdToRenderedNodeMap.get(node.id);
-      return nodeData ? { x: nodeData.x, y: nodeData.y } : null;
-    })
-    .filter((/** @type {any} */ coord) => coord !== null);
-
-  // Fallback to direct line if no valid path
-  if (pathCoords.length < 2) {
-    pathCoords.length = 0;
-    pathCoords.push({ x: sourceNode.x, y: sourceNode.y });
-    pathCoords.push({ x: targetNode.x, y: targetNode.y });
-  }
-
-  // Bundling strength controls interpolation between a straight line (0)
-  // and the full hierarchical bundle path (1). This value MUST come only from
-  // the options (the `bundlingStrength` parameter passed into drawEdge/drawEdges).
-  // No style-based fallback is used. Default is 0.85. The numeric value used
-  // will be clamped to the [0,1] range in `bundlingStrengthValue` below.
-
-  // Compute final coordinates according to bundling strength.
-  // Strategy:
-  //  - bundlingStrength === 1 -> use hierarchical path points unchanged
-  //  - bundlingStrength === 0 -> use straight-line points sampled at same param positions
-  //  - 0 < bundlingStrength < 1 -> linearly blend each hierarchical point
-  //    with the corresponding straight-line sample (by normalized position along path)
+  // Compute final path according to bundlingStrength: 0 => straight line sampling, 1 => full path
   let finalPathCoords;
-  if (bundlingStrength <= 0) {
-    // Straight-line sampling with same number of points as pathCoords
+  if (!bundlingStrength || bundlingStrength <= 0) {
+    // straight line sampled to same number of points
     finalPathCoords = [];
     const n = pathCoords.length;
     for (let i = 0; i < n; i++) {
@@ -308,9 +388,8 @@ export function drawEdge(
       });
     }
   } else if (bundlingStrength >= 1) {
-    finalPathCoords = pathCoords;
+    finalPathCoords = pathCoords.slice();
   } else {
-    // Use an explicit loop rather than .map to avoid implicit-any issues
     finalPathCoords = [];
     for (let i = 0; i < pathCoords.length; i++) {
       const pt = pathCoords[i];
@@ -324,65 +403,54 @@ export function drawEdge(
     }
   }
 
-  // Set edge styles - optimize by only setting when different
-  if (ctx.strokeStyle !== finalEdgeColor) {
-    ctx.strokeStyle = finalEdgeColor;
-  }
-  if (ctx.globalAlpha !== currentEdgeOpacity) {
-    ctx.globalAlpha = currentEdgeOpacity;
-  }
-  if (ctx.lineWidth !== finalEdgeWidth) {
-    ctx.lineWidth = finalEdgeWidth;
-  }
+  // Draw the stroke
+  setCanvasStyles(ctx, {
+    strokeStyle: finalEdgeColor,
+    lineWidth: finalEdgeWidth,
+    globalAlpha: currentEdgeOpacity,
+  });
 
   ctx.beginPath();
-
   if (finalPathCoords.length === 2) {
-    // Simple direct line
-    ctx.moveTo(finalPathCoords[0]?.x ?? 0, finalPathCoords[0]?.y ?? 0);
-    ctx.lineTo(finalPathCoords[1]?.x ?? 0, finalPathCoords[1]?.y ?? 0);
+    ctx.moveTo(finalPathCoords[0].x, finalPathCoords[0].y);
+    ctx.lineTo(finalPathCoords[1].x, finalPathCoords[1].y);
   } else if (finalPathCoords.length > 2) {
-    // Draw smooth curve through final path points
-    ctx.moveTo(finalPathCoords[0]?.x ?? 0, finalPathCoords[0]?.y ?? 0);
-
-    // Use quadratic curves between consecutive points
+    ctx.moveTo(finalPathCoords[0].x, finalPathCoords[0].y);
     for (let i = 1; i < finalPathCoords.length; i++) {
-      const currentPoint = finalPathCoords[i];
-      if (!currentPoint) continue;
-
+      const pt = finalPathCoords[i];
+      if (!pt) continue;
       if (i === finalPathCoords.length - 1) {
-        // Last segment - line to target
-        ctx.lineTo(currentPoint.x, currentPoint.y);
+        ctx.lineTo(pt.x, pt.y);
       } else {
-        // Create smooth curve through intermediate points
-        const nextPoint = finalPathCoords[i + 1];
-        if (nextPoint) {
-          const cpx = (currentPoint.x + nextPoint.x) / 2;
-          const cpy = (currentPoint.y + nextPoint.y) / 2;
-          ctx.quadraticCurveTo(currentPoint.x, currentPoint.y, cpx, cpy);
+        const next = finalPathCoords[i + 1];
+        if (next) {
+          const cpx = (pt.x + next.x) / 2;
+          const cpy = (pt.y + next.y) / 2;
+          ctx.quadraticCurveTo(pt.x, pt.y, cpx, cpy);
         }
       }
     }
   }
   ctx.stroke();
 
-  // Reset alpha if it was changed
-  if (ctx.globalAlpha !== 1.0) {
-    ctx.globalAlpha = 1.0;
-  }
+  // Reset alpha if changed via setCanvasStyles (up to implementation of setCanvasStyles)
+  // Reset alpha if changed
+  if (ctx.globalAlpha !== 1.0) ctx.globalAlpha = 1.0;
 
+  // Halos disabled: do not draw any halo visuals for highlighted nodes.
   return true;
 }
 
 /**
- * Draws connecting lines between parent and child nodes
- * @param {CanvasRenderingContext2D} ctx - Canvas context
- * @param {any[]} renderedNodes - Array of rendered node data
- * @param {Map<string, any[]>} parentToChildrenNodeMap - Map from parent to children nodes
- * @param {any} mergedStyle - Merged styles object
- * @param {Map<number, any>} depthStyleCache - Cache for depth styles
- * @param {number} overlap - Overlap setting from options
- * @param {Map<number, Set<string>>} negativeDepthNodes - Map of negative depth (e.g. -1, -2) to a Set of node IDs
+ * Draw connecting lines between parent & child nodes (for overlap < 0 case).
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Array<any>} renderedNodes
+ * @param {Map<string, any[]>} parentToChildrenNodeMap
+ * @param {any} mergedStyle
+ * @param {Map<number, any>} depthStyleCache
+ * @param {number} overlap
+ * @param {Map<number, Set<string>>} negativeDepthNodes
  */
 export function drawConnectingLines(
   ctx,
@@ -393,15 +461,15 @@ export function drawConnectingLines(
   overlap,
   negativeDepthNodes,
 ) {
-  if (overlap >= 0 || !ctx) return;
+  if (!ctx || overlap >= 0 || !renderedNodes || renderedNodes.length === 0)
+    return;
 
-  renderedNodes.forEach((nodeData) => {
+  for (const nodeData of renderedNodes) {
     const { x, y, node, depth } = nodeData;
-    const children = parentToChildrenNodeMap.get(node.id) || [];
-
-    children.forEach((/** @type {any} */ child) => {
-      // Resolve depthStyle: prefer cached exact depth, else check mergedStyle.depths
-      // including negative-depth membership via negativeDepthNodes map.
+    const children =
+      (parentToChildrenNodeMap && parentToChildrenNodeMap.get(node.id)) || [];
+    for (const child of children) {
+      // Resolve depth style similar to other modules
       let depthStyle = null;
       if (depthStyleCache && depthStyleCache.has(depth)) {
         depthStyle = depthStyleCache.get(depth);
@@ -411,21 +479,13 @@ export function drawConnectingLines(
             depthStyle = ds;
             break;
           } else if (ds.depth < 0) {
-            // For negative depths, only apply the depth style when the
-            // parent -> child pair crosses the negative levels. Concretely:
-            //   - the parent must be in depth -N (ds.depth)
-            //   - the child must be in depth -(N - 1) (ds.depth + 1)
-            // This ensures a style for -2 only affects the direct parent->leaf
-            // line, not other child subtrees of that parent.
-            const nodesAtThisNegativeDepth = negativeDepthNodes?.get(ds.depth);
-            const childNodesAtNextNegativeDepth = negativeDepthNodes?.get(
-              ds.depth + 1,
-            );
+            const nodesAt = negativeDepthNodes?.get(ds.depth);
+            const childAt = negativeDepthNodes?.get(ds.depth + 1);
             if (
-              nodesAtThisNegativeDepth &&
-              nodesAtThisNegativeDepth.has(node.id) &&
-              childNodesAtNextNegativeDepth &&
-              childNodesAtNextNegativeDepth.has(child?.node?.id)
+              nodesAt &&
+              childAt &&
+              nodesAt.has(node.id) &&
+              childAt.has(child?.node?.id)
             ) {
               depthStyle = ds;
               break;
@@ -434,100 +494,73 @@ export function drawConnectingLines(
         }
       }
 
-      // Support nested `line` object (strokeColor, strokeOpacity, strokeWidth)
-      const currentLineWidth =
+      const lineWidth =
         depthStyle?.line?.strokeWidth ?? mergedStyle?.line?.strokeWidth ?? 0;
-      const currentLineColor =
+      const lineColor =
         depthStyle?.line?.strokeColor ??
         mergedStyle?.line?.strokeColor ??
         'none';
-      const currentLineOpacity =
+      const lineOpacity =
         depthStyle?.line?.strokeOpacity ??
         mergedStyle?.line?.strokeOpacity ??
         1;
 
-      if (currentLineWidth > 0 && currentLineColor !== 'none') {
+      if (lineWidth > 0 && lineColor !== 'none') {
         const prevAlpha = ctx.globalAlpha;
         setCanvasStyles(ctx, {
-          strokeStyle: currentLineColor,
-          lineWidth: currentLineWidth,
-          globalAlpha: currentLineOpacity,
+          strokeStyle: lineColor,
+          lineWidth,
+          globalAlpha: lineOpacity,
         });
-
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(child.x, child.y);
         ctx.stroke();
-
-        // restore alpha if changed
         if (ctx.globalAlpha !== prevAlpha) ctx.globalAlpha = prevAlpha;
       }
-    });
-  });
+    }
+  }
 }
 
 /**
- * Compute visible node IDs for links without performing any drawing.
+ * Compute visible node ids from links without drawing.
  *
- * This helper lets callers determine which nodes are connected via visible edges
- * (respecting the existing edge-filtering behavior such as leaf-only hover filtering)
- * without actually rendering the edges. This is useful when the caller needs the
- * set of connected nodes to decide highlight behavior for nodes/labels, while the
- * actual edge drawing can be performed later.
+ * NOTE: annotated as `any` to avoid static-analysis complaints about shapes of link objects.
  *
- * NOTE: this function now uses a Set internally to avoid duplicates and will
- * ensure that, when hovering, if any edge connects to the hovered node we also
- * include the hovered node id itself in the returned set. This helps label
- * layout code include the hovered node's label when appropriate.
- *
- * @param {any[]} links - Array of link objects
- * @param {Map<string, any>} nodeIdToRenderedNodeMap - Map from node ID to rendered node data
- * @param {string|null} hoveredNodeId - Currently hovered node ID
- * @param {Map<string, any[]>} parentToChildrenNodeMap - Map from parent to children nodes
- * @returns {string[]} Array of visible node IDs from links
+ * @param {any} links
+ * @param {any} nodeIdToRenderedNodeMap
+ * @param {any} hoveredNodeId
+ * @returns {string[]}
  */
 export function computeVisibleEdgeNodeIds(
   links,
   nodeIdToRenderedNodeMap,
   hoveredNodeId,
-  parentToChildrenNodeMap,
 ) {
-  if (!links?.length) return [];
+  if (!links || links.length === 0) return [];
 
-  // Use a set to deduplicate node ids
   const visibleSet = new Set();
-
-  links.forEach((link) => {
-    const sourceNode = nodeIdToRenderedNodeMap.get(link.source);
-    const targetNode = nodeIdToRenderedNodeMap.get(link.target);
-
-    if (sourceNode && targetNode) {
-      // Reuse existing filtering logic to determine visibility. `shouldFilterEdge`
-      // returns true when the edge should be hidden (for example when hovering a leaf
-      // node and the edge isn't attached to that leaf). We include the edge when it's
-      // not filtered.
-      if (!shouldFilterEdge(link, hoveredNodeId, parentToChildrenNodeMap)) {
-        visibleSet.add(link.source);
-        visibleSet.add(link.target);
-      }
+  for (const link of links) {
+    const li = /** @type {any} */ (link);
+    const s = nodeIdToRenderedNodeMap.get(li.source);
+    const t = nodeIdToRenderedNodeMap.get(li.target);
+    if (s && t && !shouldFilterEdge(li, hoveredNodeId)) {
+      visibleSet.add(li.source);
+      visibleSet.add(li.target);
     }
-  });
+  }
 
-  // If hovering and at least one visible edge involves the hovered node, ensure
-  // the hovered node id is included so label layout can pick up the hovered node's label.
+  // If hovering and hovered node participates in visible edges, ensure it's present
   if (hoveredNodeId) {
-    // Check whether hovered node appears in any visible edge we discovered
     if (visibleSet.has(hoveredNodeId)) {
       visibleSet.add(hoveredNodeId);
     } else {
-      // Also check for edges that would be visible if the hovered node were attached.
-      // This covers cases where logic elsewhere filtered edges prematurely.
-      for (const link of links || []) {
+      for (const link of links) {
         if (
           (link.source === hoveredNodeId || link.target === hoveredNodeId) &&
           nodeIdToRenderedNodeMap.get(link.source) &&
           nodeIdToRenderedNodeMap.get(link.target) &&
-          !shouldFilterEdge(link, hoveredNodeId, parentToChildrenNodeMap)
+          !shouldFilterEdge(link, hoveredNodeId)
         ) {
           visibleSet.add(link.source);
           visibleSet.add(link.target);
@@ -542,15 +575,19 @@ export function computeVisibleEdgeNodeIds(
 }
 
 /**
- * Draws all edges in batch for better performance
- * @param {CanvasRenderingContext2D} ctx - Canvas context
- * @param {any[]} links - Array of link objects
- * @param {Map<string, any>} nodeIdToRenderedNodeMap - Map from node ID to rendered node data
- * @param {Map<string, any[]>} hierarchicalPathCache - Cache for hierarchical paths
- * @param {any} mergedStyle - Merged styles object
- * @param {string|null} hoveredNodeId - Currently hovered node ID
- * @param {Map<string, any[]>} parentToChildrenNodeMap - Map from parent to children nodes
- * @returns {string[]} Array of visible node IDs from drawn edges
+ * Draw all edges in batch. Returns array of visible node ids (unique).
+ *
+ * NOTE: annotate params as `any` to quiet static checks about the runtime shapes of link/node objects.
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {any} links
+ * @param {any} nodeIdToRenderedNodeMap
+ * @param {any} hierarchicalPathCache
+ * @param {any} mergedStyle
+ * @param {any} hoveredNodeId
+ * @param {any} highlightedNodeIds
+ * @param {any} bundlingStrength
+ * @returns {string[]}
  */
 export function drawEdges(
   ctx,
@@ -559,84 +596,141 @@ export function drawEdges(
   hierarchicalPathCache,
   mergedStyle,
   hoveredNodeId,
-  parentToChildrenNodeMap,
+  highlightedNodeIds = null,
   bundlingStrength = 0.97,
 ) {
-  if (!ctx || !links?.length) return [];
+  if (!ctx || !links || links.length === 0) return [];
 
-  const visibleNodeIds = /** @type {string[]} */ ([]);
-  // Keep a set to avoid duplicate pushes
+  // Normalize highlightedNodeIds into a Set for consistent `.has` checks downstream.
+  // This ensures the rest of the function can rely on `highlightedSet` being
+  // either `null` or a Set-like object.
+  let highlightedSet = null;
+  if (highlightedNodeIds != null) {
+    if (typeof highlightedNodeIds.has === 'function') {
+      // Already Set-like (SvelteSet / native Set)
+      highlightedSet = highlightedNodeIds;
+    } else if (Array.isArray(highlightedNodeIds)) {
+      highlightedSet = new Set(highlightedNodeIds);
+    } else {
+      highlightedSet = new Set([highlightedNodeIds]);
+    }
+  }
+
   const visibleSet = new Set();
 
-  links.forEach((link) => {
-    const sourceNode = nodeIdToRenderedNodeMap.get(link.source);
-    const targetNode = nodeIdToRenderedNodeMap.get(link.target);
+  for (const link of links) {
+    const li = /** @type {any} */ (link);
+    // Skip edges filtered by the hover policy early so we never attempt fallback
+    // drawing (which can produce straight-line fallbacks for non-associated edges).
+    if (shouldFilterEdge(li, hoveredNodeId)) continue;
+    const sNode = nodeIdToRenderedNodeMap.get(li.source);
+    const tNode = nodeIdToRenderedNodeMap.get(li.target);
+    if (!sNode || !tNode) continue;
 
-    if (sourceNode && targetNode) {
-      // Try normal drawing path first
-      const wasDrawn = drawEdge(
-        ctx,
-        link,
-        sourceNode,
-        targetNode,
-        hierarchicalPathCache,
-        nodeIdToRenderedNodeMap,
-        mergedStyle,
-        hoveredNodeId,
-        parentToChildrenNodeMap,
-        bundlingStrength,
-      );
+    const drawn = drawEdge(
+      ctx,
+      li,
+      sNode,
+      tNode,
+      hierarchicalPathCache,
+      nodeIdToRenderedNodeMap,
+      mergedStyle,
+      hoveredNodeId,
+      highlightedSet,
+      bundlingStrength,
+    );
 
-      if (wasDrawn) {
-        visibleSet.add(link.source);
-        visibleSet.add(link.target);
-      } else {
-        // If the edge wasn't drawn but it connects to the hovered node,
-        // draw a fallback visible line using highlight or base edge styles.
-        if (
-          hoveredNodeId !== null &&
-          (link.source === hoveredNodeId || link.target === hoveredNodeId)
-        ) {
-          // Resolve highlight vs base edge styles (prefer edge.highlight when present)
-          const edgeHighlight = mergedStyle?.edge?.highlight ?? {};
-          const baseEdge = mergedStyle?.edge ?? {};
-          const fallbackColor =
-            edgeHighlight.strokeColor ?? baseEdge.strokeColor ?? '#ff6b6b';
-          const fallbackOpacity =
-            edgeHighlight.strokeOpacity ?? baseEdge.strokeOpacity ?? 1;
-          const fallbackWidth =
-            edgeHighlight.strokeWidth ?? baseEdge.strokeWidth ?? 1;
-
-          const prevStroke = ctx.strokeStyle;
-          const prevAlpha = ctx.globalAlpha;
-          const prevWidth = ctx.lineWidth;
-
-          setCanvasStyles(ctx, {
-            strokeStyle: fallbackColor,
-            globalAlpha: fallbackOpacity,
-            lineWidth: fallbackWidth,
-          });
-
-          ctx.beginPath();
-          ctx.moveTo(sourceNode.x, sourceNode.y);
-          ctx.lineTo(targetNode.x, targetNode.y);
-          ctx.stroke();
-
-          // restore previous context state
-          if (ctx.globalAlpha !== prevAlpha) ctx.globalAlpha = prevAlpha;
-          if (ctx.lineWidth !== prevWidth) ctx.lineWidth = prevWidth;
-          if (ctx.strokeStyle !== prevStroke) ctx.strokeStyle = prevStroke;
-
-          // Mark nodes as visible so labels/highlight logic can pick them up
-          visibleSet.add(link.source);
-          visibleSet.add(link.target);
-        }
-      }
+    if (drawn) {
+      visibleSet.add(li.source);
+      visibleSet.add(li.target);
+      continue;
     }
-  });
 
-  // convert set back into array (keeps unique ids)
-  for (const id of visibleSet) visibleNodeIds.push(id);
+    // Fallback: if not drawn but should be visible because of hover/highlight, prefer drawing
+    // using the hierarchical bundling path (so hover/highlighted edges remain bundled).
+    // If that still doesn't draw (e.g. style says 'none' / width <= 0), fall back to a simple straight line.
+    const shouldFallback =
+      (hoveredNodeId !== null &&
+        (li.source === hoveredNodeId || li.target === hoveredNodeId)) ||
+      (highlightedSet &&
+        (highlightedSet.has(li.source) || highlightedSet.has(li.target)));
 
-  return visibleNodeIds;
+    if (shouldFallback) {
+      const edgeHighlight = mergedStyle?.highlight?.edge ?? {};
+      const baseEdgeStyle = mergedStyle?.edge ?? {};
+
+      // Prepare a temporary merged-style that ensures drawEdge will see highlight overrides
+      // so that drawEdge can render a bundled path with the highlighted appearance.
+      const fallbackMerged = {
+        ...(mergedStyle || {}),
+        // Ensure `highlight.edge` contains the highlight overrides
+        highlight: {
+          ...(mergedStyle?.highlight || {}),
+          edge: {
+            ...(baseEdgeStyle || {}),
+            ...(edgeHighlight || {}),
+          },
+        },
+        // Also ensure top-level edge is set so fallbackMerged.edge is consistent
+        edge: {
+          ...(baseEdgeStyle || {}),
+          ...(edgeHighlight || {}),
+        },
+      };
+
+      // Try to draw using hierarchical bundling (preferred)
+      try {
+        const drawnByBundling = drawEdge(
+          ctx,
+          li,
+          sNode,
+          tNode,
+          hierarchicalPathCache,
+          nodeIdToRenderedNodeMap,
+          fallbackMerged,
+          hoveredNodeId,
+          highlightedSet,
+          bundlingStrength,
+        );
+        if (drawnByBundling) {
+          visibleSet.add(li.source);
+          visibleSet.add(li.target);
+          continue;
+        }
+      } catch {
+        // If drawEdge threw, fall back to simple straight line below
+      }
+
+      // Last-resort fallback: straight line using highlight/base styles (unchanged appearance)
+      const color =
+        edgeHighlight.strokeColor ?? baseEdgeStyle.strokeColor ?? '#ff6b6b';
+      const opacity =
+        edgeHighlight.strokeOpacity ?? baseEdgeStyle.strokeOpacity ?? 1;
+      const width = edgeHighlight.strokeWidth ?? baseEdgeStyle.strokeWidth ?? 1;
+
+      const prevStroke = ctx.strokeStyle;
+      const prevAlpha = ctx.globalAlpha;
+      const prevWidth = ctx.lineWidth;
+
+      setCanvasStyles(ctx, {
+        strokeStyle: color,
+        globalAlpha: opacity,
+        lineWidth: width,
+      });
+      ctx.beginPath();
+      ctx.moveTo(sNode.x, sNode.y);
+      ctx.lineTo(tNode.x, tNode.y);
+      ctx.stroke();
+
+      // No halo drawing for highlighted endpoints. Restore canvas state and continue.
+      if (ctx.globalAlpha !== prevAlpha) ctx.globalAlpha = prevAlpha;
+      if (ctx.lineWidth !== prevWidth) ctx.lineWidth = prevWidth;
+      if (ctx.strokeStyle !== prevStroke) ctx.strokeStyle = prevStroke;
+
+      visibleSet.add(li.source);
+      visibleSet.add(li.target);
+    }
+  }
+
+  return Array.from(visibleSet);
 }

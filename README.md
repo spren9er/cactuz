@@ -111,49 +111,67 @@ interface Styles {
     strokeColor?: string;
     strokeOpacity?: number;
     strokeWidth?: number;
-    highlight?: {
-      fillColor?: string;
-      fillOpacity?: number;
-      strokeColor?: string;
-      strokeOpacity?: number;
-      strokeWidth?: number;
-    }
   };
   edge?: {
     strokeColor?: string;
     strokeOpacity?: number;
     strokeWidth?: number;
-    highlight?: {
-      strokeColor?: string;
-      strokeOpacity?: number;
-      strokeWidth?: number;
-    }
   };
   label?: {
-    textColor?: string;
-    textOpacity?: number;
-    fontFamily?: string;
-    minFontSize?: number;
-    maxFontSize?: number;
-    fontWeight?: string;
-    padding?: number;
-    link?: {
-      strokeColor?: string;
-      strokeOpacity?: number;
-      strokeWidth?: number;
-      padding?: number;
-      length?: number;
-    };
-    highlight?: {
+    inner: {
       textColor?: string;
       textOpacity?: number;
+      fontFamily?: string;
       fontWeight?: string;
+      minFontSize?: number;
+      maxFontSize?: number;
+    },
+    outer: {
+      textColor?: string;
+      textOpacity?: number;
+      fontFamily?: string;
+      fontWeight?: string;
+      fontSize?: number;
+      padding?: number;
+      link?: {
+        strokeColor?: string;
+        strokeOpacity?: number;
+        strokeWidth?: number;
+        padding?: number;
+        length?: number;
+      };
     };
   };
   line?: {
     strokeColor?: string;
     strokeOpacity?: number;
     strokeWidth?: number;
+  };
+  highlight?: {
+    node?: {
+      fillColor?: string;
+      fillOpacity?: number;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWidth?: number;
+    };
+    edge?: {
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWidth?: number;
+    };
+    label?: {
+      inner: {
+        textColor?: string;
+        textOpacity?: number;
+        fontWeight?: string;
+      };
+      outer: {
+        textColor?: string;
+        textOpacity?: number;
+        fontWeight?: string;
+      };
+    };
   };
   depths?: DepthStyle[]; // Per-depth overrides
 }
@@ -186,33 +204,30 @@ interface DepthStyle {
     strokeColor?: string;
     strokeOpacity?: number;
     strokeWidth?: number;
-    highlight?: {
-      fillColor?: string;
-      fillOpacity?: number;
-      strokeColor?: string;
-      strokeOpacity?: number;
-      strokeWidth?: number;
-    };
   };
   label?: {
-    textColor?: string;
-    textOpacity?: number;
-    fontFamily?: string;
-    minFontSize?: number;
-    maxFontSize?: number;
-    fontWeight?: string;
-    padding?: number;
-    link?: {
-      strokeColor?: string;
-      strokeOpacity?: number;
-      strokeWidth?: number;
-      padding?: number;
-      length?: number;
-    };
-    highlight?: {
+    inner: {
       textColor?: string;
       textOpacity?: number;
+      fontFamily?: string;
       fontWeight?: string;
+      minFontSize?: number;
+      maxFontSize?: number;
+    },
+    outer: {
+      textColor?: string;
+      textOpacity?: number;
+      fontFamily?: string;
+      fontWeight?: string;
+      fontSize?: number;
+      padding?: number;
+      link?: {
+        strokeColor?: string;
+        strokeOpacity?: number;
+        strokeWidth?: number;
+        padding?: number;
+        length?: number;
+      };
     };
   };
   line?: {
@@ -220,6 +235,27 @@ interface DepthStyle {
     strokeOpacity?: number;
     strokeWidth?: number;
   };
+  highlight?: {
+    node?: {
+      fillColor?: string;
+      fillOpacity?: number;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWidth?: number;
+    };
+    label?: {
+      inner: {
+        textColor?: string;
+        textOpacity?: number;
+        fontWeight?: string;
+      };
+      outer: {
+        textColor?: string;
+        textOpacity?: number;
+        fontWeight?: string;
+      };
+    };
+  }  
 }
 ```
 
@@ -310,40 +346,50 @@ This example demonstrates styles and per-depth overrides. It shows a global styl
       strokeWidth: 2,
     },
     label: {
-      textColor: '#2c3e50',
-      textOpacity: 1,
-      fontFamily: 'Arial, sans-serif',
-      minFontSize: 8,
-      maxFontSize: 16,
-      padding: 2,
-      link: {
-        strokeColor: '#aaaaaa',
-        strokeOpacity: 1,
-        strokeWidth: 0.6,
-        padding: 1,
+      inner: {
+        textColor: '#2c3e50',
+        textOpacity: 1,
+        fontFamily: 'Arial, sans-serif',
+        minFontSize: 8,
+        maxFontSize: 16,
       },
+      outer: {
+        textColor: '#00ff00',
+        textOpacity: 1,
+        fontFamily: 'Arial, sans-serif',
+        minFontSize: 8,
+        maxFontSize: 16,
+        padding: 2,
+        link: {
+          strokeColor: '#aaaaaa',
+          strokeOpacity: 1,
+          strokeWidth: 0.6,
+          padding: 1,
+        }        
+      }
     },
     line: {
       strokeColor: '#cccccc',
       strokeOpacity: 1,
       strokeWidth: 1,
     },
-    node: {
-      highlight: {
-        fillColor: '#ffd700',
-        strokeColor: '#ff8c00',
-      },
-    },
     depths: [
       {
         depth: 0, // root
         node: { fillColor: '#2c3e50', strokeColor: '#ecf0f1' },
-        label: { textColor: '#ecf0f1' },
+        label: { inner: { textColor: '#ecf0f1' } },
       },
       {
         depth: -1, // leaves
         node: { fillColor: '#e74c3c', strokeColor: '#c0392b' },
-        label: { textColor: '#ffffff' },
+        label: {
+          inner: {
+            textColor: '#ffffff'
+          },
+          outer: {
+            fontWeight: 'bold'
+          }
+        },
       },
     ],
   };

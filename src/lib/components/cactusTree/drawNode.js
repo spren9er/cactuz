@@ -182,72 +182,63 @@ export function calculateNodeStyle(
     defaultStrokeOpacity,
   );
 
-  // Determine whether highlighting is enabled for this node.
-  // The schema does not explicitly include a boolean `enabled` flag, so we preserve a sensible default of true.
-  // If consumers add an `enabled` boolean under node.highlight (global or depth), honor it.
-  const depthHighlight =
-    depthStyle && depthStyle.node && depthStyle.node.highlight;
-  const globalHighlight =
-    mergedStyle && mergedStyle.node && mergedStyle.node.highlight;
-  const highlightEnabled =
-    depthHighlight && depthHighlight.enabled !== undefined
-      ? depthHighlight.enabled
-      : globalHighlight && globalHighlight.enabled !== undefined
-        ? globalHighlight.enabled
-        : true;
+  // Highlight lookup is performed directly in `readNodeHighlightProp`.
 
   // Check if this node is hovered or is associated with the hovered node (via highlightedNodeIds)
-  // Highlighting only applies if the highlight feature is enabled.
   const isDirectlyHovered = hoveredNodeId === node.id;
   const isLinkedHovered =
     highlightedNodeIds && typeof highlightedNodeIds.has === 'function'
       ? highlightedNodeIds.has(node.id)
       : false;
-  const isHovered =
-    (isDirectlyHovered || isLinkedHovered) && !!highlightEnabled;
+  const isHovered = isDirectlyHovered || isLinkedHovered;
 
   // If hovered (directly or via links), use highlight styles if provided; otherwise fall back to node styles
   // Highlight properties are nested under `node.highlight`
-  const highlightFill = readNestedStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'highlight',
-    'fillColor',
-    undefined,
-  );
-  const highlightFillOpacity = readNestedStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'highlight',
-    'fillOpacity',
-    undefined,
-  );
-  const highlightStroke = readNestedStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'highlight',
-    'strokeColor',
-    undefined,
-  );
-  const highlightStrokeOpacity = readNestedStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'highlight',
+  // Helper: read highlight properties considering depth-specific, top-level highlight.node, and legacy node.highlight locations.
+  /**
+   * Read a highlight property for a node, considering depth-specific overrides and
+   * both the top-level `mergedStyle.highlight.node` and legacy `mergedStyle.node.highlight`.
+   *
+   * @param {string} prop - Property name inside the highlight group (e.g., 'fillColor')
+   * @param {*} [defaultValue] - Value to return if the property is not found
+   * @returns {*}
+   */
+  function readNodeHighlightProp(prop, defaultValue) {
+    if (
+      depthStyle &&
+      depthStyle.node &&
+      depthStyle.node.highlight &&
+      depthStyle.node.highlight[prop] !== undefined
+    ) {
+      return depthStyle.node.highlight[prop];
+    }
+    if (
+      mergedStyle &&
+      mergedStyle.highlight &&
+      mergedStyle.highlight.node &&
+      mergedStyle.highlight.node[prop] !== undefined
+    ) {
+      return mergedStyle.highlight.node[prop];
+    }
+    if (
+      mergedStyle &&
+      mergedStyle.node &&
+      mergedStyle.node.highlight &&
+      mergedStyle.node.highlight[prop] !== undefined
+    ) {
+      return mergedStyle.node.highlight[prop];
+    }
+    return defaultValue;
+  }
+
+  const highlightFill = readNodeHighlightProp('fillColor', undefined);
+  const highlightFillOpacity = readNodeHighlightProp('fillOpacity', undefined);
+  const highlightStroke = readNodeHighlightProp('strokeColor', undefined);
+  const highlightStrokeOpacity = readNodeHighlightProp(
     'strokeOpacity',
     undefined,
   );
-  const highlightStrokeWidth = readNestedStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'highlight',
-    'strokeWidth',
-    undefined,
-  );
+  const highlightStrokeWidth = readNodeHighlightProp('strokeWidth', undefined);
 
   const finalFill =
     isHovered && highlightFill !== undefined ? highlightFill : currentFill;
@@ -263,6 +254,12 @@ export function calculateNodeStyle(
     isHovered && highlightStrokeOpacity !== undefined
       ? highlightStrokeOpacity
       : currentStrokeOpacity;
+
+  // Allow highlight to explicitly override the node stroke width when provided.
+  // Historically we prevented highlights from increasing the node stroke width
+  // (favoring halos for emphasis). In some use-cases consumers want the highlight
+  // to be able to both increase or decrease the stroke width. Honor explicit
+  // highlight strokeWidth when present.
   const finalStrokeWidth =
     isHovered && highlightStrokeWidth !== undefined
       ? highlightStrokeWidth

@@ -17,118 +17,38 @@
     buildLookupMaps,
   } from '$lib/components/cactusTree/layoutUtils.js';
 
-  /** @type {{
-      width: number,
-      height: number,
-      nodes: Array<{ id: string, name: string, parent: string | null, weight?: number }>,
-      links?: Array<{ source: string, target: string }>,
-      options?: {
-        overlap?: number,
-        arcSpan?: number,
-        sizeGrowthRate?: number,
-        orientation?: number,
-        zoom?: number,
-        numLabels?: number,
-        bundlingStrength?: number
-      },
-      styles?: {
-        node?: {
-          fillColor?: string,
-          fillOpacity?: number,
-          strokeColor?: string,
-          strokeOpacity?: number,
-          strokeWidth?: number,
-          highlight?: {
-            fillColor?: string,
-            fillOpacity?: number,
-            strokeColor?: string,
-            strokeOpacity?: number,
-            strokeWidth?: number,
-          }
-        },
-        edge?: {
-          strokeColor?: string,
-          strokeOpacity?: number,
-          strokeWidth?: number,
-          highlight?: {
-            strokeColor?: string,
-            strokeOpacity?: number,
-            strokeWidth?: number
-          }
-        },
-        label?: {
-          textColor?: string,
-          textOpacity?: number,
-          fontFamily?: string,
-          minFontSize?: number,
-          maxFontSize?: number,
-          fontWeight?: string,
-          padding?: number,
-          link?: {
-            strokeColor?: string,
-            strokeOpacity?: number,
-            strokeWidth?: number,
-            length?: number,
-            padding?: number,
-          },
-          highlight?: {
-            textColor?: string,
-            textOpacity?: number,
-            fontWeight?: string,
-          }
-        },
-        line?: {
-          strokeColor?: string,
-          strokeOpacity?: number,
-          strokeWidth?: number
-        },
-        depths?: Array<{
-          depth: number,
-          node?: {
-            fillColor?: string,
-            fillOpacity?: number,
-            strokeColor?: string,
-            strokeOpacity?: number,
-            strokeWidth?: number,
-            highlight?: {
-              fillColor?: string,
-              fillOpacity?: number,
-              strokeColor?: string,
-              strokeOpacity?: number,
-              strokeWidth?: number,
-            }
-          },
-          label?: {
-            textColor?: string,
-            textOpacity?: number,
-            fontFamily?: string,
-            minFontSize?: number,
-            maxFontSize?: number,
-            fontWeight?: string,
-            padding?: number,
-            link?: {
-              strokeColor?: string,
-              strokeOpacity?: number,
-              strokeWidth?: number,
-              length?: number,
-              padding?: number,
-            },
-            highlight?: {
-              textColor?: string,
-              textOpacity?: number,
-              fontWeight?: string,
-            }
-          },
-          line?: {
-            strokeColor?: string,
-            strokeOpacity?: number,
-            strokeWidth?: number
-          }
-        }>
-      },
-      pannable?: boolean,
-      zoomable?: boolean
-    }} */
+  /**
+   * Simplified prop type for the component.
+   *
+   * The original, deeply nested JSDoc caused parsing issues in the toolchain.
+   * This simplified annotation documents the main shape without exhaustive nesting.
+   *
+   * @typedef {Object} CactusTreeProps
+   * @property {number} width
+   * @property {number} height
+   * @property {Array<Object>} nodes - array of nodes ({ id, name, parent, weight? })
+   * @property {Array<Object>} [links] - array of links ({ source, target })
+   * @property {Object} [options] - options (overlap, arcSpan, sizeGrowthRate, orientation, zoom, numLabels, bundlingStrength)
+   * @property {Object} [styles] - style overrides (node, edge, label, line, highlight, depths)
+   * @property {boolean} [pannable]
+   * @property {boolean} [zoomable]
+   */
+
+  /**
+   * Local RenderedNode type (lightweight, used for JSDoc typing within this file).
+   * This matches the minimal fields the drawing/layout code expects.
+   *
+   * @typedef {Object} RenderedNode
+   * @property {string} id
+   * @property {number} x
+   * @property {number} y
+   * @property {number} depth
+   * @property {number} radius
+   * @property {string} name
+   * @property {Object} [meta]
+   */
+
+  // Props (kept simple in code; types above for docs only)
   let {
     width,
     height,
@@ -154,77 +74,108 @@
     node: {
       fillColor: '#efefef',
       fillOpacity: 1,
-      strokeColor: '#333333',
+      strokeColor: '#aaaaaa',
       strokeOpacity: 1,
       strokeWidth: 1,
-      highlight: {
-        fillColor: '#ffcc99',
-        fillOpacity: 1,
-        strokeColor: '#ff6600',
-        strokeOpacity: 1,
-        strokeWidth: 1,
-        enabled: true,
-      },
     },
     edge: {
-      strokeColor: '#ff6b6b',
+      strokeColor: '#333333',
       strokeOpacity: 0.1,
       strokeWidth: 1,
-      highlight: {
-        strokeColor: '#ff6600',
-        strokeOpacity: 1,
-        strokeWidth: 1,
-      },
     },
     label: {
-      textColor: '#333333',
-      textOpacity: 1,
-      fontFamily: 'monospace',
-      minFontSize: 8,
-      maxFontSize: 14,
-      fontWeight: 'normal',
-      padding: 1,
-      link: {
-        strokeColor: '#333333',
-        strokeOpacity: 1,
-        strokeWidth: 0.5,
-        padding: 0,
+      inner: {
+        textColor: '#333333',
+        textOpacity: 1,
+        fontFamily: 'monospace',
+        fontWeight: 'normal',
+        minFontSize: 9,
+        maxFontSize: 14,
       },
-      highlight: {
-        textColor: undefined,
-        textOpacity: undefined,
-        fontWeight: undefined,
+      outer: {
+        textColor: '#333333',
+        textOpacity: 1,
+        fontFamily: 'monospace',
+        fontWeight: 'normal',
+        fontSize: 9,
+        padding: 1,
+        link: {
+          strokeColor: '#cccccc',
+          strokeOpacity: 1,
+          strokeWidth: 0.5,
+          padding: 0,
+          length: 5,
+        },
       },
     },
     line: {
-      strokeColor: '#333333',
+      strokeColor: '#aaaaaa',
       strokeOpacity: 1,
       strokeWidth: 1,
+    },
+    highlight: {
+      node: {
+        fillColor: '#ffbbb7',
+        fillOpacity: 1,
+        strokeColor: '#ea575a',
+        strokeOpacity: 1,
+        strokeWidth: 1.5,
+      },
+      edge: {
+        strokeColor: '#ea575a',
+        strokeOpacity: 1,
+        strokeWidth: 1,
+      },
+      label: {
+        inner: {
+          textColor: '#ea575a',
+          textOpacity: 1,
+          fontWeight: 'bold',
+        },
+        outer: {
+          textColor: '#333333',
+          textOpacity: 1,
+          fontWeight: 'normal',
+        },
+      },
     },
     depths: [],
   };
 
-  // Merge options and styles
+  // Merge options and styles using simple derived-style helpers
   const mergedOptions = $derived({ ...defaultOptions, ...options });
+
   const mergedStyle = $derived({
-    node: {
-      ...(defaultStyle.node || {}),
-      ...(styles.node || {}),
-      highlight: {
-        ...((defaultStyle.node && defaultStyle.node.highlight) || {}),
-        ...((styles.node && styles.node.highlight) || {}),
-      },
-    },
-    edge: {
-      ...(defaultStyle.edge || {}),
-      ...(styles.edge || {}),
-      highlight: {
-        ...((defaultStyle.edge && defaultStyle.edge.highlight) || {}),
-        ...((styles.edge && styles.edge.highlight) || {}),
-      },
-    },
-    label: { ...(defaultStyle.label || {}), ...(styles.label || {}) },
+    node: (() => {
+      const s = { ...(defaultStyle.node || {}), ...(styles.node || {}) };
+      if (s && typeof s === 'object' && 'highlight' in s) delete s.highlight;
+      return s;
+    })(),
+    edge: (() => {
+      const s = { ...(defaultStyle.edge || {}), ...(styles.edge || {}) };
+      if (s && typeof s === 'object' && 'highlight' in s) delete s.highlight;
+      return s;
+    })(),
+    label: (() => {
+      const s = { ...(defaultStyle.label || {}), ...(styles.label || {}) };
+      if (s && typeof s === 'object' && 'highlight' in s) delete s.highlight;
+      return s;
+    })(),
     line: { ...(defaultStyle.line || {}), ...(styles.line || {}) },
+    highlight: {
+      node: {
+        ...((defaultStyle.highlight && defaultStyle.highlight.node) || {}),
+        ...((styles.highlight && styles.highlight.node) || {}),
+      },
+      edge: {
+        ...((defaultStyle.highlight && defaultStyle.highlight.edge) || {}),
+        ...((styles.highlight && styles.highlight.edge) || {}),
+      },
+      label: {
+        ...((defaultStyle.highlight && defaultStyle.highlight.label) || {}),
+        ...((styles.highlight && styles.highlight.label) || {}),
+      },
+    },
     depths: styles.depths ?? defaultStyle.depths,
   });
 
@@ -234,14 +185,29 @@
   /** @type {CanvasRenderingContext2D|null} */
   let ctx = $state(null);
 
-  // Layout and rendering state (no reactive state for these)
-  /** @type {Array<any>} */
+  // Layout and rendering state with explicit types to avoid inference issues.
+  /** @type {RenderedNode[]} */
   let renderedNodes = [];
+
+  /** @type {SvelteMap<string, RenderedNode>} */
   let nodeIdToRenderedNodeMap = new SvelteMap();
+
+  /** @type {SvelteSet<string>} */
   let leafNodes = new SvelteSet();
+
+  /**
+   * Map from negative depth number (e.g., -1, -2) to a Set of node IDs at that depth.
+   * @type {SvelteMap<number, Set<string>>}
+   */
   let negativeDepthNodes = new SvelteMap();
+
+  /** @type {SvelteMap<number, any>} */
   let depthStyleCache = new SvelteMap();
+
+  /** @type {SvelteMap<string, any>} */
   let hierarchicalPathCache = new SvelteMap();
+
+  /** @type {SvelteMap<string, any>} */
   let parentToChildrenNodeMap = new SvelteMap();
 
   // Interaction state
@@ -262,18 +228,23 @@
   let minZoomLimit = $state(0.1);
   let maxZoomLimit = $state(10);
 
-  // Animation frame for render scheduling
+  // Animation frame id
   /** @type {number|null} */
   let animationFrameId = null;
 
-  // Calculate layout and build lookup maps (called on each render)
   function calculateLayoutAndMaps() {
     if (!nodes?.length) {
       renderedNodes = [];
+      // clear maps
+      nodeIdToRenderedNodeMap = new SvelteMap();
+      leafNodes = new SvelteSet();
+      negativeDepthNodes = new SvelteMap();
+      depthStyleCache = new SvelteMap();
+      hierarchicalPathCache = new SvelteMap();
+      parentToChildrenNodeMap = new SvelteMap();
       return;
     }
 
-    // Calculate layout with current zoom
     const layoutZoom = mergedOptions.zoom * currentZoom;
     renderedNodes = calculateLayout(
       width,
@@ -283,13 +254,16 @@
       mergedOptions,
     );
 
-    // Build lookup maps
-    const lookupMaps =
-      /** @type {{ nodeIdToRenderedNodeMap: any, leafNodes: any, negativeDepthNodes: any, nodeIdToNodeMap: any, depthStyleCache: any, hierarchicalPathCache: any, parentToChildrenNodeMap: any }} */ (
-        buildLookupMaps(renderedNodes, mergedStyle)
-      );
+    // Restore explicit cast for lookup maps so the analyzer knows the expected shape.
+    const lookupMaps = /** @type {{
+        nodeIdToRenderedNodeMap: SvelteMap<string, RenderedNode>,
+        leafNodes: SvelteSet<string>,
+        negativeDepthNodes: SvelteMap<number, Set<string>>,
+        depthStyleCache: SvelteMap<number, any>,
+        hierarchicalPathCache: SvelteMap<string, any>,
+        parentToChildrenNodeMap: SvelteMap<string, any>
+      }} */ (buildLookupMaps(renderedNodes, mergedStyle));
 
-    // Update maps
     nodeIdToRenderedNodeMap = lookupMaps.nodeIdToRenderedNodeMap;
     leafNodes = lookupMaps.leafNodes;
     negativeDepthNodes = lookupMaps.negativeDepthNodes;
@@ -297,16 +271,11 @@
     hierarchicalPathCache = lookupMaps.hierarchicalPathCache;
     parentToChildrenNodeMap = lookupMaps.parentToChildrenNodeMap;
 
-    // Update zoom limits
     if (nodes?.length) {
-      const limits =
-        /** @type {{ minZoomLimit: number, maxZoomLimit: number }} */ (
-          computeZoomLimits(width, height, nodes, mergedOptions)
-        );
+      const limits = computeZoomLimits(width, height, nodes, mergedOptions);
       minZoomLimit = limits.minZoomLimit;
       maxZoomLimit = limits.maxZoomLimit;
 
-      // Reset zoom if it's outside the new limits
       if (currentZoom < minZoomLimit || currentZoom > maxZoomLimit) {
         currentZoom = 1.0;
         panX = 0;
@@ -315,18 +284,13 @@
     }
   }
 
-  // Main draw function
   function draw() {
     if (!canvas || !ctx) return;
 
-    // Clear and set up canvas context
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
-
-    // Apply only pan transform (zoom is handled in layout calculation)
     ctx.translate(panX, panY);
 
-    // Draw connecting lines (if overlap < 0)
     drawConnectingLines(
       ctx,
       renderedNodes,
@@ -337,32 +301,23 @@
       negativeDepthNodes,
     );
 
-    // Compute which nodes are part of visible edges (without drawing them).
-    // We use this to identify direct neighbors of the hovered node for highlighting.
     const edgeNodeIds = computeVisibleEdgeNodeIds(
       links,
       nodeIdToRenderedNodeMap,
       hoveredNodeId,
-      parentToChildrenNodeMap,
     );
 
-    // Build a set and compute highlighted node ids (include hovered node itself + direct neighbors
-    // only if that neighbor is part of the visible edges). This prevents broad highlighting on
-    // non-leaf hovers while ensuring the hovered node's own label can be shown.
-    // Use SvelteSet for persistent reactive collections elsewhere in the component,
-    // but here we need an ephemeral set that supports standard Set semantics for the
-    // drawing/label logic, so we populate a SvelteSet via .add instead of using
-    // the constructor with arrays.
     const edgeNodeIdSet = new SvelteSet();
     if (edgeNodeIds && edgeNodeIds.length) {
       for (const id of edgeNodeIds) {
         edgeNodeIdSet.add(id);
       }
     }
+
     const highlightedNodeIds = (() => {
       const neighbors = new SvelteSet();
       if (!hoveredNodeId) return neighbors;
-      neighbors.add(hoveredNodeId); // include hovered node itself
+      neighbors.add(hoveredNodeId);
       for (const link of links || []) {
         if (link.source === hoveredNodeId && edgeNodeIdSet.has(link.target)) {
           neighbors.add(link.target);
@@ -376,7 +331,6 @@
       return neighbors;
     })();
 
-    // Draw non-leaf nodes first (so edges are drawn over non-leaf nodes)
     drawNodes(
       ctx,
       renderedNodes,
@@ -389,7 +343,6 @@
       'nonLeaf',
     );
 
-    // Draw edges on top of non-leaf nodes
     drawEdges(
       ctx,
       links,
@@ -397,11 +350,10 @@
       hierarchicalPathCache,
       mergedStyle,
       hoveredNodeId,
-      parentToChildrenNodeMap,
+      highlightedNodeIds,
       Number(mergedOptions?.bundlingStrength ?? 0.97),
     );
 
-    // Draw leaf nodes over edges (leaf nodes should appear on top of edges)
     drawNodes(
       ctx,
       renderedNodes,
@@ -414,7 +366,6 @@
       'leaf',
     );
 
-    // Draw labels (pass hover + highlighted nodes so labels/links can apply highlight & filtering)
     drawLabels(
       ctx,
       renderedNodes,
@@ -432,19 +383,16 @@
     ctx.restore();
   }
 
-  // Render function (matches original pattern)
   function render() {
     if (!canvas || !nodes?.length) {
       return;
     }
 
-    // Setup canvas on every render like the original
     ctx = setupCanvas(canvas, width, height);
     calculateLayoutAndMaps();
     draw();
   }
 
-  // Schedule render function (matches original)
   function scheduleRender() {
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId);
@@ -456,7 +404,6 @@
     });
   }
 
-  // Initialize canvas on mount
   onMount(() => {
     if (canvas) {
       currentZoom = mergedOptions.zoom;
@@ -470,14 +417,11 @@
     };
   });
 
-  // Create mouse handlers as derived to ensure proper timing and avoid canvas issues
   const mouseHandlers = $derived.by(() => {
-    // Don't create handlers until canvas is ready
     if (!canvas) return null;
 
     const mutableState = {
-      // Use a static reference to prevent reactive dependencies
-      canvas: canvas,
+      canvas,
       get hoveredNodeId() {
         return hoveredNodeId;
       },
