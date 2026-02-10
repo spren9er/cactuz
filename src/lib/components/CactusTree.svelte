@@ -440,11 +440,9 @@
     if (!canvas || !nodes?.length) {
       return;
     }
-    console.time('cactuz:render');
     ctx = setupCanvas(canvas, width, height);
     calculateLayoutAndMaps();
     draw();
-    console.timeEnd('cactuz:render');
   }
 
   function scheduleRender() {
