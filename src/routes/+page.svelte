@@ -21,7 +21,7 @@
     sizeGrowthRate: 0.8,
     orientation: 90,
     zoom: 1.0,
-    numLabels: 30,
+    numLabels: 20,
     bundlingStrength: 0.97,
     strategy: 'mute',
     muteOpacity: 0.2,
@@ -55,7 +55,7 @@
     { value: 'minimal.json', label: 'Minimal' },
   ];
 
-  let selectedStyle = 'default.json';
+  let selectedStyle = 'minimal.json';
   let currentStyles = {};
 
   /** @param {string} styleName */

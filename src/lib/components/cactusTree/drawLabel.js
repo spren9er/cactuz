@@ -794,7 +794,7 @@ export function drawPositionedLabel(
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
- * @param {number} [numLabels=30]
+ * @param {number} [numLabels=20]
  * @param {number} [panX=0]
  * @param {number} [panY=0]
  * @returns {{labels:any[],links:any[],nodesWithLabels:any[],labelMinFontSize:number,labelMaxFontSize:number}|null}
@@ -808,7 +808,7 @@ export function computeLabelLayout(
   mergedStyle,
   depthStyleCache,
   negativeDepthNodes,
-  numLabels = 30,
+  numLabels = 20,
   panX = 0,
   panY = 0,
 ) {
@@ -868,7 +868,7 @@ export function computeLabelLayout(
     );
   });
 
-  const labelLimit = Number(numLabels ?? 30);
+  const labelLimit = Number(numLabels ?? 20);
   if (labelLimit === 0) return null;
 
   let nodesWithLabels;
@@ -1086,7 +1086,7 @@ export function computeLabelLayout(
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
- * @param {number} [numLabels=30]
+ * @param {number} [numLabels=20]
  * @param {number} [panX=0]
  * @param {number} [panY=0]
  * @returns {void}
@@ -1100,7 +1100,7 @@ export function drawLabels(
   mergedStyle,
   depthStyleCache,
   negativeDepthNodes,
-  numLabels = 30,
+  numLabels = 20,
   panX = 0,
   panY = 0,
 ) {

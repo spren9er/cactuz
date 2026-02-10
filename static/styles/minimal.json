@@ -1,24 +1,23 @@
 {
   "node": {
     "fillColor": "transparent",
-    "strokeColor": "#333333",
-    "strokeOpacity": 0.025,
+    "strokeColor": "#efefef",
     "strokeWidth": 1
   },
   "edge": {
-    "strokeColor": "transparent",
-    "strokeWidth": 0
+    "strokeColor": "#333333",
+    "strokeWidth": 1
   },
   "label": {
     "inner": {
-      "textColor": "transparent"
+      "textColor": "#333333"
     },
     "outer": {
       "textColor": "transparent",
-      "padding": 0,
+      "padding": 2,
       "link": {
         "strokeColor": "transparent",
-        "length": 0,
+        "length": 10,
         "padding": 0
       }
     }
@@ -29,8 +28,10 @@
   },
   "highlight": {
     "node": {
-      "fillColor": "transparent",
-      "strokeColor": "#999999"
+      "fillColor": "#efefef",
+      "fillOpacity": 0.75,
+      "strokeColor": "#dedede",
+      "strokeOpacity": 0.75
     },
     "edge": {
       "strokeColor": "#333333",
@@ -38,14 +39,14 @@
     },
     "label": {
       "inner": {
-        "textColor": "transparent"
+        "textColor": "#333333"
       },
       "outer": {
-        "textColor": "transparent",
-        "padding": 3,
+        "textColor": "#333333",
+        "padding": 2,
         "link": {
           "strokeColor": "#333333",
-          "length": 0,
+          "length": 10,
           "padding": 0
         }
       }
@@ -56,7 +57,9 @@
       "depth": -1,
       "node": {
         "fillColor": "#333333",
-        "fillOpacity": 0.2
+        "fillOpacity": 1,
+        "strokeColor": "#333333",
+        "strokeOpacity": 1
       },
       "label": {
         "inner": {
@@ -66,6 +69,7 @@
       "highlight": {
         "node": {
           "fillColor": "#efefef",
+          "fillOpacity": 1,
           "strokeColor": "#333333",
           "strokeWidth": 1.5
         },
@@ -82,146 +86,6 @@
             }
           }
         }
-      }
-    },
-    {
-      "depth": 0,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 1
-      }
-    },
-    {
-      "depth": 1,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.95
-      }
-    },
-    {
-      "depth": 2,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.9
-      }
-    },
-    {
-      "depth": 3,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.85
-      }
-    },
-    {
-      "depth": 4,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.8
-      }
-    },
-    {
-      "depth": 5,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.75
-      }
-    },
-    {
-      "depth": 6,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.7
-      }
-    },
-    {
-      "depth": 7,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.65
-      }
-    },
-    {
-      "depth": 8,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.6
-      }
-    },
-    {
-      "depth": 9,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.55
-      }
-    },
-    {
-      "depth": 10,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.5
-      }
-    },
-    {
-      "depth": 11,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.45
-      }
-    },
-    {
-      "depth": 12,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.4
-      }
-    },
-    {
-      "depth": 13,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.35
-      }
-    },
-    {
-      "depth": 14,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.3
-      }
-    },
-    {
-      "depth": 15,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.25
-      }
-    },
-    {
-      "depth": 16,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.2
-      }
-    },
-    {
-      "depth": 17,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.15
-      }
-    },
-    {
-      "depth": 18,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.1
-      }
-    },
-    {
-      "depth": 19,
-      "node": {
-        "strokeColor": "#333333",
-        "strokeOpacity": 0.05
       }
     }
   ]

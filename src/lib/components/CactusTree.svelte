@@ -65,7 +65,7 @@
     sizeGrowthRate: 0.75,
     orientation: Math.PI / 2,
     zoom: 1.0,
-    numLabels: 30,
+    numLabels: 20,
     edgeOptions: {
       bundlingStrength: 0.97,
       strategy: 'hide',

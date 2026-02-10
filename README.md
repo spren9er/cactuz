@@ -92,7 +92,7 @@ interface Options {
   sizeGrowthRate?: number;    // Size growth rate (default: 0.75)
   orientation?: number;       // Root orientation in radians (default: π/2)
   zoom?: number;              // Layout zoom factor (default: 1.0)
-  numLabels?: number;         // Number of labels (default: 30)
+  numLabels?: number;         // Number of labels (default: 20)
   edgeOptions?: EdgeOptions;  // Edge-specific interactive settings (bundling, hover behavior)
 }
 
