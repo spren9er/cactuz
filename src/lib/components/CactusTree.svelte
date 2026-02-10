@@ -44,6 +44,7 @@
    * @property {number} depth
    * @property {number} radius
    * @property {string} name
+   * @property {Object} [node]
    * @property {Object} [meta]
    */
 

@@ -561,8 +561,8 @@ export class CactusLayout {
       this._boundingBoxCacheSizeGrowthRate = this.sizeGrowthRate;
     }
 
-    const scaleX = bbox.width > 0 ? this.width / bbox.width : 1;
-    const scaleY = bbox.height > 0 ? this.height / bbox.height : 1;
+    const scaleX = bbox && bbox.width > 0 ? this.width / bbox.width : 1;
+    const scaleY = bbox && bbox.height > 0 ? this.height / bbox.height : 1;
     this.globalScale = Math.min(scaleX, scaleY) * this.zoom * 0.95;
 
     // Restore original settings

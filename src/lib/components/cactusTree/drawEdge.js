@@ -29,6 +29,11 @@ import { setCanvasStyles } from './canvasUtils.js';
 const _colorAlphaCache = new Map();
 const _COLOR_CACHE_MAX_SIZE = 256;
 
+/**
+ * @param {string} color
+ * @param {number} alpha
+ * @returns {string}
+ */
 function colorWithAlpha(color, alpha) {
   if (color == null) return color;
   const c = String(color).trim();

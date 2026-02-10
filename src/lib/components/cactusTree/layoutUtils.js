@@ -22,18 +22,19 @@ export function getPerformanceStats(totalNodes, renderedNodes, filteredNodes) {
   };
 }
 
+/** @type {CactusLayout | null} */
+let _sharedLayout = null;
+
 /**
  * Calculates the layout using CactusLayout
  *
  * @param {number} width - Canvas width
  * @param {number} height - Canvas height
  * @param {number} layoutZoom - Layout zoom level (already combined zoom)
- * @param {Array<Object>} nodes - Array of node objects (each: { id, name, parent, weight? })
+ * @param {Array<any>} nodes - Array of node objects (each: { id, name, parent, weight? })
  * @param {{ overlap:number, arcSpan:number, sizeGrowthRate:number, orientation:number, zoom:number }} mergedOptions - Merged options object
- * @returns {Array<Object>} Array of rendered node data (id, x, y, depth, radius, name, node)
+ * @returns {Array<any>} Array of rendered node data
  */
-let _sharedLayout = null;
-
 export function calculateLayout(
   width,
   height,
@@ -85,7 +86,7 @@ export function calculateLayout(
   const renderedNodes = nodeDatas.map((nd) => {
     const nodeObj = nd.node || {};
     return {
-      id: nodeObj.id != null ? nodeObj.id : nd.id,
+      id: nodeObj.id != null ? nodeObj.id : '',
       x: nd.x,
       y: nd.y,
       depth: nd.depth,

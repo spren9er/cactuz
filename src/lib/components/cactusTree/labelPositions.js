@@ -1021,7 +1021,7 @@ export class LabelPositioner {
     );
 
     // Run simulated annealing
-    labeler.call(120);
+    labeler.call(60);
 
     // Return updated label data
     return outsideLabels.map((labelData, i) => ({
