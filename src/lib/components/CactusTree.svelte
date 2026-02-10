@@ -4,11 +4,7 @@
 
   import { setupCanvas } from '$lib/components/cactusTree/canvasUtils.js';
   import { drawNodes } from '$lib/components/cactusTree/drawNode.js';
-  import {
-    drawEdges,
-    drawConnectingLines,
-    computeVisibleEdgeNodeIds,
-  } from '$lib/components/cactusTree/drawEdge.js';
+  import * as drawEdge from '$lib/components/cactusTree/drawEdge.js';
   import { drawLabels } from '$lib/components/cactusTree/drawLabel.js';
   import { createMouseHandlers } from '$lib/components/cactusTree/mouseHandlers.js';
   import {
@@ -315,21 +311,22 @@
     ctx.save();
     ctx.translate(panX, panY);
 
-    drawConnectingLines(
+    // Draw connecting parent->child lines (only when overlap < 0)
+    drawEdge.drawConnectingLines(
       ctx,
       renderedNodes,
-      parentToChildrenNodeMap,
+      /** @type {any} */ (parentToChildrenNodeMap),
       mergedStyle,
-      depthStyleCache,
+      /** @type {any} */ (depthStyleCache),
       mergedOptions.overlap,
-      negativeDepthNodes,
+      /** @type {any} */ (negativeDepthNodes),
     );
 
     // Compute the set of visible nodes that participate in edges according to current filtering.
-    // This leverages computeVisibleEdgeNodeIds (which respects shouldFilterEdge etc.)
-    const edgeNodeIds = computeVisibleEdgeNodeIds(
+    // Use the drawEdge helper (keeps logic centralised and consistent).
+    const edgeNodeIds = drawEdge.computeVisibleEdgeNodeIds(
       links,
-      nodeIdToRenderedNodeMap,
+      /** @type {any} */ (nodeIdToRenderedNodeMap),
       hoveredNodeId,
     );
 
@@ -384,18 +381,18 @@
     );
 
     // Draw edges — pass only the hovered-node-only set for edge highlighting.
-    drawEdges(
+    drawEdge.drawEdges(
       ctx,
       links,
-      nodeIdToRenderedNodeMap,
-      hierarchicalPathCache,
+      /** @type {any} */ (nodeIdToRenderedNodeMap),
+      /** @type {any} */ (hierarchicalPathCache),
       mergedStyle,
       hoveredNodeId,
-      edgeHighlightedNodeIds,
+      /** @type {any} */ (edgeHighlightedNodeIds),
       Number(mergedOptions?.edgeOptions?.bundlingStrength ?? 0.97),
       mergedOptions?.edgeOptions ?? {},
-      depthStyleCache,
-      negativeDepthNodes,
+      /** @type {any} */ (depthStyleCache),
+      /** @type {any} */ (negativeDepthNodes),
     );
 
     // Draw leaf nodes (so they appear on top of edges) with same node highlight set.

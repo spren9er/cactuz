@@ -53,6 +53,9 @@
  * @property {number} radius - Child node radius
  */
 
+/** @type {CactusLayout|null} */
+let _sharedCactusLayout = null;
+
 export class CactusLayout {
   /**
    * @param {number} width - Target width in pixels
@@ -86,6 +89,57 @@ export class CactusLayout {
     this.hierarchyCache = new Map();
     /** @type {string|null} */
     this.lastDataHash = null;
+  }
+
+  /**
+   * Return a shared/reusable CactusLayout instance.
+   *
+   * Consumers (for example layout helpers) can call `CactusLayout.getShared(...)`
+   * to obtain a single shared instance that preserves internal caches across
+   * invocations. The returned instance will have its size/parameters updated to
+   * match the provided arguments prior to use.
+   *
+   * Note: callers are expected to update width/height/zoom/etc. on the returned
+   * instance if they use other instance methods directly. This helper simply
+   * centralizes instance reuse to reduce allocations.
+   *
+   * @param {number} width
+   * @param {number} height
+   * @param {number} zoom
+   * @param {number} overlap
+   * @param {number} arcSpan
+   * @param {number} sizeGrowthRate
+   * @returns {CactusLayout}
+   */
+  static getShared(
+    width,
+    height,
+    zoom = 1,
+    overlap = 0,
+    arcSpan = Math.PI,
+    sizeGrowthRate = 0.75,
+  ) {
+    if (!_sharedCactusLayout) {
+      _sharedCactusLayout = new CactusLayout(
+        width,
+        height,
+        zoom,
+        overlap,
+        arcSpan,
+        sizeGrowthRate,
+      );
+    } else {
+      // Update instance properties for current usage so callers don't need to
+      // recreate an instance just to set dimensions or options.
+      const inst = _sharedCactusLayout;
+      inst.width = width;
+      inst.height = height;
+      inst.zoom = zoom;
+      inst.overlap = overlap;
+      inst.arcSpan = arcSpan;
+      inst.sizeGrowthRate = sizeGrowthRate;
+    }
+    return _sharedCactusLayout;
   }
 
   /**
@@ -460,7 +514,14 @@ export class CactusLayout {
    */
   render(input, startX, startY, startAngle = Math.PI / 2) {
     this.nodes = [];
-    this.weightCache.clear(); // Clear cache for fresh calculation
+
+    // Only clear the weight cache when the input data has changed.
+    // Clearing it unconditionally prevented reuse of expensive subtree weight
+    // computations across repeated renders of the same dataset.
+    const incomingHash = this.hashData(input);
+    if (this.lastDataHash !== incomingHash) {
+      this.weightCache.clear();
+    }
 
     // Use cached hierarchy if possible
     const root = this.getCachedHierarchy(input);

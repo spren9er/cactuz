@@ -24,13 +24,16 @@ export function getPerformanceStats(totalNodes, renderedNodes, filteredNodes) {
 
 /**
  * Calculates the layout using CactusLayout
+ *
  * @param {number} width - Canvas width
  * @param {number} height - Canvas height
  * @param {number} layoutZoom - Layout zoom level (already combined zoom)
- * @param {Array<any>} nodes - Array of node objects
- * @param {{ overlap: number, arcSpan: number, sizeGrowthRate: number, orientation: number, zoom: number }} mergedOptions - Merged options object
- * @returns {Array<any>} Array of rendered node data
+ * @param {Array<Object>} nodes - Array of node objects (each: { id, name, parent, weight? })
+ * @param {{ overlap:number, arcSpan:number, sizeGrowthRate:number, orientation:number, zoom:number }} mergedOptions - Merged options object
+ * @returns {Array<Object>} Array of rendered node data (id, x, y, depth, radius, name, node)
  */
+let _sharedLayout = null;
+
 export function calculateLayout(
   width,
   height,
@@ -42,21 +45,58 @@ export function calculateLayout(
     return [];
   }
 
-  const cactusLayout = new CactusLayout(
-    width,
-    height,
-    layoutZoom,
-    mergedOptions.overlap,
-    mergedOptions.arcSpan,
-    mergedOptions.sizeGrowthRate,
-  );
+  // Use a module-level shared CactusLayout instance so internal caches
+  // (hierarchy cache, weight cache when input hasn't changed) persist between
+  // calls. Avoid attaching properties to the function object which can trigger
+  // type-checker/linters in some environments.
+  if (!_sharedLayout) {
+    _sharedLayout = new CactusLayout(
+      width,
+      height,
+      layoutZoom,
+      mergedOptions.overlap,
+      mergedOptions.arcSpan,
+      mergedOptions.sizeGrowthRate,
+    );
+  }
 
-  return cactusLayout.render(
+  const cactusLayout = _sharedLayout;
+
+  // Update layout instance properties for the current request
+  cactusLayout.width = width;
+  cactusLayout.height = height;
+  cactusLayout.zoom = layoutZoom;
+  cactusLayout.overlap = mergedOptions.overlap;
+  cactusLayout.arcSpan = mergedOptions.arcSpan;
+  cactusLayout.sizeGrowthRate = mergedOptions.sizeGrowthRate;
+
+  // Get NodeData objects from the layout and convert them to the lightweight
+  // RenderedNode shape expected by the rest of the component (id, x, y, depth, radius, name).
+  const nodeDatas = cactusLayout.render(
     nodes,
     width / 2,
     height / 2,
     mergedOptions.orientation,
   );
+
+  if (!nodeDatas || nodeDatas.length === 0) return [];
+
+  // Map CactusLayout NodeData -> RenderedNode
+  const renderedNodes = nodeDatas.map((nd) => {
+    const nodeObj = nd.node || {};
+    return {
+      id: nodeObj.id != null ? nodeObj.id : nd.id,
+      x: nd.x,
+      y: nd.y,
+      depth: nd.depth,
+      radius: nd.radius,
+      name: nodeObj.name != null ? nodeObj.name : '',
+      // Keep original node reference for consumers that need full metadata
+      node: nodeObj,
+    };
+  });
+
+  return renderedNodes;
 }
 
 /**
@@ -72,17 +112,29 @@ export function computeZoomLimits(width, height, nodes, mergedOptions) {
     return { minZoomLimit: 0.1, maxZoomLimit: 10 };
   }
 
-  // Create a base layout to measure bounds using the base zoom
-  const baseLayout = new CactusLayout(
-    width,
-    height,
-    mergedOptions.zoom, // Use the base zoom from options
-    mergedOptions.overlap,
-    mergedOptions.arcSpan,
-    mergedOptions.sizeGrowthRate,
-  );
+  // Reuse the module-level shared layout instance for bounds measurement to
+  // avoid allocating a fresh CactusLayout each time. This preserves internal
+  // caches and reduces repeated work when computeZoomLimits is called frequently.
+  if (!_sharedLayout) {
+    _sharedLayout = new CactusLayout(
+      width,
+      height,
+      mergedOptions.zoom, // Use the base zoom from options
+      mergedOptions.overlap,
+      mergedOptions.arcSpan,
+      mergedOptions.sizeGrowthRate,
+    );
+  } else {
+    // Update instance properties for the current measurement request
+    _sharedLayout.width = width;
+    _sharedLayout.height = height;
+    _sharedLayout.zoom = mergedOptions.zoom;
+    _sharedLayout.overlap = mergedOptions.overlap;
+    _sharedLayout.arcSpan = mergedOptions.arcSpan;
+    _sharedLayout.sizeGrowthRate = mergedOptions.sizeGrowthRate;
+  }
 
-  const baseNodes = baseLayout.render(
+  const baseNodes = _sharedLayout.render(
     nodes,
     width / 2,
     height / 2,
