@@ -341,7 +341,7 @@
       hoveredNodeId,
     );
 
-    const edgeNodeIdSet = new Set();
+    const edgeNodeIdSet = new SvelteSet();
     if (edgeNodeIds && edgeNodeIds.length) {
       for (const id of edgeNodeIds) {
         edgeNodeIdSet.add(id);
@@ -351,7 +351,7 @@
     // Node highlight set: the hovered node AND its directly associated neighbor nodes (when visible).
     // These nodes should be styled as highlighted.
     const nodeHighlightedIds = (() => {
-      const s = new Set();
+      const s = new SvelteSet();
       if (!hoveredNodeId) return s;
       s.add(hoveredNodeId);
 
@@ -373,7 +373,7 @@
     // (neither endpoint being the hovered node) from being treated as highlighted.
     const edgeHighlightedNodeIds = (() => {
       if (!hoveredNodeId) return null;
-      const s = new Set();
+      const s = new SvelteSet();
       s.add(hoveredNodeId);
       return s;
     })();
@@ -441,6 +441,7 @@
     if (!canvas || !nodes?.length) {
       return;
     }
+
     ctx = setupCanvas(canvas, width, height);
     calculateLayoutAndMaps();
     draw();
