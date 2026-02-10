@@ -89,6 +89,14 @@ export class CactusLayout {
     this.hierarchyCache = new Map();
     /** @type {string|null} */
     this.lastDataHash = null;
+
+    // Bounding box cache for pass-1 (standard settings: overlap=0, arcSpan=PI)
+    /** @type {BoundingBox|null} */
+    this._boundingBoxCache = null;
+    /** @type {string|null} */
+    this._boundingBoxCacheHash = null;
+    /** @type {number|null} */
+    this._boundingBoxCacheSizeGrowthRate = null;
   }
 
   /**
@@ -521,6 +529,7 @@ export class CactusLayout {
     const incomingHash = this.hashData(input);
     if (this.lastDataHash !== incomingHash) {
       this.weightCache.clear();
+      this._boundingBoxCache = null;
     }
 
     // Use cached hierarchy if possible
@@ -530,13 +539,27 @@ export class CactusLayout {
     const refOverlap = this.overlap;
     const refArcSpan = this.arcSpan;
 
-    // First pass: calculate layout with standard settings to get bounding box
-    this.overlap = 0;
-    this.arcSpan = Math.PI;
+    // First pass: calculate layout with standard settings to get bounding box.
+    // Cache the result since pass-1 uses fixed settings (overlap=0, arcSpan=PI)
+    // and only depends on the data and sizeGrowthRate.
+    const canReuseBBox =
+      this._boundingBoxCache !== null &&
+      this._boundingBoxCacheHash === incomingHash &&
+      this._boundingBoxCacheSizeGrowthRate === this.sizeGrowthRate;
 
-    this.drawCactusLayout(root, 0, 0, startAngle, null);
+    let bbox;
+    if (canReuseBBox) {
+      bbox = this._boundingBoxCache;
+    } else {
+      this.overlap = 0;
+      this.arcSpan = Math.PI;
+      this.drawCactusLayout(root, 0, 0, startAngle, null);
+      bbox = this.calculateBoundingBox();
 
-    const bbox = this.calculateBoundingBox();
+      this._boundingBoxCache = bbox;
+      this._boundingBoxCacheHash = incomingHash;
+      this._boundingBoxCacheSizeGrowthRate = this.sizeGrowthRate;
+    }
 
     const scaleX = bbox.width > 0 ? this.width / bbox.width : 1;
     const scaleY = bbox.height > 0 ? this.height / bbox.height : 1;

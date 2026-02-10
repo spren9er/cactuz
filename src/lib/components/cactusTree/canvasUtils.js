@@ -3,8 +3,18 @@
  * Handles canvas setup, context management, and basic drawing operations
  */
 
+// Canvas setup cache — avoids expensive buffer reallocation when dimensions are unchanged
+/** @type {HTMLCanvasElement|null} */
+let _lastCanvasRef = null;
+let _lastWidth = -1;
+let _lastHeight = -1;
+let _lastDpr = -1;
+/** @type {CanvasRenderingContext2D|null} */
+let _cachedCtx = null;
+
 /**
- * Sets up canvas with proper pixel ratio and dimensions
+ * Sets up canvas with proper pixel ratio and dimensions.
+ * Skips buffer reallocation when canvas reference, dimensions, and DPR are unchanged.
  * @param {HTMLCanvasElement} canvas - The canvas element
  * @param {number} width - Canvas width
  * @param {number} height - Canvas height
@@ -15,7 +25,17 @@ export function setupCanvas(canvas, width, height) {
 
   const devicePixelRatio = window.devicePixelRatio || 1;
 
-  // Set canvas dimensions (like original - no double-scaling check)
+  if (
+    canvas === _lastCanvasRef &&
+    width === _lastWidth &&
+    height === _lastHeight &&
+    devicePixelRatio === _lastDpr &&
+    _cachedCtx
+  ) {
+    return _cachedCtx;
+  }
+
+  // Full setup needed — dimensions or canvas changed
   canvas.width = width * devicePixelRatio;
   canvas.height = height * devicePixelRatio;
   canvas.style.width = width + 'px';
@@ -24,12 +44,17 @@ export function setupCanvas(canvas, width, height) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
-  // Apply scaling and settings like original
   ctx.scale(devicePixelRatio, devicePixelRatio);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+
+  _lastCanvasRef = canvas;
+  _lastWidth = width;
+  _lastHeight = height;
+  _lastDpr = devicePixelRatio;
+  _cachedCtx = ctx;
 
   return ctx;
 }

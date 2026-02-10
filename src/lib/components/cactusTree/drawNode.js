@@ -338,23 +338,43 @@ export function drawNode(
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, 2 * Math.PI);
 
-  // Fill if specified and not 'none'
-  if (style.fill !== 'none') {
+  // Fill and stroke optimizations: prefer a single style set when possible to reduce canvas state churn
+  const fillNeeded = style.fill !== 'none' && (style.fillOpacity ?? 1) > 0;
+  const strokeNeeded =
+    style.stroke !== 'none' &&
+    (style.strokeWidth ?? 0) > 0 &&
+    (style.strokeOpacity ?? 1) > 0;
+
+  if (
+    fillNeeded &&
+    strokeNeeded &&
+    (style.fillOpacity ?? 1) === (style.strokeOpacity ?? 1)
+  ) {
+    // Both fill and stroke share same opacity -> set styles once to minimize canvas property updates.
     setCanvasStyles(ctx, {
       fillStyle: style.fill,
+      strokeStyle: style.stroke,
+      lineWidth: style.strokeWidth,
       globalAlpha: style.fillOpacity ?? 1,
     });
     ctx.fill();
-  }
-
-  // Stroke if specified and width > 0
-  if (style.stroke !== 'none' && (style.strokeWidth ?? 0) > 0) {
-    setCanvasStyles(ctx, {
-      strokeStyle: style.stroke,
-      lineWidth: style.strokeWidth,
-      globalAlpha: style.strokeOpacity ?? 1,
-    });
     ctx.stroke();
+  } else {
+    if (fillNeeded) {
+      setCanvasStyles(ctx, {
+        fillStyle: style.fill,
+        globalAlpha: style.fillOpacity ?? 1,
+      });
+      ctx.fill();
+    }
+    if (strokeNeeded) {
+      setCanvasStyles(ctx, {
+        strokeStyle: style.stroke,
+        lineWidth: style.strokeWidth,
+        globalAlpha: style.strokeOpacity ?? 1,
+      });
+      ctx.stroke();
+    }
   }
 
   // Reset alpha if changed
@@ -410,6 +430,10 @@ export function drawNodes(
     return { rendered: 0, filtered: 0 };
   }
 
+  // Start simple local metrics so we can surface them to the page for profiling.
+  const metricsEnabled = typeof window !== 'undefined';
+  const start = metricsEnabled ? performance.now() : 0;
+
   let renderedCount = 0;
   let filteredCount = 0;
 
@@ -454,6 +478,51 @@ export function drawNodes(
 
     if (wasRendered) renderedCount++;
     else filteredCount++;
+  }
+
+  const totalMs = metricsEnabled ? performance.now() - start : 0;
+
+  // Store/update lightweight metrics on window for external inspection.
+  if (metricsEnabled) {
+    try {
+      // Initialize container if missing
+      const w = /** @type {any} */ (window);
+      if (!w.__CACTUS_TREE_METRICS__) {
+        w.__CACTUS_TREE_METRICS__ = {
+          drawNodes: {
+            calls: 0,
+            totalMs: 0,
+            lastMs: 0,
+            nodesRendered: 0,
+            nodesFiltered: 0,
+            lastCounts: null,
+          },
+        };
+      } else if (!w.__CACTUS_TREE_METRICS__.drawNodes) {
+        w.__CACTUS_TREE_METRICS__.drawNodes = {
+          calls: 0,
+          totalMs: 0,
+          lastMs: 0,
+          nodesRendered: 0,
+          nodesFiltered: 0,
+          lastCounts: null,
+        };
+      }
+
+      const d = w.__CACTUS_TREE_METRICS__.drawNodes;
+      d.calls = (d.calls || 0) + 1;
+      d.totalMs = (d.totalMs || 0) + totalMs;
+      d.lastMs = totalMs;
+      d.nodesRendered = (d.nodesRendered || 0) + renderedCount;
+      d.nodesFiltered = (d.nodesFiltered || 0) + filteredCount;
+      d.lastCounts = {
+        rendered: renderedCount,
+        filtered: filteredCount,
+        total: renderedNodes.length,
+      };
+    } catch {
+      // Ignore metric errors to avoid impacting rendering.
+    }
   }
 
   return { rendered: renderedCount, filtered: filteredCount };

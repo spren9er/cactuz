@@ -19,38 +19,42 @@ import { setCanvasStyles } from './canvasUtils.js';
  * - Otherwise return the original color (alpha ignored)
  *
  * This lets us avoid touching `ctx.globalAlpha` while still applying per-stroke opacity.
+ * Results are cached since only a small number of distinct color+alpha combinations exist.
  *
  * @param {string} color
  * @param {number} alpha
  * @returns {string}
  */
+/** @type {Map<string, string>} */
+const _colorAlphaCache = new Map();
+const _COLOR_CACHE_MAX_SIZE = 256;
+
 function colorWithAlpha(color, alpha) {
   if (color == null) return color;
   const c = String(color).trim();
   if (!c) return c;
   if (alpha === undefined || alpha === null) return c;
-  // If alpha is 1, no change needed
   if (alpha === 1) return c;
-  // rgba(...) -> replace alpha
+
+  const cacheKey = `${c}|${alpha}`;
+  const cached = _colorAlphaCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+
+  let result = c;
+
   if (c.startsWith('rgba(')) {
     const inner = c.slice(5, -1);
     const parts = inner.split(',').map((s) => s.trim());
     if (parts.length >= 3) {
-      return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+      result = `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
     }
-    return c;
-  }
-  // rgb(...) -> convert
-  if (c.startsWith('rgb(')) {
+  } else if (c.startsWith('rgb(')) {
     const inner = c.slice(4, -1);
     const parts = inner.split(',').map((s) => s.trim());
     if (parts.length >= 3) {
-      return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+      result = `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
     }
-    return c;
-  }
-  // hex -> convert (#rgb or #rrggbb)
-  if (c[0] === '#') {
+  } else if (c[0] === '#') {
     let hex = c.slice(1);
     if (hex.length === 3) {
       hex = hex
@@ -62,12 +66,15 @@ function colorWithAlpha(color, alpha) {
       const r = parseInt(hex.slice(0, 2), 16);
       const g = parseInt(hex.slice(2, 4), 16);
       const b = parseInt(hex.slice(4, 6), 16);
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      result = `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
-    return c;
   }
-  // Fallback: unknown color format -> return original (alpha ignored)
-  return c;
+
+  if (_colorAlphaCache.size > _COLOR_CACHE_MAX_SIZE) {
+    _colorAlphaCache.clear();
+  }
+  _colorAlphaCache.set(cacheKey, result);
+  return result;
 }
 
 /**
@@ -592,36 +599,12 @@ export function drawEdge(
     targetNode,
   );
 
-  // Compute final path according to bundlingStrength: 0 => straight line sampling, 1 => full path
-  let finalPathCoords;
-  if (!bundlingStrength || bundlingStrength <= 0) {
-    // straight line sampled to same number of points
-    finalPathCoords = [];
-    const n = pathCoords.length;
-    for (let i = 0; i < n; i++) {
-      const frac = n === 1 ? 0 : i / (n - 1);
-      finalPathCoords.push({
-        x: sourceNode.x * (1 - frac) + targetNode.x * frac,
-        y: sourceNode.y * (1 - frac) + targetNode.y * frac,
-      });
-    }
-  } else if (bundlingStrength >= 1) {
-    finalPathCoords = pathCoords.slice();
-  } else {
-    finalPathCoords = [];
-    for (let i = 0; i < pathCoords.length; i++) {
-      const pt = pathCoords[i];
-      const frac = pathCoords.length === 1 ? 0 : i / (pathCoords.length - 1);
-      const straightX = sourceNode.x * (1 - frac) + targetNode.x * frac;
-      const straightY = sourceNode.y * (1 - frac) + targetNode.y * frac;
-      finalPathCoords.push({
-        x: straightX * (1 - bundlingStrength) + pt.x * bundlingStrength,
-        y: straightY * (1 - bundlingStrength) + pt.y * bundlingStrength,
-      });
-    }
-  }
+  // Compute final path according to bundlingStrength and draw it with minimal allocations:
+  // - Fast-path straight line draws directly without creating intermediate arrays.
+  // - For bundled paths we iterate pathCoords and draw into the context on-the-fly,
+  //   avoiding creating objects for every sampled point.
+  // This reduces GC pressure and canvas state churn for common zoom/hover scenarios.
 
-  // Draw the stroke. Compute a stroke color with embedded alpha so we do not touch `ctx.globalAlpha`.
   // Preserve strokeStyle/lineWidth around the stroke.
   const prevStroke = ctx.strokeStyle;
   const prevWidth = ctx.lineWidth;
@@ -636,26 +619,116 @@ export function drawEdge(
   });
 
   ctx.beginPath();
-  if (finalPathCoords.length === 2) {
-    ctx.moveTo(finalPathCoords[0].x, finalPathCoords[0].y);
-    ctx.lineTo(finalPathCoords[1].x, finalPathCoords[1].y);
-  } else if (finalPathCoords.length > 2) {
-    ctx.moveTo(finalPathCoords[0].x, finalPathCoords[0].y);
-    for (let i = 1; i < finalPathCoords.length; i++) {
-      const pt = finalPathCoords[i];
-      if (!pt) continue;
-      if (i === finalPathCoords.length - 1) {
-        ctx.lineTo(pt.x, pt.y);
-      } else {
-        const next = finalPathCoords[i + 1];
-        if (next) {
-          const cpx = (pt.x + next.x) / 2;
-          const cpy = (pt.y + next.y) / 2;
-          ctx.quadraticCurveTo(pt.x, pt.y, cpx, cpy);
+
+  // Fast path: no bundling -> draw straight segment between source and target.
+  if (!bundlingStrength || bundlingStrength <= 0) {
+    ctx.moveTo(sourceNode.x, sourceNode.y);
+    ctx.lineTo(targetNode.x, targetNode.y);
+    ctx.stroke();
+
+    // restore
+    if (ctx.lineWidth !== prevWidth) ctx.lineWidth = prevWidth;
+    if (ctx.strokeStyle !== prevStroke) ctx.strokeStyle = prevStroke;
+
+    // Halos disabled: do not draw any halo visuals for highlighted nodes.
+    return true;
+  }
+
+  // If bundlingStrength >= 1, prefer drawing the pathCoords directly (no interpolation).
+  if (bundlingStrength >= 1) {
+    if (pathCoords.length === 2) {
+      ctx.moveTo(pathCoords[0].x, pathCoords[0].y);
+      ctx.lineTo(pathCoords[1].x, pathCoords[1].y);
+    } else if (pathCoords.length > 2) {
+      ctx.moveTo(pathCoords[0].x, pathCoords[0].y);
+      for (let i = 1; i < pathCoords.length; i++) {
+        const pt = pathCoords[i];
+        if (!pt) continue;
+        if (i === pathCoords.length - 1) {
+          ctx.lineTo(pt.x, pt.y);
+        } else {
+          const next = pathCoords[i + 1];
+          if (next) {
+            const cpx = (pt.x + next.x) / 2;
+            const cpy = (pt.y + next.y) / 2;
+            ctx.quadraticCurveTo(pt.x, pt.y, cpx, cpy);
+          }
         }
       }
     }
+    ctx.stroke();
+
+    if (ctx.lineWidth !== prevWidth) ctx.lineWidth = prevWidth;
+    if (ctx.strokeStyle !== prevStroke) ctx.strokeStyle = prevStroke;
+
+    // Halos disabled: do not draw any halo visuals for highlighted nodes.
+    return true;
   }
+
+  // General case: 0 < bundlingStrength < 1
+  // Draw interpolated points on-the-fly to avoid allocating finalPathCoords array.
+  // We'll sample exactly pathCoords.length points and compute each interpolated pair then draw.
+  const n = pathCoords.length;
+  if (n === 0) {
+    // Nothing meaningful to draw: fallback to straight line
+    ctx.moveTo(sourceNode.x, sourceNode.y);
+    ctx.lineTo(targetNode.x, targetNode.y);
+    ctx.stroke();
+
+    if (ctx.lineWidth !== prevWidth) ctx.lineWidth = prevWidth;
+    if (ctx.strokeStyle !== prevStroke) ctx.strokeStyle = prevStroke;
+
+    return true;
+  }
+
+  // Move to first computed point
+  // Compute first point (i = 0)
+  {
+    const i = 0;
+    const pt = pathCoords[0];
+    const frac = n === 1 ? 0 : i / (n - 1);
+    const straightX = sourceNode.x * (1 - frac) + targetNode.x * frac;
+    const straightY = sourceNode.y * (1 - frac) + targetNode.y * frac;
+    const fx = straightX * (1 - bundlingStrength) + pt.x * bundlingStrength;
+    const fy = straightY * (1 - bundlingStrength) + pt.y * bundlingStrength;
+    ctx.moveTo(fx, fy);
+  }
+
+  for (let i = 1; i < n; i++) {
+    const pt = pathCoords[i];
+    if (!pt) continue;
+
+    const frac = n === 1 ? 0 : i / (n - 1);
+    const straightX = sourceNode.x * (1 - frac) + targetNode.x * frac;
+    const straightY = sourceNode.y * (1 - frac) + targetNode.y * frac;
+    const fx = straightX * (1 - bundlingStrength) + pt.x * bundlingStrength;
+    const fy = straightY * (1 - bundlingStrength) + pt.y * bundlingStrength;
+
+    if (i === n - 1) {
+      // final point: straight line to it
+      ctx.lineTo(fx, fy);
+    } else {
+      // build a smooth quadratic curve using this point and the next
+      const next = pathCoords[i + 1];
+      if (next) {
+        const nextFrac = (i + 1) / (n - 1);
+        const nextStraightX =
+          sourceNode.x * (1 - nextFrac) + targetNode.x * nextFrac;
+        const nextStraightY =
+          sourceNode.y * (1 - nextFrac) + targetNode.y * nextFrac;
+        const nx =
+          nextStraightX * (1 - bundlingStrength) + next.x * bundlingStrength;
+        const ny =
+          nextStraightY * (1 - bundlingStrength) + next.y * bundlingStrength;
+        const cpx = (fx + nx) * 0.5;
+        const cpy = (fy + ny) * 0.5;
+        ctx.quadraticCurveTo(fx, fy, cpx, cpy);
+      } else {
+        ctx.lineTo(fx, fy);
+      }
+    }
+  }
+
   ctx.stroke();
 
   // Restore canvas style values we changed (preserve outer drawing state)

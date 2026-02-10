@@ -5,11 +5,14 @@
   import { setupCanvas } from '$lib/components/cactusTree/canvasUtils.js';
   import { drawNodes } from '$lib/components/cactusTree/drawNode.js';
   import * as drawEdge from '$lib/components/cactusTree/drawEdge.js';
-  import { drawLabels } from '$lib/components/cactusTree/drawLabel.js';
+  import {
+    drawLabels,
+    clearLabelLayoutCache,
+  } from '$lib/components/cactusTree/drawLabel.js';
   import { createMouseHandlers } from '$lib/components/cactusTree/mouseHandlers.js';
   import {
     calculateLayout,
-    computeZoomLimits,
+    computeZoomLimitsFromNodes,
     buildLookupMaps,
   } from '$lib/components/cactusTree/layoutUtils.js';
 
@@ -253,6 +256,8 @@
   let animationFrameId = null;
 
   function calculateLayoutAndMaps() {
+    clearLabelLayoutCache();
+
     if (!nodes?.length) {
       renderedNodes = [];
       // clear maps
@@ -291,8 +296,13 @@
     hierarchicalPathCache = lookupMaps.hierarchicalPathCache;
     parentToChildrenNodeMap = lookupMaps.parentToChildrenNodeMap;
 
-    if (nodes?.length) {
-      const limits = computeZoomLimits(width, height, nodes, mergedOptions);
+    if (renderedNodes?.length) {
+      const limits = computeZoomLimitsFromNodes(
+        width,
+        height,
+        renderedNodes,
+        currentZoom,
+      );
       minZoomLimit = limits.minZoomLimit;
       maxZoomLimit = limits.maxZoomLimit;
 
@@ -330,7 +340,7 @@
       hoveredNodeId,
     );
 
-    const edgeNodeIdSet = new SvelteSet();
+    const edgeNodeIdSet = new Set();
     if (edgeNodeIds && edgeNodeIds.length) {
       for (const id of edgeNodeIds) {
         edgeNodeIdSet.add(id);
@@ -340,7 +350,7 @@
     // Node highlight set: the hovered node AND its directly associated neighbor nodes (when visible).
     // These nodes should be styled as highlighted.
     const nodeHighlightedIds = (() => {
-      const s = new SvelteSet();
+      const s = new Set();
       if (!hoveredNodeId) return s;
       s.add(hoveredNodeId);
 
@@ -362,7 +372,7 @@
     // (neither endpoint being the hovered node) from being treated as highlighted.
     const edgeHighlightedNodeIds = (() => {
       if (!hoveredNodeId) return null;
-      const s = new SvelteSet();
+      const s = new Set();
       s.add(hoveredNodeId);
       return s;
     })();
@@ -430,10 +440,11 @@
     if (!canvas || !nodes?.length) {
       return;
     }
-
+    console.time('cactuz:render');
     ctx = setupCanvas(canvas, width, height);
     calculateLayoutAndMaps();
     draw();
+    console.timeEnd('cactuz:render');
   }
 
   function scheduleRender() {
@@ -443,6 +454,23 @@
 
     animationFrameId = requestAnimationFrame(() => {
       render();
+      animationFrameId = null;
+    });
+  }
+
+  /**
+   * Lightweight redraw — skips layout computation and canvas re-setup.
+   * Used for pan, zoom, and hover interactions where only the view transform
+   * or highlight state changed, not the underlying data.
+   */
+  function scheduleDraw() {
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+
+    animationFrameId = requestAnimationFrame(() => {
+      if (!canvas || !ctx || !renderedNodes.length) return;
+      draw();
       animationFrameId = null;
     });
   }
@@ -532,9 +560,10 @@
       zoomable,
     };
 
-    return createMouseHandlers(mutableState, width, height, scheduleRender);
+    return createMouseHandlers(mutableState, width, height, scheduleDraw);
   });
 
+  // Full layout when data, options, dimensions, or zoom change
   $effect(() => {
     void nodes;
     void links;
@@ -545,8 +574,6 @@
     void mergedOptions.zoom;
     void mergedOptions.edgeOptions;
     void currentZoom;
-    void panX;
-    void panY;
     void width;
     void height;
 

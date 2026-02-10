@@ -177,6 +177,55 @@ export function computeZoomLimits(width, height, nodes, mergedOptions) {
 }
 
 /**
+ * Computes zoom limits directly from already-rendered nodes, avoiding a redundant layout pass.
+ * The rendered nodes include the interactive zoom factor, so we divide it out to get base radii.
+ * @param {number} width - Canvas width
+ * @param {number} height - Canvas height
+ * @param {Array<any>} renderedNodes - Already computed rendered node array
+ * @param {number} [currentInteractiveZoom=1] - The interactive zoom factor applied during layout
+ * @returns {{ minZoomLimit: number, maxZoomLimit: number }}
+ */
+export function computeZoomLimitsFromNodes(
+  width,
+  height,
+  renderedNodes,
+  currentInteractiveZoom = 1,
+) {
+  if (!renderedNodes || renderedNodes.length === 0) {
+    return { minZoomLimit: 0.1, maxZoomLimit: 10 };
+  }
+
+  let minRadius = Infinity;
+  let maxRadius = 0;
+
+  for (const nodeData of renderedNodes) {
+    const radius = nodeData.radius;
+    if (radius > 0) {
+      if (radius < minRadius) minRadius = radius;
+      if (radius > maxRadius) maxRadius = radius;
+    }
+  }
+
+  if (!isFinite(minRadius) || minRadius <= 0) minRadius = 1;
+  if (maxRadius <= 0) maxRadius = 100;
+
+  // Divide out interactive zoom to get base radii (zoom=1)
+  const zoomFactor = currentInteractiveZoom > 0 ? currentInteractiveZoom : 1;
+  const baseMinRadius = minRadius / zoomFactor;
+  const baseMaxRadius = maxRadius / zoomFactor;
+
+  const targetDiameter = Math.min(width, height) / 10;
+  const maxZoomLimit = targetDiameter / (2 * baseMinRadius);
+
+  const minZoomLimit = Math.max(
+    0.01,
+    Math.min(0.5, Math.min(width, height) / (baseMaxRadius * 8)),
+  );
+
+  return { minZoomLimit, maxZoomLimit };
+}
+
+/**
  * Ensures parent references are properly set up on rendered nodes
  * @param {Array<any>} renderedNodes - Array of rendered node data
  * @returns {Array<any>} Nodes with proper parent references

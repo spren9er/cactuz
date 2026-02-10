@@ -20,6 +20,43 @@
 import { setCanvasStyles } from './canvasUtils.js';
 import { calculateLabelPositions } from './labelPositions.js';
 
+// Label layout cache — avoids expensive simulated annealing on every frame
+/** @type {any} */
+let _labelLayoutCache = null;
+/** @type {string|null} */
+let _labelCacheKey = null;
+
+/**
+ * Generate a cache key for label layout inputs.
+ * Recompute only when hover state or viewport changes meaningfully.
+ * @param {any[]} renderedNodes
+ * @param {string|null} hoveredNodeId
+ * @param {number} numLabels
+ * @param {number} panX
+ * @param {number} panY
+ * @returns {string}
+ */
+function labelLayoutCacheKey(
+  renderedNodes,
+  hoveredNodeId,
+  numLabels,
+  panX,
+  panY,
+) {
+  const nodeCount = renderedNodes ? renderedNodes.length : 0;
+  const firstNode = renderedNodes && renderedNodes[0];
+  const lastNode = renderedNodes && renderedNodes[nodeCount - 1];
+  return `${nodeCount}-${hoveredNodeId}-${numLabels}-${Math.round(panX)}-${Math.round(panY)}-${firstNode?.x?.toFixed(1)}-${lastNode?.x?.toFixed(1)}`;
+}
+
+/**
+ * Clear the label layout cache. Call when data or styles change.
+ */
+export function clearLabelLayoutCache() {
+  _labelLayoutCache = null;
+  _labelCacheKey = null;
+}
+
 /**
  * @typedef {Object} LabelLinkStyle
  * @property {string} [strokeColor]
@@ -855,6 +892,18 @@ export function computeLabelLayout(
 ) {
   if (!ctx || !renderedNodes || renderedNodes.length === 0) return null;
 
+  // Check label layout cache — skip expensive simulated annealing when inputs are unchanged
+  const cacheKey = labelLayoutCacheKey(
+    renderedNodes,
+    hoveredNodeId,
+    numLabels,
+    panX,
+    panY,
+  );
+  if (_labelCacheKey === cacheKey && _labelLayoutCache !== null) {
+    return _labelLayoutCache;
+  }
+
   const devicePixelRatio = window.devicePixelRatio || 1;
   const width = ctx.canvas.width / devicePixelRatio;
   const height = ctx.canvas.height / devicePixelRatio;
@@ -1141,13 +1190,19 @@ export function computeLabelLayout(
     },
   );
 
-  return {
+  const result = {
     labels,
     links,
     nodesWithLabels,
     labelMinFontSize,
     labelMaxFontSize,
   };
+
+  // Cache the result
+  _labelLayoutCache = result;
+  _labelCacheKey = cacheKey;
+
+  return result;
 }
 
 /**
