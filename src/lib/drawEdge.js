@@ -343,7 +343,7 @@ export function drawEdge(
       : undefined;
 
   let currentEdgeOpacity =
-    isEdgeHovered && highlightOpacity !== undefined
+    (isEdgeHovered || isEdgeHighlighted) && highlightOpacity !== undefined
       ? highlightOpacity
       : baseEdgeOpacity;
 

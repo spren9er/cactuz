@@ -109,7 +109,9 @@ const DEFAULT_STYLE = {
 
 /** @param {any} userOptions */
 function mergeOptions(userOptions) {
-  return { ...DEFAULT_OPTIONS, ...userOptions };
+  const merged = { ...DEFAULT_OPTIONS, ...userOptions };
+  merged.edges = { ...DEFAULT_OPTIONS.edges, ...(userOptions?.edges || {}) };
+  return merged;
 }
 
 /** @param {any} userStyles */
@@ -128,7 +130,19 @@ function mergeStyles(userStyles) {
   return {
     node: mergeGroup('node'),
     edge: mergeGroup('edge'),
-    label: mergeGroup('label'),
+    label: {
+      ...DEFAULT_STYLE.label,
+      ...(s.label || {}),
+      inner: { ...DEFAULT_STYLE.label.inner, ...(s.label?.inner || {}) },
+      outer: {
+        ...DEFAULT_STYLE.label.outer,
+        ...(s.label?.outer || {}),
+        link: {
+          ...DEFAULT_STYLE.label.outer.link,
+          ...(s.label?.outer?.link || {}),
+        },
+      },
+    },
     link: { ...(DEFAULT_STYLE.link || {}), ...(s.link || {}) },
     highlight: {
       node: {
@@ -142,6 +156,14 @@ function mergeStyles(userStyles) {
       label: {
         ...((DEFAULT_STYLE.highlight && DEFAULT_STYLE.highlight.label) || {}),
         ...((s.highlight && s.highlight.label) || {}),
+        inner: {
+          ...(DEFAULT_STYLE.highlight?.label?.inner || {}),
+          ...(s.highlight?.label?.inner || {}),
+        },
+        outer: {
+          ...(DEFAULT_STYLE.highlight?.label?.outer || {}),
+          ...(s.highlight?.label?.outer || {}),
+        },
       },
     },
     depths: s.depths ?? DEFAULT_STYLE.depths,
