@@ -1,13 +1,19 @@
+import { defineConfig } from 'vitest/config';
 import devtoolsJson from 'vite-plugin-devtools-json';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vitest/config';
+import { webdriverio } from '@vitest/browser-webdriverio';
 
 export default defineConfig({
   plugins: [sveltekit(), devtoolsJson()],
   test: {
-    environment: 'jsdom',
-    alias: {
-      $lib: new URL('./src/lib', import.meta.url).pathname,
+    browser: {
+      enabled: true,
+      instances: [{ browser: 'chrome' }],
+      provider: webdriverio({}),
+      headless: true,
+      isolate: true,
+      fileParallelism: true,
     },
+    include: ['tests/**/*.test.js'],
   },
 });
