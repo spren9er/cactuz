@@ -28,8 +28,8 @@ const DEFAULT_OPTIONS = {
   numLabels: 20,
   edges: {
     bundlingStrength: 0.97,
-    filterMode: 'hide',
-    muteOpacity: 0.2,
+    filterMode: 'mute',
+    muteOpacity: 0.1,
   },
 };
 
@@ -102,22 +102,7 @@ const DEFAULT_STYLE = {
       },
     },
   },
-  depths: [
-    {
-      depth: -1,
-      node: { fillColor: '#333333', strokeColor: '#333333' },
-      label: {
-        inner: { textColor: '#efefef' },
-      },
-      highlight: {
-        node: { fillColor: '#ffbbb7', strokeColor: '#ea575a' },
-        label: {
-          inner: { strokeColor: '#ea575a' },
-          outer: { textColor: '#ea575a' },
-        },
-      },
-    },
-  ],
+  depths: [],
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

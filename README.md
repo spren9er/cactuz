@@ -145,8 +145,8 @@ interface Options {
 
 interface EdgeOptions {
   bundlingStrength?: number;  // Edge bundling strength (0..1, default: 0.97)
-  filterMode?: 'hide' | 'mute'; // Hover behavior when over a leaf: 'hide' hides unrelated edges, 'mute' shows them at reduced opacity (default: 'hide')
-  muteOpacity?: number;         // When filterMode is 'mute', multiplier applied to unrelated edges (0..1, default: 0.25)
+  filterMode?: 'hide' | 'mute'; // Hover behavior when over a leaf: 'hide' hides unrelated edges, 'mute' shows them at reduced opacity (default: 'mute')
+  muteOpacity?: number;         // When filterMode is 'mute', multiplier applied to unrelated edges (0..1, default: 0.1)
 }
 ```
 

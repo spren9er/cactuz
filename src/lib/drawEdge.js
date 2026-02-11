@@ -591,7 +591,7 @@ export function drawEdges(
   const muteOpacity =
     typeof edgesOptionsLocal.muteOpacity === 'number'
       ? edgesOptionsLocal.muteOpacity
-      : 0.25;
+      : 0.1;
 
   const backgroundEdges = [];
   const highlightedEdges = [];

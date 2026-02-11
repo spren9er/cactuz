@@ -1,0 +1,98 @@
+{
+  "node": {
+    "fillColor": "#efefef",
+    "fillOpacity": 1,
+    "strokeColor": "#aaaaaa",
+    "strokeOpacity": 1,
+    "strokeWidth": 1
+  },
+  "edge": {
+    "strokeColor": "#333333",
+    "strokeOpacity": 0.1,
+    "strokeWidth": 1
+  },
+  "label": {
+    "inner": {
+      "textColor": "#333333",
+      "textOpacity": 1,
+      "fontFamily": "monospace",
+      "fontWeight": "normal",
+      "minFontSize": 9,
+      "maxFontSize": 14
+    },
+    "outer": {
+      "textColor": "#333333",
+      "textOpacity": 1,
+      "fontFamily": "monospace",
+      "fontWeight": "normal",
+      "fontSize": 9,
+      "padding": 1,
+      "link": {
+        "strokeColor": "#cccccc",
+        "strokeOpacity": 1,
+        "strokeWidth": 0.5,
+        "padding": 0,
+        "length": 5
+      }
+    }
+  },
+  "link": {
+    "strokeColor": "#aaaaaa",
+    "strokeOpacity": 1,
+    "strokeWidth": 1
+  },
+  "highlight": {
+    "node": {
+      "fillColor": "#dedede",
+      "fillOpacity": 1,
+      "strokeColor": "#333333",
+      "strokeOpacity": 1,
+      "strokeWidth": 1
+    },
+    "edge": {
+      "strokeColor": "#ea575a",
+      "strokeOpacity": 0.2,
+      "strokeWidth": 1
+    },
+    "label": {
+      "inner": {
+        "textColor": "#ea575a",
+        "textOpacity": 1,
+        "fontWeight": "bold"
+      },
+      "outer": {
+        "textColor": "#333333",
+        "textOpacity": 1,
+        "fontWeight": "normal"
+      }
+    }
+  },
+  "depths": [
+    {
+      "depth": -1,
+      "node": {
+        "fillColor": "#333333",
+        "strokeColor": "#333333"
+      },
+      "label": {
+        "inner": {
+          "textColor": "#efefef"
+        }
+      },
+      "highlight": {
+        "node": {
+          "fillColor": "#ffbbb7",
+          "strokeColor": "#ea575a"
+        },
+        "label": {
+          "inner": {
+            "strokeColor": "#ea575a"
+          },
+          "outer": {
+            "textColor": "#ea575a"
+          }
+        }
+      }
+    }
+  ]
+}

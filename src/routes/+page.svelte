@@ -22,8 +22,8 @@
     zoom: 1.0,
     numLabels: 20,
     bundlingStrength: 0.97,
-    filterMode: 'hide',
-    muteOpacity: 0.2,
+    filterMode: 'mute',
+    muteOpacity: 0.1,
   };
 
   let showEdgeBundling = true;
@@ -51,6 +51,7 @@
 
   const availableStyles = [
     { value: 'default.json', label: 'Default' },
+    { value: 'classic.json', label: 'Classic' },
     { value: 'minimal.json', label: 'Minimal' },
   ];
 
