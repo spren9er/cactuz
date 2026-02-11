@@ -4,6 +4,7 @@
  */
 
 import { CactusLayout } from './cactusLayout.js';
+import { expandWildcardDepths } from './colorScale.js';
 
 /** @type {CactusLayout | null} */
 let _sharedLayout = null;
@@ -214,9 +215,21 @@ export function buildLookupMaps(renderedNodes, mergedStyle) {
     }
   });
 
+  // Compute max depth from rendered nodes
+  let maxDepth = 0;
+  nodesWithRefs.forEach((nodeData) => {
+    if (nodeData.depth > maxDepth) maxDepth = nodeData.depth;
+  });
+
+  // Expand wildcard depth entries (depth: '*') with color scales
+  const expandedDepths = expandWildcardDepths(
+    mergedStyle.depths || [],
+    maxDepth,
+  );
+
   // Cache depth styles for performance
-  if (mergedStyle.depths) {
-    mergedStyle.depths.forEach((depthStyle) => {
+  if (expandedDepths) {
+    expandedDepths.forEach((depthStyle) => {
       if (depthStyle.depth >= 0) {
         depthStyleCache.set(depthStyle.depth, depthStyle);
       }

@@ -50,12 +50,13 @@
   }
 
   const availableStyles = [
+    { value: 'magma.json', label: 'Magma' },
     { value: 'classic.json', label: 'Classic' },
     { value: 'minimal.json', label: 'Minimal' },
     { value: 'default.json', label: 'Default' },
   ];
 
-  let selectedStyle = 'classic.json';
+  let selectedStyle = 'magma.json';
   let currentStyles = {};
 
   /** @param {string} styleName */
@@ -104,7 +105,7 @@
   <p>
     This modern, interactive visualization of <i>CactusTree</i> provides several
     configurable options that allow you to control the visual appearance and
-    layout behavior of the tree. The source code for the JavaScript library
+    layout behavior of the tree. The source code of the JavaScript library
     <b>cactuz</b> is available on
     <a href="https://github.com/spren9er/cactus">GitHub</a>.
   </p>

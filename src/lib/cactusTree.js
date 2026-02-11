@@ -114,10 +114,16 @@ const DEFAULT_STYLE = {
  */
 
 /**
+ * @typedef {Object} ColorScale
+ * @property {string} scale
+ * @property {boolean} [reverse]
+ */
+
+/**
  * @typedef {Object} NodeStyle
- * @property {string} [fillColor]
+ * @property {string | ColorScale} [fillColor]
  * @property {number} [fillOpacity]
- * @property {string} [strokeColor]
+ * @property {string | ColorScale} [strokeColor]
  * @property {number} [strokeOpacity]
  * @property {number} [strokeWidth]
  */
@@ -195,7 +201,7 @@ const DEFAULT_STYLE = {
 
 /**
  * @typedef {Object} DepthStyle
- * @property {number} depth
+ * @property {number | '*'} depth
  * @property {NodeStyle} [node]
  * @property {LabelStyle} [label]
  * @property {LinkStyle} [link]

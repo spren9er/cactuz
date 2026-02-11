@@ -48,8 +48,10 @@ describe('getLabelStyle', () => {
 
   it('returns global style when no depth style exists', () => {
     const style = getLabelStyle(0, 'node1', mergedStyle, new Map(), new Map());
-    expect(style.textColor).toBe('#333333');
-    expect(style.fontFamily).toBe('monospace');
+    expect(style.inner?.textColor).toBe('#333333');
+    expect(style.inner?.fontFamily).toBe('monospace');
+    expect(style.outer?.textColor).toBe('#333333');
+    expect(style.outer?.fontFamily).toBe('monospace');
     expect(style.inner?.minFontSize).toBe(9);
     expect(style.inner?.maxFontSize).toBe(14);
     expect(style.link?.strokeColor).toBe('#cccccc');
@@ -70,7 +72,7 @@ describe('getLabelStyle', () => {
       depthStyleCache,
       new Map(),
     );
-    expect(style.textColor).toBe('#ff0000');
+    expect(style.inner?.textColor).toBe('#ff0000');
   });
 
   it('uses depth style for minFontSize/maxFontSize', () => {

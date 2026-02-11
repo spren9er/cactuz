@@ -249,12 +249,17 @@ Negative integers (-1, -2, -3, ...) are supported as a convenience for leaf-orie
 These negative-depth entries are not absolute numeric depths in the tree; instead the implementation maps them to groups of nodes computed from the layout. This is useful when you want to style leaves or near-leaf levels without knowing their positive depth value.
 
 ```typescript
+interface ColorScale {
+  scale: string;              // d3-scale-chromatic sequential scale name (e.g. 'magma', 'viridis')
+  reverse?: boolean;          // Reverse the scale direction (default: false)
+}
+
 interface DepthStyle {
-  depth: number;
+  depth: number | '*';        // Depth level, or '*' for wildcard (all depths)
   node?: {
-    fillColor?: string;
+    fillColor?: string | ColorScale;
     fillOpacity?: number;
-    strokeColor?: string;
+    strokeColor?: string | ColorScale;
     strokeOpacity?: number;
     strokeWidth?: number;
   };
@@ -310,6 +315,40 @@ interface DepthStyle {
     };
   }  
 }
+```
+
+#### Wildcard Depth Styling
+
+Setting `depth` to `'*'` applies a style to every depth level in the tree. When combined with `ColorScale` objects for `fillColor` and/or `strokeColor`, it automatically samples colors from a [d3-scale-chromatic](https://d3js.org/d3-scale-chromatic) sequential color scale. The number of sampled colors equals the tree depth + 1, evenly distributed across the scale from 0 to 1.
+
+All d3 sequential scales are supported: `magma`, `viridis`, `inferno`, `plasma`, `blues`, `greens`, `reds`, `turbo`, `cividis`, `warm`, `cool`, and more.
+
+Wildcard entries are always applied first, so explicit numeric depth entries override them. This allows you to define a color gradient across the entire tree and still customize individual levels.
+
+```javascript
+const tree = new CactusTree(canvas, {
+  width: 800,
+  height: 600,
+  nodes,
+  edges,
+  styles: {
+    depths: [
+      // Apply a Magma color gradient across all depths
+      {
+        depth: '*',
+        node: {
+          fillColor: { scale: 'magma', reverse: true },
+          strokeColor: { scale: 'magma', reverse: true },
+        },
+      },
+      // Override depth 0 (root) with a specific color
+      {
+        depth: 0,
+        node: { fillColor: '#2c3e50', strokeColor: '#ecf0f1' },
+      },
+    ],
+  },
+});
 ```
 
 ### CactusLayout

@@ -165,39 +165,23 @@ export function getLabelStyle(
   const depthInner = labelFromDepth?.inner ?? {};
   const depthOuter = labelFromDepth?.outer ?? {};
 
-  const textColor =
-    depthInner?.textColor ??
-    depthOuter?.textColor ??
-    depthInner?.strokeColor ??
-    depthOuter?.strokeColor ??
-    globalInner?.textColor ??
-    globalOuter?.textColor ??
-    globalInner?.strokeColor ??
-    globalOuter?.strokeColor ??
-    globalLabel?.textColor ??
-    '#333333';
-  const textOpacity =
-    depthInner?.textOpacity ??
-    depthOuter?.textOpacity ??
-    globalInner?.textOpacity ??
-    globalOuter?.textOpacity ??
-    globalLabel?.textOpacity ??
-    1.0;
+  const innerTextColor =
+    depthInner?.textColor ?? globalInner?.textColor ?? '#333333';
+  const innerTextOpacity =
+    depthInner?.textOpacity ?? globalInner?.textOpacity ?? 1.0;
+  const innerFontFamily =
+    depthInner?.fontFamily ?? globalInner?.fontFamily ?? 'monospace';
+  const innerFontWeight =
+    depthInner?.fontWeight ?? globalInner?.fontWeight ?? undefined;
 
-  const fontFamily =
-    depthInner?.fontFamily ??
-    depthOuter?.fontFamily ??
-    globalInner?.fontFamily ??
-    globalOuter?.fontFamily ??
-    globalLabel?.fontFamily ??
-    'monospace';
-
-  const fontWeight =
-    depthInner?.fontWeight ??
-    depthOuter?.fontWeight ??
-    globalInner?.fontWeight ??
-    globalOuter?.fontWeight ??
-    globalLabel?.fontWeight;
+  const outerTextColor =
+    depthOuter?.textColor ?? globalOuter?.textColor ?? '#333333';
+  const outerTextOpacity =
+    depthOuter?.textOpacity ?? globalOuter?.textOpacity ?? 1.0;
+  const outerFontFamily =
+    depthOuter?.fontFamily ?? globalOuter?.fontFamily ?? 'monospace';
+  const outerFontWeight =
+    depthOuter?.fontWeight ?? globalOuter?.fontWeight ?? undefined;
 
   const innerMinFontSize =
     depthInner?.minFontSize ??
@@ -224,18 +208,9 @@ export function getLabelStyle(
   const linkFromDepth = depthOuter?.link ?? labelFromDepth?.link ?? null;
   const globalLink = globalOuter?.link ?? globalLabel?.link ?? {};
 
-  const depthStrokeShorthand =
-    depthInner?.strokeColor ?? depthOuter?.strokeColor ?? null;
-  const globalStrokeShorthand =
-    globalInner?.strokeColor ?? globalOuter?.strokeColor ?? null;
-
   const link = {
     strokeColor:
-      linkFromDepth?.strokeColor ??
-      depthStrokeShorthand ??
-      globalLink?.strokeColor ??
-      globalStrokeShorthand ??
-      '#333333',
+      linkFromDepth?.strokeColor ?? globalLink?.strokeColor ?? '#333333',
     strokeOpacity:
       linkFromDepth?.strokeOpacity ?? globalLink?.strokeOpacity ?? 1.0,
     strokeWidth: linkFromDepth?.strokeWidth ?? globalLink?.strokeWidth ?? 0.5,
@@ -251,7 +226,7 @@ export function getLabelStyle(
     innerFromLabel ?? innerFromDepthHighlight ?? innerLegacy ?? null;
   if (innerRaw) {
     depthLabelHighlight.inner = {
-      textColor: innerRaw?.textColor ?? innerRaw?.strokeColor,
+      textColor: innerRaw?.textColor,
       textOpacity: innerRaw?.textOpacity,
       fontWeight: innerRaw?.fontWeight,
     };
@@ -261,17 +236,13 @@ export function getLabelStyle(
   const outerRaw = outerFromLabel ?? outerFromDepthHighlight ?? null;
   if (outerRaw) {
     depthLabelHighlight.outer = {
-      textColor: outerRaw?.textColor ?? outerRaw?.strokeColor,
+      textColor: outerRaw?.textColor,
       textOpacity: outerRaw?.textOpacity,
       fontWeight: outerRaw?.fontWeight,
     };
   }
 
   return {
-    textColor,
-    textOpacity,
-    fontFamily,
-    fontWeight,
     padding,
     link,
     highlight: Object.keys(depthLabelHighlight).length
@@ -279,35 +250,19 @@ export function getLabelStyle(
       : undefined,
     insideFitFactor,
     inner: {
+      textColor: innerTextColor,
+      textOpacity: innerTextOpacity,
+      fontFamily: innerFontFamily,
+      fontWeight: innerFontWeight,
       minFontSize: innerMinFontSize,
       maxFontSize: innerMaxFontSize,
     },
     outer: {
-      textColor:
-        depthOuter?.textColor ??
-        globalOuter?.textColor ??
-        globalLabel?.textColor ??
-        undefined,
-      textOpacity:
-        depthOuter?.textOpacity ??
-        globalOuter?.textOpacity ??
-        globalLabel?.textOpacity ??
-        undefined,
-      fontFamily:
-        depthOuter?.fontFamily ??
-        globalOuter?.fontFamily ??
-        globalLabel?.fontFamily ??
-        undefined,
-      fontWeight:
-        depthOuter?.fontWeight ??
-        globalOuter?.fontWeight ??
-        globalLabel?.fontWeight ??
-        undefined,
-      padding:
-        depthOuter?.padding ??
-        globalOuter?.padding ??
-        globalLabel?.padding ??
-        undefined,
+      textColor: outerTextColor,
+      textOpacity: outerTextOpacity,
+      fontFamily: outerFontFamily,
+      fontWeight: outerFontWeight,
+      padding: depthOuter?.padding ?? globalOuter?.padding ?? undefined,
       link: {
         strokeColor: link.strokeColor,
         strokeOpacity: link.strokeOpacity,
@@ -430,7 +385,6 @@ export function drawCenteredLabel(
     h &&
     hHasDepth &&
     (h.textColor !== undefined ||
-      /** @type {any} */ (h).strokeColor !== undefined ||
       h.textOpacity !== undefined ||
       h.fontWeight !== undefined)
       ? h
@@ -442,27 +396,25 @@ export function drawCenteredLabel(
   const fillColor =
     hFlat && hFlat.textColor !== undefined
       ? hFlat.textColor
-      : hFlat && /** @type {any} */ (hFlat).strokeColor !== undefined
-        ? /** @type {any} */ (hFlat).strokeColor
-        : hInner && hInner.textColor !== undefined
-          ? hInner.textColor
-          : (ls.inner?.textColor ?? ls.textColor);
+      : hInner && hInner.textColor !== undefined
+        ? hInner.textColor
+        : (ls.inner?.textColor ?? '#333333');
   const alpha =
     hFlat && hFlat.textOpacity !== undefined
       ? hFlat.textOpacity
       : hInner && hInner.textOpacity !== undefined
         ? hInner.textOpacity
-        : (ls.inner?.textOpacity ?? ls.textOpacity ?? 1);
+        : (ls.inner?.textOpacity ?? 1);
   const fontWeightPrefix =
     hFlat && hFlat.fontWeight
       ? `${hFlat.fontWeight} `
       : hInner && hInner.fontWeight
         ? `${hInner.fontWeight} `
-        : (ls.inner?.fontWeight ?? ls.fontWeight)
-          ? `${ls.inner?.fontWeight ?? ls.fontWeight} `
+        : ls.inner?.fontWeight
+          ? `${ls.inner.fontWeight} `
           : '';
 
-  const fontFamily = ls.inner?.fontFamily ?? ls.fontFamily ?? 'monospace';
+  const fontFamily = ls.inner?.fontFamily ?? 'monospace';
   setCanvasStyles(ctx, {
     fillStyle: fillColor,
     globalAlpha: alpha,
@@ -627,17 +579,14 @@ export function drawLabelConnectors(
         };
       }
 
-      let highlightStrokeOrText = undefined;
+      let highlightTextColor = undefined;
       if (nodeData && nodeData.highlightStyle) {
         const hs = nodeData.highlightStyle;
-        highlightStrokeOrText =
-          (hs.outer && (hs.outer.textColor ?? hs.outer.strokeColor)) ??
-          hs.textColor ??
-          hs.strokeColor;
+        highlightTextColor = (hs.outer && hs.outer.textColor) ?? hs.textColor;
       }
       const color =
         linkStyle.strokeColor ??
-        highlightStrokeOrText ??
+        highlightTextColor ??
         globalOuter.textColor ??
         globalLabel.textColor ??
         '#333333';
@@ -713,54 +662,22 @@ export function drawPositionedLabel(
   const nhInner = nodeHighlight ? (nodeHighlight.inner ?? nodeHighlight) : null;
 
   const resolvedTextColor = labelData.isInside
-    ? (nhInner?.textColor ??
-      nhInner?.strokeColor ??
-      (labelStyle.inner && labelStyle.inner.textColor !== undefined
-        ? labelStyle.inner.textColor
-        : labelStyle.textColor !== undefined
-          ? labelStyle.textColor
-          : '#333333'))
-    : (nhOuter?.textColor ??
-      nhOuter?.strokeColor ??
-      (labelStyle.outer && labelStyle.outer.textColor !== undefined
-        ? labelStyle.outer.textColor
-        : labelStyle.textColor !== undefined
-          ? labelStyle.textColor
-          : '#333333'));
+    ? (nhInner?.textColor ?? labelStyle.inner?.textColor ?? '#333333')
+    : (nhOuter?.textColor ?? labelStyle.outer?.textColor ?? '#333333');
 
   const resolvedTextOpacity = labelData.isInside
-    ? (nhInner?.textOpacity ??
-      (labelStyle.inner && labelStyle.inner.textOpacity !== undefined
-        ? labelStyle.inner.textOpacity
-        : labelStyle.textOpacity !== undefined
-          ? labelStyle.textOpacity
-          : 1))
-    : (nhOuter?.textOpacity ??
-      (labelStyle.outer && labelStyle.outer.textOpacity !== undefined
-        ? labelStyle.outer.textOpacity
-        : labelStyle.textOpacity !== undefined
-          ? labelStyle.textOpacity
-          : 1));
+    ? (nhInner?.textOpacity ?? labelStyle.inner?.textOpacity ?? 1)
+    : (nhOuter?.textOpacity ?? labelStyle.outer?.textOpacity ?? 1);
 
   const resolvedFontWeight = labelData.isInside
-    ? (nhInner?.fontWeight ??
-      (labelStyle.inner && labelStyle.inner.fontWeight !== undefined
-        ? labelStyle.inner.fontWeight
-        : labelStyle.fontWeight))
-    : (nhOuter?.fontWeight ??
-      (labelStyle.outer && labelStyle.outer.fontWeight !== undefined
-        ? labelStyle.outer.fontWeight
-        : labelStyle.fontWeight));
+    ? (nhInner?.fontWeight ?? labelStyle.inner?.fontWeight)
+    : (nhOuter?.fontWeight ?? labelStyle.outer?.fontWeight);
 
   const fontWeightPrefix = resolvedFontWeight ? `${resolvedFontWeight} ` : '';
 
   const fontFamily = labelData.isInside
-    ? ((labelStyle.inner && labelStyle.inner.fontFamily) ??
-      labelStyle.fontFamily ??
-      'monospace')
-    : ((labelStyle.outer && labelStyle.outer.fontFamily) ??
-      labelStyle.fontFamily ??
-      'monospace');
+    ? (labelStyle.inner?.fontFamily ?? 'monospace')
+    : (labelStyle.outer?.fontFamily ?? 'monospace');
 
   setCanvasStyles(ctx, {
     fillStyle: resolvedTextColor,
@@ -778,7 +695,7 @@ export function drawPositionedLabel(
         ? labelStyle.outer.padding
         : typeof labelStyle.padding === 'number'
           ? labelStyle.padding
-          : 4;
+          : 4; // padding is outer-only but kept as top-level fallback for backwards compat
     ctx.fillText(text, x + labelPadding, y + labelPadding);
   }
 
@@ -871,7 +788,7 @@ export function computeLabelLayout(
       leafNodes,
       hoveredNodeId,
       highlightedNodeIds,
-      { textColor: labelStyle.outer?.textColor ?? labelStyle.textColor },
+      { textColor: labelStyle.inner?.textColor },
     );
   });
 

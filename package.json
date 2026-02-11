@@ -1,6 +1,6 @@
 {
   "name": "cactuz",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "A JavaScript library for visualizing hierarchical data as cactus tree",
   "scripts": {
     "dev": "vite dev",
@@ -71,5 +71,8 @@
   "keywords": [
     "svelte"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "d3-scale-chromatic": "^3.1.0"
+  }
 }

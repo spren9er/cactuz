@@ -155,7 +155,8 @@ describe('resolveDepthStyle', () => {
       depthStyleCache,
       negativeDepthNodes,
     );
-    expect(result).toBe(negativeStyle);
+    // Negative depth merges on top: fillColor from negative wins
+    expect(result.node.fillColor).toBe('#00ff00');
   });
 
   it('last matching negative depth wins (not first)', () => {
@@ -174,7 +175,8 @@ describe('resolveDepthStyle', () => {
       new Map(),
       negativeDepthNodes,
     );
-    expect(result).toBe(negativeStyle2);
+    // Last matching negative depth wins: fillColor from -1 overrides -2
+    expect(result.node.fillColor).toBe('#00ff00');
   });
 
   it('skips negative depth when node is not in its set', () => {

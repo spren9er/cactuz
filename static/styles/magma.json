@@ -1,0 +1,50 @@
+{
+  "node": {
+    "strokeColor": "#333333"
+  },
+  "edge": {
+    "strokeColor": "#ffffff"
+  },
+  "label": {
+    "inner": {
+      "textColor": "#333333",
+      "fontFamily": "monospace",
+      "fontWeight": "normal",
+      "minFontSize": 9,
+      "maxFontSize": 14
+    },
+    "outer": {
+      "textColor": "#333333",
+      "textOpacity": 1,
+      "fontFamily": "monospace",
+      "fontWeight": "normal",
+      "fontSize": 9,
+      "link": {
+        "strokeColor": "#cccccc"
+      }
+    }
+  },
+  "depths": [
+    {
+      "depth": -1,
+      "highlight": {
+        "node": {
+          "fillColor": "#efefef",
+          "strokeColor": "#333333",
+          "strokeWidth": 2
+        },
+        "label": {
+          "inner": {
+            "textColor": "#333333"
+          }
+        }
+      }
+    },
+    {
+      "depth": "*",
+       "node": {
+         "fillColor": { "scale": "magma" }
+       }
+     }
+  ]
+}

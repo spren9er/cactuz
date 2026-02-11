@@ -95,14 +95,36 @@ export function resolveDepthStyle(
   // Apply positive depth first
   let depthStyle = depthStyleCache.get(depth);
 
-  // Then apply negative depths (override positive if matched).
+  // Then apply negative depths (merge on top of existing depth style).
   // Last matching negative depth wins (later entries override earlier ones).
   if (mergedStyle?.depths) {
     for (const ds of mergedStyle.depths) {
       if (ds.depth < 0) {
         const nodesAtThisNegativeDepth = negativeDepthNodes.get(ds.depth);
         if (nodesAtThisNegativeDepth && nodesAtThisNegativeDepth.has(nodeId)) {
-          depthStyle = ds;
+          if (depthStyle) {
+            // Merge: negative depth properties override, but missing ones
+            // are preserved from the existing (e.g. wildcard) depth style
+            const merged = { ...depthStyle };
+            for (const key of Object.keys(ds)) {
+              if (key === 'depth') continue;
+              const base = depthStyle[key];
+              const override = ds[key];
+              if (
+                base &&
+                override &&
+                typeof base === 'object' &&
+                typeof override === 'object'
+              ) {
+                merged[key] = { ...base, ...override };
+              } else {
+                merged[key] = override;
+              }
+            }
+            depthStyle = merged;
+          } else {
+            depthStyle = ds;
+          }
         }
       }
     }
