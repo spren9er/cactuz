@@ -27,7 +27,7 @@ const DEFAULT_OPTIONS = {
   numLabels: 20,
   edgeOptions: {
     bundlingStrength: 0.97,
-    strategy: 'hide',
+    filterMode: 'hide',
     muteOpacity: 0.2,
   },
 };
@@ -167,7 +167,7 @@ function mergeStyles(userStyles) {
 export class CactusTree {
   /**
    * @param {HTMLCanvasElement} canvas
-   * @param {{ width?: number, height?: number, nodes?: any[], links?: any[], options?: any, styles?: any, pannable?: boolean, zoomable?: boolean }} config
+   * @param {{ width?: number, height?: number, nodes?: any[], edges?: any[], options?: any, styles?: any, pannable?: boolean, zoomable?: boolean }} config
    */
   constructor(canvas, config = {}) {
     this.canvas = canvas;
@@ -177,7 +177,7 @@ export class CactusTree {
     this.width = config.width ?? canvas.width;
     this.height = config.height ?? canvas.height;
     this.nodes = config.nodes ?? [];
-    this.links = config.links ?? [];
+    this.edges = config.edges ?? [];
     this.pannable = config.pannable ?? true;
     this.zoomable = config.zoomable ?? true;
 
@@ -230,7 +230,7 @@ export class CactusTree {
   /**
    * Update configuration. Any subset of the config properties may be provided.
    * Triggers a full re-render.
-   * @param {{ width?: number, height?: number, nodes?: any[], links?: any[], options?: any, styles?: any, pannable?: boolean, zoomable?: boolean }} config
+   * @param {{ width?: number, height?: number, nodes?: any[], edges?: any[], options?: any, styles?: any, pannable?: boolean, zoomable?: boolean }} config
    */
   update(config) {
     if (!config) return;
@@ -240,7 +240,7 @@ export class CactusTree {
     if (config.width !== undefined) this.width = config.width;
     if (config.height !== undefined) this.height = config.height;
     if (config.nodes !== undefined) this.nodes = config.nodes;
-    if (config.links !== undefined) this.links = config.links;
+    if (config.edges !== undefined) this.edges = config.edges;
     if (config.options !== undefined)
       this.mergedOptions = mergeOptions(config.options);
     if (config.styles !== undefined)
@@ -365,7 +365,7 @@ export class CactusTree {
 
     // Compute visible edge node ids
     const edgeNodeIds = drawEdge.computeVisibleEdgeNodeIds(
-      this.links,
+      this.edges,
       this.nodeIdToRenderedNodeMap,
       this.hoveredNodeId,
     );
@@ -383,17 +383,17 @@ export class CactusTree {
       if (!this.hoveredNodeId) return s;
       s.add(this.hoveredNodeId);
 
-      for (const link of this.links || []) {
+      for (const edge of this.edges || []) {
         if (
-          link.source === this.hoveredNodeId &&
-          edgeNodeIdSet.has(link.target)
+          edge.source === this.hoveredNodeId &&
+          edgeNodeIdSet.has(edge.target)
         ) {
-          s.add(link.target);
+          s.add(edge.target);
         } else if (
-          link.target === this.hoveredNodeId &&
-          edgeNodeIdSet.has(link.source)
+          edge.target === this.hoveredNodeId &&
+          edgeNodeIdSet.has(edge.source)
         ) {
-          s.add(link.source);
+          s.add(edge.source);
         }
       }
       return s;
@@ -423,7 +423,7 @@ export class CactusTree {
     // Draw edges
     drawEdge.drawEdges(
       this.ctx,
-      this.links,
+      this.edges,
       this.nodeIdToRenderedNodeMap,
       this.hierarchicalPathCache,
       this.mergedStyle,

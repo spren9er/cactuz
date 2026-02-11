@@ -797,7 +797,7 @@ export function drawPositionedLabel(
  * @param {any[]} renderedNodes
  * @param {Set<string>} leafNodes
  * @param {string|null} hoveredNodeId
- * @param {any[]|Set<string>} highlightedNodeIds - Set/array of node IDs that are considered highlighted due to link association (direct neighbors of hovered node)
+ * @param {any[]|Set<string>} highlightedNodeIds - Set/array of node IDs that are considered highlighted due to edge association (direct neighbors of hovered node)
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes

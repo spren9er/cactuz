@@ -7,12 +7,12 @@
   let nodes = [];
 
   /** @type {Array<{source: string, target: string}>} */
-  let links = [];
+  let edges = [];
 
   let width = 750;
   let height = 750;
 
-  $: displayedLinks = showEdgeBundling ? links : [];
+  $: displayedEdges = showEdgeBundling ? edges : [];
 
   let config = {
     overlap: 0.2,
@@ -22,7 +22,7 @@
     zoom: 1.0,
     numLabels: 20,
     bundlingStrength: 0.97,
-    strategy: 'mute',
+    filterMode: 'mute',
     muteOpacity: 0.2,
   };
 
@@ -42,10 +42,10 @@
     nodes = await response.json();
 
     if (dataset === 'rill') {
-      links = [];
+      edges = [];
     } else {
-      const linksResponse = await fetch(`datasets/${dataset}Edges.json`);
-      links = await linksResponse.json();
+      const edgesResponse = await fetch(`datasets/${dataset}Edges.json`);
+      edges = await edgesResponse.json();
     }
   }
 
@@ -103,7 +103,7 @@
   <p>
     This modern, interactive visualization of <i>CactusTree</i> provides several
     configurable options that allow you to control the visual appearance and
-    layout behavior of the tree. The source code for the JS library
+    layout behavior of the tree. The source code for the JavaScript library
     <b>cactuz</b> is available on
     <a href="https://github.com/spren9er/cactus">GitHub</a>.
   </p>
@@ -124,7 +124,7 @@
       </label>
 
       <div class="dataset-summary">
-        {nodes.length} nodes, {links.length} edges
+        {nodes.length} nodes, {edges.length} edges
       </div>
 
       <label for="style" style="margin-left:12px;">
@@ -237,7 +237,7 @@
       {width}
       {height}
       {nodes}
-      links={displayedLinks}
+      edges={displayedEdges}
       options={{
         overlap: config.overlap,
         arcSpan: (config.arcSpan * Math.PI) / 180,
@@ -247,7 +247,7 @@
         numLabels: config.numLabels,
         edgeOptions: {
           bundlingStrength: config.bundlingStrength,
-          strategy: config.strategy,
+          filterMode: config.filterMode,
           muteOpacity: config.muteOpacity,
         },
       }}
@@ -280,10 +280,10 @@
         </label>
       </div>
 
-      <label class="strategy-label">
-        Highlight Strategy:
+      <label class="filter-mode-label">
+        Filter Mode:
         <select
-          bind:value={config.strategy}
+          bind:value={config.filterMode}
           disabled={!showEdgeBundling}
           aria-disabled={!showEdgeBundling}
         >
@@ -302,8 +302,8 @@
             max="1"
             step="0.01"
             bind:value={config.muteOpacity}
-            disabled={!showEdgeBundling || config.strategy === 'hide'}
-            aria-disabled={!showEdgeBundling || config.strategy === 'hide'}
+            disabled={!showEdgeBundling || config.filterMode === 'hide'}
+            aria-disabled={!showEdgeBundling || config.filterMode === 'hide'}
           />
         </label>
       </div>
@@ -471,7 +471,7 @@
     color: #333333;
   }
 
-  .strategy-label {
+  .filter-mode-label {
     flex-direction: row;
     align-items: center;
     justify-self: center;
@@ -480,7 +480,7 @@
     color: #333333;
   }
 
-  .strategy-label select {
+  .filter-mode-label select {
     padding: 4px 6px;
     font-family: monospace;
     font-size: 11px;

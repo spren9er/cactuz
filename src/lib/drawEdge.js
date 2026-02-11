@@ -266,12 +266,12 @@ export function pathToCoordinates(
 /**
  * Edge filtering: when hovering a leaf node, show only edges connected to that node.
  *
- * @param {any} link
+ * @param {any} edge
  * @param {any} hoveredNodeId
  * @returns {boolean} true if edge should be filtered
  */
 export function shouldFilterEdge(
-  link,
+  edge,
   hoveredNodeId,
   nodeIdToRenderedNodeMap = null,
 ) {
@@ -290,7 +290,7 @@ export function shouldFilterEdge(
       if (hasChildren) return false;
     }
 
-    return link.source !== hoveredNodeId && link.target !== hoveredNodeId;
+    return edge.source !== hoveredNodeId && edge.target !== hoveredNodeId;
   } catch {
     return false;
   }
@@ -300,7 +300,7 @@ export function shouldFilterEdge(
  * Draw a single edge with hierarchical bundling and highlight support.
  *
  * @param {CanvasRenderingContext2D} ctx
- * @param {any} link
+ * @param {any} edge
  * @param {any} sourceNode
  * @param {any} targetNode
  * @param {any} hierarchicalPathCache
@@ -316,7 +316,7 @@ export function shouldFilterEdge(
  */
 export function drawEdge(
   ctx,
-  link,
+  edge,
   sourceNode,
   targetNode,
   hierarchicalPathCache,
@@ -342,7 +342,7 @@ export function drawEdge(
     }
   }
 
-  const l = /** @type {any} */ (link);
+  const l = /** @type {any} */ (edge);
 
   if (!ctx) return false;
 
@@ -626,23 +626,23 @@ export function drawConnectingLines(
 }
 
 /**
- * Compute visible node ids from links without drawing.
+ * Compute visible node ids from edges without drawing.
  *
- * @param {any} links
+ * @param {any} edges
  * @param {any} nodeIdToRenderedNodeMap
  * @param {any} hoveredNodeId
  * @returns {string[]}
  */
 export function computeVisibleEdgeNodeIds(
-  links,
+  edges,
   nodeIdToRenderedNodeMap,
   hoveredNodeId,
 ) {
-  if (!links || links.length === 0) return [];
+  if (!edges || edges.length === 0) return [];
 
   const visibleSet = new Set();
-  for (const link of links) {
-    const li = /** @type {any} */ (link);
+  for (const edge of edges) {
+    const li = /** @type {any} */ (edge);
     const s = nodeIdToRenderedNodeMap.get(li.source);
     const t = nodeIdToRenderedNodeMap.get(li.target);
     if (
@@ -659,15 +659,15 @@ export function computeVisibleEdgeNodeIds(
     if (visibleSet.has(hoveredNodeId)) {
       visibleSet.add(hoveredNodeId);
     } else {
-      for (const link of links) {
+      for (const edge of edges) {
         if (
-          (link.source === hoveredNodeId || link.target === hoveredNodeId) &&
-          nodeIdToRenderedNodeMap.get(link.source) &&
-          nodeIdToRenderedNodeMap.get(link.target) &&
-          !shouldFilterEdge(link, hoveredNodeId, nodeIdToRenderedNodeMap)
+          (edge.source === hoveredNodeId || edge.target === hoveredNodeId) &&
+          nodeIdToRenderedNodeMap.get(edge.source) &&
+          nodeIdToRenderedNodeMap.get(edge.target) &&
+          !shouldFilterEdge(edge, hoveredNodeId, nodeIdToRenderedNodeMap)
         ) {
-          visibleSet.add(link.source);
-          visibleSet.add(link.target);
+          visibleSet.add(edge.source);
+          visibleSet.add(edge.target);
           visibleSet.add(hoveredNodeId);
           break;
         }
@@ -682,21 +682,21 @@ export function computeVisibleEdgeNodeIds(
  * Draw all edges in batch. Returns array of visible node ids.
  *
  * @param {CanvasRenderingContext2D} ctx
- * @param {any} links
+ * @param {any} edges
  * @param {any} nodeIdToRenderedNodeMap
  * @param {any} hierarchicalPathCache
  * @param {any} mergedStyle
  * @param {any} hoveredNodeId
  * @param {any} highlightedNodeIds
  * @param {any} bundlingStrength
- * @param {{bundlingStrength?:number,strategy?:string,muteOpacity?:number}|null} edgeOptions
+ * @param {{bundlingStrength?:number,filterMode?:string,muteOpacity?:number}|null} edgeOptions
  * @param {Map<number, any>|null} depthStyleCache
  * @param {Map<number, Set<string>>|null} negativeDepthNodes
  * @returns {string[]}
  */
 export function drawEdges(
   ctx,
-  links,
+  edges,
   nodeIdToRenderedNodeMap,
   hierarchicalPathCache,
   mergedStyle,
@@ -707,7 +707,7 @@ export function drawEdges(
   depthStyleCache = null,
   negativeDepthNodes = null,
 ) {
-  if (!ctx || !links || links.length === 0) return [];
+  if (!ctx || !edges || edges.length === 0) return [];
 
   let highlightedSet = null;
   if (highlightedNodeIds != null) {
@@ -725,7 +725,7 @@ export function drawEdges(
   const edgeOptionsLocal = edgeOptions ?? mergedStyle?.edgeOptions ?? {};
   const effectiveBundlingStrength =
     bundlingStrength ?? edgeOptionsLocal?.bundlingStrength ?? 0.97;
-  const strategy = edgeOptionsLocal.strategy ?? 'hide';
+  const filterMode = edgeOptionsLocal.filterMode ?? 'hide';
   const muteOpacity =
     typeof edgeOptionsLocal.muteOpacity === 'number'
       ? edgeOptionsLocal.muteOpacity
@@ -734,8 +734,8 @@ export function drawEdges(
   const backgroundEdges = [];
   const highlightedEdges = [];
 
-  for (const link of links) {
-    const li = /** @type {any} */ (link);
+  for (const edge of edges) {
+    const li = /** @type {any} */ (edge);
 
     const sNode = nodeIdToRenderedNodeMap.get(li.source);
     const tNode = nodeIdToRenderedNodeMap.get(li.target);
@@ -753,7 +753,7 @@ export function drawEdges(
       (highlightedSet &&
         (highlightedSet.has(li.source) || highlightedSet.has(li.target)));
 
-    if (strategy === 'hide' && isFiltered && !isHighlighted) continue;
+    if (filterMode === 'hide' && isFiltered && !isHighlighted) continue;
 
     if (isHighlighted) {
       highlightedEdges.push({ li, sNode, tNode, isFiltered });
@@ -764,7 +764,7 @@ export function drawEdges(
 
   for (const e of backgroundEdges) {
     const { li, sNode, tNode, isFiltered } = e;
-    const muted = strategy === 'mute' && isFiltered;
+    const muted = filterMode === 'mute' && isFiltered;
     const skipFiltered = !muted;
 
     try {

@@ -16,7 +16,7 @@ The library **cactuz** is based on the research paper *[CactusTree: A Tree Drawi
 - **Fractal-based Tree Layout** - Recursively stacks child nodes on parent nodes
 - **Hierarchical Edge Bundling** - Groups related connections for cleaner visualization
 - **Highly Customizable** - Extensive styling and behavior options
-- **Interactive** - Pan, zoom, hover effects, and link filtering
+- **Interactive** - Pan, zoom, hover effects, and edge filtering
 - **Depth-based Styling** - Configure appearance for different tree levels
 
 ## Installation
@@ -40,13 +40,13 @@ const nodes = [
   { id: 'leaf2', name: 'Leaf 2', parent: 'child1' },
 ];
 
-const links = [{ source: 'leaf1', target: 'leaf2' }];
+const edges = [{ source: 'leaf1', target: 'leaf2' }];
 
 const tree = new CactusTree(canvas, {
   width: 800,
   height: 600,
   nodes,
-  links,
+  edges,
 });
 ```
 
@@ -76,7 +76,7 @@ new CactusTree(canvas, config)
 | `width`    | `number`  | yes      | -       | Canvas width in pixels             |
 | `height`   | `number`  | yes      | -       | Canvas height in pixels            |
 | `nodes`    | `Node[]`  | yes      | -       | Array of hierarchical nodes        |
-| `links`    | `Link[]`  | no       | `[]`    | Array of connections between nodes |
+| `edges`    | `Edge[]`  | no       | `[]`    | Array of connections between nodes |
 | `options`  | `Options` | no       | `{}`    | Layout and behavior configuration  |
 | `styles`   | `Styles`  | no       | `{}`    | Visual styling configuration       |
 | `pannable` | `boolean` | no       | `true`  | Enable pan interaction             |
@@ -89,7 +89,7 @@ new CactusTree(canvas, config)
 Update any subset of the config properties. Triggers a full re-render.
 
 ```javascript
-tree.update({ nodes: newNodes, links: newLinks });
+tree.update({ nodes: newNodes, edges: newEdges });
 tree.update({ options: { zoom: 1.5 } });
 tree.update({ styles: myStyles });
 ```
@@ -121,10 +121,10 @@ interface Node {
 }
 ```
 
-#### Link Structure
+#### Edge Structure
 
 ```typescript
-interface Link {
+interface Edge {
   source: string;             // Source node ID
   target: string;             // Target node ID
 }
@@ -145,12 +145,12 @@ interface Options {
 
 interface EdgeOptions {
   bundlingStrength?: number;  // Edge bundling strength (0..1, default: 0.97)
-  strategy?: 'hide' | 'mute'; // Hover behavior when over a leaf: 'hide' hides unrelated edges, 'mute' shows them at reduced opacity (default: 'hide')
-  muteOpacity?: number;       // When strategy is 'mute', multiplier applied to unrelated edges (0..1, default: 0.25)
+  filterMode?: 'hide' | 'mute'; // Hover behavior when over a leaf: 'hide' hides unrelated edges, 'mute' shows them at reduced opacity (default: 'hide')
+  muteOpacity?: number;         // When filterMode is 'mute', multiplier applied to unrelated edges (0..1, default: 0.25)
 }
 ```
 
-**Note:** Negative values for `overlap` create gaps and connect nodes with links.
+**Note:** Negative values for `overlap` create gaps and connect nodes with edges.
 
 #### Styles
 
@@ -381,7 +381,7 @@ const tree = new CactusTree(canvas, {
   width: 800,
   height: 600,
   nodes,
-  links,
+  edges,
   styles: {
     node: {
       fillColor: '#f0f8ff',
@@ -450,7 +450,7 @@ const tree = new CactusTree(canvas, {
   <img src="https://github.com/spren9er/cactuz/blob/main/docs/images/cactus_tree_advanced.png?raw=true" alt="cactus-tree-advanced" width="75%" height="75%">
 </div>
 
-For a negative overlap parameter, nodes are connected by links. When hovering over leaf nodes, only the links connected to that node are shown, while all other links are hidden. This allows for better readability in dense visualizations.
+For a negative overlap parameter, nodes are connected by edges. When hovering over leaf nodes, only the edges connected to that node are shown, while all other edges are hidden. This allows for better readability in dense visualizations.
 
 ## Svelte Component
 
@@ -468,10 +468,10 @@ For Svelte applications, **cactuz** also exports a ready-to-use `Cactus` Svelte 
     { id: 'leaf2', name: 'Leaf 2', parent: 'child1' },
   ];
 
-  const links = [{ source: 'leaf1', target: 'leaf2' }];
+  const edges = [{ source: 'leaf1', target: 'leaf2' }];
 </script>
 
-<Cactus width={800} height={600} {nodes} {links} />
+<Cactus width={800} height={600} {nodes} {edges} />
 ```
 
-The component accepts the same props as the `CactusTree` config: `width`, `height`, `nodes`, `links`, `options`, `styles`, `pannable`, and `zoomable`. It automatically re-renders when any prop changes.
+The component accepts the same props as the `CactusTree` config: `width`, `height`, `nodes`, `edges`, `options`, `styles`, `pannable`, and `zoomable`. It automatically re-renders when any prop changes.
