@@ -50,10 +50,10 @@ describe('getLabelStyle', () => {
     const style = getLabelStyle(0, 'node1', mergedStyle, new Map(), new Map());
     expect(style.textColor).toBe('#333333');
     expect(style.fontFamily).toBe('monospace');
-    expect(style.inner.minFontSize).toBe(9);
-    expect(style.inner.maxFontSize).toBe(14);
-    expect(style.link.strokeColor).toBe('#cccccc');
-    expect(style.link.strokeWidth).toBe(0.5);
+    expect(style.inner?.minFontSize).toBe(9);
+    expect(style.inner?.maxFontSize).toBe(14);
+    expect(style.link?.strokeColor).toBe('#cccccc');
+    expect(style.link?.strokeWidth).toBe(0.5);
   });
 
   it('uses depth style inner textColor over global', () => {
@@ -87,8 +87,8 @@ describe('getLabelStyle', () => {
       depthStyleCache,
       new Map(),
     );
-    expect(style.inner.minFontSize).toBe(6);
-    expect(style.inner.maxFontSize).toBe(20);
+    expect(style.inner?.minFontSize).toBe(6);
+    expect(style.inner?.maxFontSize).toBe(20);
   });
 
   it('uses depth link style over global link style', () => {
@@ -109,8 +109,8 @@ describe('getLabelStyle', () => {
       depthStyleCache,
       new Map(),
     );
-    expect(style.link.strokeColor).toBe('#ff0000');
-    expect(style.link.strokeWidth).toBe(2);
+    expect(style.link?.strokeColor).toBe('#ff0000');
+    expect(style.link?.strokeWidth).toBe(2);
   });
 
   it('resolves highlight styles from depth', () => {
@@ -132,15 +132,15 @@ describe('getLabelStyle', () => {
       new Map(),
     );
     expect(style.highlight).toBeDefined();
-    expect(style.highlight.inner.textColor).toBe('#00ff00');
+    expect(style.highlight?.inner?.textColor).toBe('#00ff00');
   });
 
   it('returns outer style properties', () => {
     const style = getLabelStyle(0, 'node1', mergedStyle, new Map(), new Map());
     expect(style.outer).toBeDefined();
-    expect(style.outer.textColor).toBe('#333333');
-    expect(style.outer.fontSize).toBe(9);
-    expect(style.outer.link.strokeColor).toBe('#cccccc');
+    expect(style.outer?.textColor).toBe('#333333');
+    expect(style.outer?.fontSize).toBe(9);
+    expect(style.outer?.link?.strokeColor).toBe('#cccccc');
   });
 });
 
@@ -211,6 +211,7 @@ describe('calculateFontSize', () => {
 // ── truncateText ────────────────────────────────────────────────────────────
 
 describe('truncateText', () => {
+  /** @returns {any} */
   function createMockCtx(widthPerChar = 8) {
     return {
       measureText: vi.fn((text) => ({ width: text.length * widthPerChar })),
@@ -230,7 +231,7 @@ describe('truncateText', () => {
   });
 
   it('returns original text for null ctx', () => {
-    expect(truncateText(null, 'hello', 10)).toBe('hello');
+    expect(truncateText(/** @type {any} */ (null), 'hello', 10)).toBe('hello');
   });
 
   it('handles very short text', () => {
@@ -288,6 +289,7 @@ describe('shouldShowLabel', () => {
 // ── drawCenteredLabel ───────────────────────────────────────────────────────
 
 describe('drawCenteredLabel', () => {
+  /** @returns {any} */
   function createMockCtx() {
     return {
       measureText: vi.fn(() => ({ width: 40 })),
@@ -301,7 +303,9 @@ describe('drawCenteredLabel', () => {
   }
 
   it('does nothing for null ctx', () => {
-    expect(() => drawCenteredLabel(null, 'test', 50, 50, 30, {})).not.toThrow();
+    expect(() =>
+      drawCenteredLabel(/** @type {any} */ (null), 'test', 50, 50, 30, {}),
+    ).not.toThrow();
   });
 
   it('does nothing for empty text', () => {

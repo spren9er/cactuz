@@ -418,6 +418,7 @@ describe('findHoveredNode', () => {
 // ── drawNode ────────────────────────────────────────────────────────────────
 
 describe('drawNode', () => {
+  /** @returns {any} */
   function createMockCtx() {
     return {
       beginPath: vi.fn(),
@@ -446,7 +447,7 @@ describe('drawNode', () => {
   it('returns false for null ctx', () => {
     expect(
       drawNode(
-        null,
+        /** @type {any} */ (null),
         0,
         0,
         10,
@@ -505,6 +506,7 @@ describe('drawNode', () => {
 // ── drawNodes ───────────────────────────────────────────────────────────────
 
 describe('drawNodes', () => {
+  /** @returns {any} */
   function createMockCtx() {
     return {
       beginPath: vi.fn(),
@@ -540,7 +542,7 @@ describe('drawNodes', () => {
 
   it('returns zero counts for null ctx', () => {
     const result = drawNodes(
-      null,
+      /** @type {any} */ (null),
       renderedNodes,
       leafNodes,
       null,

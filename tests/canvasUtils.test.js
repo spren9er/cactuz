@@ -37,15 +37,19 @@ describe('colorWithAlpha', () => {
   });
 
   it('returns null/undefined as-is', () => {
-    expect(colorWithAlpha(null, 0.5)).toBeNull();
+    expect(colorWithAlpha(/** @type {any} */ (null), 0.5)).toBeNull();
   });
 
   it('returns color when alpha is undefined', () => {
-    expect(colorWithAlpha('#ff0000', undefined)).toBe('#ff0000');
+    expect(colorWithAlpha('#ff0000', /** @type {any} */ (undefined))).toBe(
+      '#ff0000',
+    );
   });
 
   it('returns color when alpha is null', () => {
-    expect(colorWithAlpha('#ff0000', null)).toBe('#ff0000');
+    expect(colorWithAlpha('#ff0000', /** @type {any} */ (null))).toBe(
+      '#ff0000',
+    );
   });
 
   it('caches results for repeated calls', () => {
@@ -145,7 +149,9 @@ describe('setCanvasStyles', () => {
   });
 
   it('does nothing when ctx is null', () => {
-    expect(() => setCanvasStyles(null, { fillStyle: 'red' })).not.toThrow();
+    expect(() =>
+      setCanvasStyles(/** @type {any} */ (null), { fillStyle: 'red' }),
+    ).not.toThrow();
   });
 
   it('skips undefined properties', () => {
@@ -164,7 +170,7 @@ describe('setupCanvas', () => {
   });
 
   it('returns null for null canvas', () => {
-    expect(setupCanvas(null, 800, 600)).toBeNull();
+    expect(setupCanvas(/** @type {any} */ (null), 800, 600)).toBeNull();
   });
 
   it('sets canvas dimensions accounting for devicePixelRatio', () => {

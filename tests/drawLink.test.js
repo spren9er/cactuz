@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { drawConnectingLinks } from '$lib/drawLink.js';
 
+/** @returns {any} */
 function createMockCtx() {
   return {
     beginPath: vi.fn(),
@@ -40,7 +41,7 @@ describe('drawConnectingLinks', () => {
   it('does nothing when ctx is null', () => {
     expect(() =>
       drawConnectingLinks(
-        null,
+        /** @type {any} */ (null),
         [],
         new Map(),
         mergedStyle,

@@ -15,32 +15,34 @@ let originalGetContext;
 
 function mockCanvasGetContext() {
   originalGetContext = HTMLCanvasElement.prototype.getContext;
-  HTMLCanvasElement.prototype.getContext = vi.fn(function () {
-    return {
-      font: '',
-      measureText: vi.fn((text) => ({
-        width: text.length * 6,
-        actualBoundingBoxAscent: 8,
-        actualBoundingBoxDescent: 2,
-      })),
-      fillText: vi.fn(),
-      fillStyle: '',
-      strokeStyle: '',
-      lineWidth: 1,
-      globalAlpha: 1,
-      textAlign: 'start',
-      textBaseline: 'alphabetic',
-      beginPath: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      stroke: vi.fn(),
-      fill: vi.fn(),
-      arc: vi.fn(),
-      save: vi.fn(),
-      restore: vi.fn(),
-      scale: vi.fn(),
-    };
-  });
+  /** @type {any} */ (HTMLCanvasElement.prototype).getContext = vi.fn(
+    function () {
+      return {
+        font: '',
+        measureText: vi.fn((text) => ({
+          width: text.length * 6,
+          actualBoundingBoxAscent: 8,
+          actualBoundingBoxDescent: 2,
+        })),
+        fillText: vi.fn(),
+        fillStyle: '',
+        strokeStyle: '',
+        lineWidth: 1,
+        globalAlpha: 1,
+        textAlign: 'start',
+        textBaseline: 'alphabetic',
+        beginPath: vi.fn(),
+        moveTo: vi.fn(),
+        lineTo: vi.fn(),
+        stroke: vi.fn(),
+        fill: vi.fn(),
+        arc: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        scale: vi.fn(),
+      };
+    },
+  );
 }
 
 function restoreCanvasGetContext() {
@@ -214,12 +216,12 @@ describe('CircleAwareLabeler', () => {
     const labeler = new CircleAwareLabeler([], [], [], 800, 600);
 
     // Label overlapping with circle
-    expect(labeler.labelOverlapsCircle(90, 90, 50, 20, 100, 100, 30)).toBe(
+    expect(labeler.labelOverlapsCircle(90, 90, 50, 20, 100, 100, 30, 0)).toBe(
       true,
     );
 
     // Label far from circle
-    expect(labeler.labelOverlapsCircle(500, 500, 50, 20, 100, 100, 30)).toBe(
+    expect(labeler.labelOverlapsCircle(500, 500, 50, 20, 100, 100, 30, 0)).toBe(
       false,
     );
   });

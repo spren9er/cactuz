@@ -10,6 +10,7 @@ import {
   createMouseHandlers,
 } from '$lib/mouseHandlers.js';
 
+/** @returns {any} */
 function createMockState(overrides = {}) {
   return {
     canvas: {

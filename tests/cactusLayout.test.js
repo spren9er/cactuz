@@ -75,7 +75,7 @@ describe('getRadius', () => {
 describe('weight', () => {
   it('returns 1 for leaf node', () => {
     const layout = new CactusLayout(800, 600);
-    const leaf = { id: 'leaf', children: [] };
+    const leaf = /** @type {any} */ ({ id: 'leaf', children: [] });
     expect(layout.weight(leaf)).toBe(1);
   });
 
@@ -83,20 +83,20 @@ describe('weight', () => {
     const layout = new CactusLayout(800, 600);
     const leaf1 = { id: 'l1', children: [] };
     const leaf2 = { id: 'l2', children: [] };
-    const parent = { id: 'p', children: [leaf1, leaf2] };
+    const parent = /** @type {any} */ ({ id: 'p', children: [leaf1, leaf2] });
 
     expect(layout.weight(parent)).toBe(2);
   });
 
   it('uses explicit weight when provided', () => {
     const layout = new CactusLayout(800, 600);
-    const node = { id: 'n', weight: 5, children: [] };
+    const node = /** @type {any} */ ({ id: 'n', weight: 5, children: [] });
     expect(layout.weight(node)).toBe(5);
   });
 
   it('caches weight calculations', () => {
     const layout = new CactusLayout(800, 600);
-    const leaf = { id: 'leaf', children: [] };
+    const leaf = /** @type {any} */ ({ id: 'leaf', children: [] });
 
     layout.weight(leaf);
     expect(layout.weightCache.has('leaf')).toBe(true);
@@ -109,7 +109,7 @@ describe('weight', () => {
     const l2 = { id: 'l2', children: [] };
     const l3 = { id: 'l3', children: [] };
     const mid = { id: 'mid', children: [l1, l2] };
-    const root = { id: 'root', children: [mid, l3] };
+    const root = /** @type {any} */ ({ id: 'root', children: [mid, l3] });
 
     expect(layout.weight(root)).toBe(3);
   });
@@ -122,8 +122,8 @@ describe('sortChildNodesByWeight', () => {
     const layout = new CactusLayout(800, 600);
     const l1 = { id: 'l1', children: [] };
     const l2 = { id: 'l2', children: [] };
-    const heavy = { id: 'heavy', children: [l1, l2] };
-    const light = { id: 'light', children: [] };
+    const heavy = /** @type {any} */ ({ id: 'heavy', children: [l1, l2] });
+    const light = /** @type {any} */ ({ id: 'light', children: [] });
 
     // Precompute weights
     layout.weight(heavy);
@@ -136,8 +136,8 @@ describe('sortChildNodesByWeight', () => {
 
   it('does not mutate the original array', () => {
     const layout = new CactusLayout(800, 600);
-    const a = { id: 'a', children: [] };
-    const b = { id: 'b', weight: 5, children: [] };
+    const a = /** @type {any} */ ({ id: 'a', children: [] });
+    const b = /** @type {any} */ ({ id: 'b', weight: 5, children: [] });
     const original = [b, a];
 
     layout.weight(a);
@@ -154,13 +154,13 @@ describe('sortChildNodesByWeight', () => {
 describe('orderMaxInCenter', () => {
   it('places max weight in center', () => {
     const layout = new CactusLayout(800, 600);
-    const items = [
+    const items = /** @type {any[]} */ ([
       { id: '1' },
       { id: '2' },
       { id: '3' },
       { id: '4' },
       { id: '5' },
-    ];
+    ]);
 
     const centered = layout.orderMaxInCenter(items);
     expect(centered.length).toBe(5);
@@ -170,7 +170,9 @@ describe('orderMaxInCenter', () => {
 
   it('handles single element', () => {
     const layout = new CactusLayout(800, 600);
-    const centered = layout.orderMaxInCenter([{ id: 'only' }]);
+    const centered = layout.orderMaxInCenter(
+      /** @type {any[]} */ ([{ id: 'only' }]),
+    );
     expect(centered.length).toBe(1);
     expect(centered[0].id).toBe('only');
   });
@@ -186,6 +188,7 @@ describe('orderMaxInCenter', () => {
 describe('buildHierarchyFromArray', () => {
   it('builds tree from flat node array', () => {
     const layout = new CactusLayout(800, 600);
+    /** @type {any} */
     const root = layout.buildHierarchyFromArray(sampleNodes);
 
     expect(root.id).toBe('root');
@@ -199,6 +202,7 @@ describe('buildHierarchyFromArray', () => {
       { id: 'root', name: 'Root', parent: null },
       { id: 'child', name: 'Child', parent: 'root' },
     ];
+    /** @type {any} */
     const root = layout.buildHierarchyFromArray(nodes);
 
     expect(root.children[0].parentRef).toBe(root);
@@ -241,7 +245,9 @@ describe('hashData', () => {
 
   it('handles single node input', () => {
     const layout = new CactusLayout(800, 600);
-    const hash = layout.hashData({ id: 'root', name: 'Root' });
+    const hash = layout.hashData(
+      /** @type {any} */ ({ id: 'root', name: 'Root' }),
+    );
     expect(hash).toContain('single');
   });
 });
@@ -283,17 +289,23 @@ describe('render', () => {
     const root = result.find((n) => n.node.id === 'root');
 
     expect(root).toBeDefined();
-    expect(root.depth).toBe(0);
-    expect(root.isLeaf).toBe(false);
+    expect(/** @type {NonNullable<typeof root>} */ (root).depth).toBe(0);
+    expect(/** @type {NonNullable<typeof root>} */ (root).isLeaf).toBe(false);
   });
 
   it('identifies leaf nodes correctly', () => {
     const layout = new CactusLayout(800, 600, 1, 0.5, Math.PI, 0.75);
     const result = layout.render(sampleNodes, 400, 300);
 
-    const c = result.find((n) => n.node.id === 'c');
-    const d = result.find((n) => n.node.id === 'd');
-    const e = result.find((n) => n.node.id === 'e');
+    const c = /** @type {NonNullable<ReturnType<typeof result.find>>} */ (
+      result.find((n) => n.node.id === 'c')
+    );
+    const d = /** @type {NonNullable<ReturnType<typeof result.find>>} */ (
+      result.find((n) => n.node.id === 'd')
+    );
+    const e = /** @type {NonNullable<ReturnType<typeof result.find>>} */ (
+      result.find((n) => n.node.id === 'e')
+    );
 
     expect(c.isLeaf).toBe(true);
     expect(d.isLeaf).toBe(true);
@@ -306,7 +318,9 @@ describe('render', () => {
     const root = result.find((n) => n.node.id === 'root');
     const maxRadius = Math.max(...result.map((n) => n.radius));
 
-    expect(root.radius).toBe(maxRadius);
+    expect(/** @type {NonNullable<typeof root>} */ (root).radius).toBe(
+      maxRadius,
+    );
   });
 
   it('handles single-node input', () => {
@@ -329,8 +343,12 @@ describe('render', () => {
     const layout2 = new CactusLayout(800, 600, 2, 0.5, Math.PI, 0.75);
     const result2 = layout2.render(sampleNodes, 400, 300);
 
-    const root1 = result1.find((n) => n.node.id === 'root');
-    const root2 = result2.find((n) => n.node.id === 'root');
+    const root1 = /** @type {NonNullable<ReturnType<typeof result1.find>>} */ (
+      result1.find((n) => n.node.id === 'root')
+    );
+    const root2 = /** @type {NonNullable<ReturnType<typeof result2.find>>} */ (
+      result2.find((n) => n.node.id === 'root')
+    );
 
     // Zoomed version should have larger radii
     expect(root2.radius).toBeGreaterThan(root1.radius);
@@ -361,10 +379,10 @@ describe('calculateBoundingBox', () => {
 
   it('calculates correct bounding box', () => {
     const layout = new CactusLayout(800, 600);
-    layout.nodes = [
+    layout.nodes = /** @type {any[]} */ ([
       { x: 100, y: 100, radius: 20 },
       { x: 200, y: 200, radius: 30 },
-    ];
+    ]);
     const box = layout.calculateBoundingBox();
 
     expect(box.minX).toBe(80);
@@ -381,14 +399,16 @@ describe('calculateBoundingBox', () => {
 describe('calculateMaxDepth', () => {
   it('returns 0 for leaf node', () => {
     const layout = new CactusLayout(800, 600);
-    expect(layout.calculateMaxDepth({ children: [] })).toBe(0);
+    expect(
+      layout.calculateMaxDepth(/** @type {any} */ ({ children: [] })),
+    ).toBe(0);
   });
 
   it('returns correct depth for tree', () => {
     const layout = new CactusLayout(800, 600);
-    const tree = {
+    const tree = /** @type {any} */ ({
       children: [{ children: [{ children: [] }] }, { children: [] }],
-    };
+    });
     expect(layout.calculateMaxDepth(tree)).toBe(2);
   });
 });

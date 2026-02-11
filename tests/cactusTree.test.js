@@ -429,7 +429,7 @@ describe('CactusTree.update', () => {
     const { canvas } = createMockCanvas();
     const tree = new CactusTree(canvas, { width: 800, height: 600 });
 
-    expect(() => tree.update(null)).not.toThrow();
+    expect(() => tree.update(/** @type {any} */ (null))).not.toThrow();
 
     tree.destroy();
   });

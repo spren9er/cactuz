@@ -136,7 +136,11 @@ describe('shouldFilterEdge', () => {
     nodeMap.set('hoveredLeaf', { node: { children: [] } });
 
     expect(
-      shouldFilterEdge({ source: 'a', target: 'b' }, 'hoveredLeaf', nodeMap),
+      shouldFilterEdge(
+        { source: 'a', target: 'b' },
+        'hoveredLeaf',
+        /** @type {any} */ (nodeMap),
+      ),
     ).toBe(true);
   });
 
@@ -147,7 +151,11 @@ describe('shouldFilterEdge', () => {
     });
 
     expect(
-      shouldFilterEdge({ source: 'a', target: 'b' }, 'parent', nodeMap),
+      shouldFilterEdge(
+        { source: 'a', target: 'b' },
+        'parent',
+        /** @type {any} */ (nodeMap),
+      ),
     ).toBe(false);
   });
 });
@@ -198,6 +206,7 @@ describe('computeVisibleEdgeNodeIds', () => {
 // ── drawEdge ────────────────────────────────────────────────────────────────
 
 describe('drawEdge', () => {
+  /** @returns {any} */
   function createMockCtx() {
     return {
       beginPath: vi.fn(),
@@ -230,7 +239,7 @@ describe('drawEdge', () => {
   it('returns false for null ctx', () => {
     expect(
       drawEdge(
-        null,
+        /** @type {any} */ (null),
         { source: 'a', target: 'b' },
         { x: 0, y: 0 },
         { x: 10, y: 10 },

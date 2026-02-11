@@ -30,7 +30,9 @@ describe('calculateLayout', () => {
   });
 
   it('returns empty array for null nodes', () => {
-    expect(calculateLayout(800, 600, 1, null, defaultOptions)).toEqual([]);
+    expect(
+      calculateLayout(800, 600, 1, /** @type {any} */ (null), defaultOptions),
+    ).toEqual([]);
   });
 
   it('returns rendered nodes for valid input', () => {
@@ -63,7 +65,7 @@ describe('calculateLayout', () => {
     const root = result.find((nd) => nd.id === 'root');
 
     expect(root).toBeDefined();
-    expect(root.depth).toBe(0);
+    expect(/** @type {NonNullable<typeof root>} */ (root).depth).toBe(0);
   });
 });
 
@@ -115,6 +117,7 @@ describe('buildLookupMaps', () => {
 
   it('builds nodeIdToRenderedNodeMap', () => {
     const rendered = createRenderedNodes();
+    /** @type {any} */
     const maps = buildLookupMaps(rendered, { depths: [] });
 
     expect(maps.nodeIdToRenderedNodeMap).toBeInstanceOf(Map);
@@ -127,6 +130,7 @@ describe('buildLookupMaps', () => {
 
   it('identifies leaf nodes correctly', () => {
     const rendered = createRenderedNodes();
+    /** @type {any} */
     const maps = buildLookupMaps(rendered, { depths: [] });
 
     expect(maps.leafNodes).toBeInstanceOf(Set);
@@ -140,6 +144,7 @@ describe('buildLookupMaps', () => {
 
   it('computes negative depth nodes', () => {
     const rendered = createRenderedNodes();
+    /** @type {any} */
     const maps = buildLookupMaps(rendered, { depths: [] });
 
     expect(maps.negativeDepthNodes).toBeInstanceOf(Map);
@@ -165,12 +170,14 @@ describe('buildLookupMaps', () => {
 
   it('builds depthStyleCache for positive depths', () => {
     const rendered = createRenderedNodes();
+    /** @type {any[]} */
     const depths = [
       { depth: 0, node: { fillColor: '#000' } },
       { depth: 1, node: { fillColor: '#111' } },
       { depth: -1, node: { fillColor: '#fff' } },
     ];
 
+    /** @type {any} */
     const maps = buildLookupMaps(rendered, { depths });
 
     expect(maps.depthStyleCache.has(0)).toBe(true);
@@ -181,6 +188,7 @@ describe('buildLookupMaps', () => {
 
   it('builds parentToChildrenNodeMap', () => {
     const rendered = createRenderedNodes();
+    /** @type {any} */
     const maps = buildLookupMaps(rendered, { depths: [] });
 
     expect(maps.parentToChildrenNodeMap).toBeInstanceOf(Map);
@@ -205,6 +213,7 @@ describe('buildLookupMaps', () => {
 
   it('provides empty hierarchicalPathCache', () => {
     const rendered = createRenderedNodes();
+    /** @type {any} */
     const maps = buildLookupMaps(rendered, { depths: [] });
 
     expect(maps.hierarchicalPathCache).toBeInstanceOf(Map);
