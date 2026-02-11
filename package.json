@@ -1,6 +1,6 @@
 {
   "name": "cactuz",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "A JavaScript library for visualizing hierarchical data as cactus tree",
   "scripts": {
     "dev": "vite dev",
