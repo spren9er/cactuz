@@ -80,9 +80,14 @@ const DEFAULT_STYLE = {
   highlight: {
     node: {
       strokeColor: '#333333',
+      strokeWidth: 1,
     },
     edge: {
       strokeOpacity: 0.5,
+    },
+    edgeNode: {
+      strokeColor: '#777777',
+      strokeWidth: 1,
     },
     label: {
       inner: {},

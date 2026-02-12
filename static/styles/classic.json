@@ -54,6 +54,10 @@
       "strokeOpacity": 0.5,
       "strokeWidth": 1
     },
+    "edgeNode": {
+      "fillColor": "#ffbbb7",
+      "strokeColor": "#ea575a"
+    },
     "label": {
       "inner": {
         "textColor": "#ea575a",
@@ -82,7 +86,8 @@
       "highlight": {
         "node": {
           "fillColor": "#ffbbb7",
-          "strokeColor": "#ea575a"
+          "strokeColor": "#ea575a",
+          "strokeWidth": 2
         },
         "label": {
           "inner": {

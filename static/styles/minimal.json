@@ -29,13 +29,15 @@
   "highlight": {
     "node": {
       "fillColor": "#efefef",
-      "fillOpacity": 0.75,
-      "strokeColor": "#dedede",
-      "strokeOpacity": 0.75
+      "strokeColor": "#dedede"
     },
     "edge": {
       "strokeColor": "#333333",
       "strokeOpacity": 0.5
+    },
+    "edgeNode": {
+      "fillColor": "#efefef",
+      "strokeColor": "#dedede"
     },
     "label": {
       "inner": {
@@ -71,7 +73,8 @@
           "fillColor": "#efefef",
           "fillOpacity": 1,
           "strokeColor": "#333333",
-          "strokeWidth": 1.5
+          "strokeOpacity": 1,
+          "strokeWidth": 2
         },
         "label": {
           "inner": {

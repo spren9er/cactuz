@@ -25,6 +25,12 @@
       }
     }
   },
+  "highlight": {
+    "edgeNode": {
+      "fillColor": "#ffffff",
+      "strokeColor": "#cccccc"
+    }
+  },
   "depths": [
     {
       "depth": -1,
@@ -37,7 +43,7 @@
         "node": {
           "fillColor": "#ffffff",
           "strokeColor": "#333333",
-          "strokeWidth": 1.5
+          "strokeWidth": 2
         },
         "label": {
           "inner": {
