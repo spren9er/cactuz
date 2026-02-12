@@ -60,7 +60,7 @@
     },
     "label": {
       "inner": {
-        "textColor": "#ea575a",
+        "textColor": "#333333",
         "textOpacity": 1,
         "fontWeight": "bold"
       },
@@ -91,7 +91,7 @@
         },
         "label": {
           "inner": {
-            "strokeColor": "#ea575a"
+            "textColor": "#ea575a"
           },
           "outer": {
             "textColor": "#ea575a"

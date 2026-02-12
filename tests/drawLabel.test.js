@@ -54,8 +54,8 @@ describe('getLabelStyle', () => {
     expect(style.outer?.fontFamily).toBe('monospace');
     expect(style.inner?.minFontSize).toBe(9);
     expect(style.inner?.maxFontSize).toBe(14);
-    expect(style.link?.strokeColor).toBe('#cccccc');
-    expect(style.link?.strokeWidth).toBe(0.5);
+    expect(style.outer?.link?.strokeColor).toBe('#cccccc');
+    expect(style.outer?.link?.strokeWidth).toBe(0.5);
   });
 
   it('uses depth style inner textColor over global', () => {
@@ -111,8 +111,8 @@ describe('getLabelStyle', () => {
       depthStyleCache,
       new Map(),
     );
-    expect(style.link?.strokeColor).toBe('#ff0000');
-    expect(style.link?.strokeWidth).toBe(2);
+    expect(style.outer?.link?.strokeColor).toBe('#ff0000');
+    expect(style.outer?.link?.strokeWidth).toBe(2);
   });
 
   it('resolves highlight styles from depth', () => {

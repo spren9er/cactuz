@@ -76,16 +76,6 @@ export function clearLabelLayoutCache() {
 
 /**
  * @typedef {Object} HighlightStyle
- * @property {string} [textColor]
- * @property {number} [textOpacity]
- * @property {string} [fontWeight]
- *
- * Optional nested highlight groups for label rendering:
- * - `inner` applies to labels rendered inside nodes (centered labels)
- * - `outer` applies to outside-positioned labels
- *
- * Each nested group mirrors the flat highlight properties and may override them.
- *
  * @property {Object} [inner] - inner label highlight overrides
  * @property {string} [inner.textColor]
  * @property {number} [inner.textOpacity]
@@ -99,17 +89,7 @@ export function clearLabelLayoutCache() {
 
 /**
  * @typedef {Object} LabelStyle
- * @property {string} [textColor] - convenience top-level color (prefers outer then inner)
- * @property {number} [textOpacity] - convenience top-level opacity
- * @property {string} [fontFamily] - convenience top-level fontFamily
- * @property {number} [minFontSize] - legacy/compat: min font size used for inner labels
- * @property {number} [maxFontSize] - legacy/compat: max font size used for inner labels
- * @property {string} [fontWeight]
- * @property {number} [padding]
- * @property {LabelLinkStyle} [link]
  * @property {HighlightStyle} [highlight]
- * @property {number} [insideFitFactor]
- * @property {number} [estimatedCharWidth]
  *
  * @property {Object} [inner] - settings for labels rendered inside circles
  * @property {string} [inner.textColor]
@@ -118,8 +98,6 @@ export function clearLabelLayoutCache() {
  * @property {number} [inner.minFontSize]
  * @property {number} [inner.maxFontSize]
  * @property {string} [inner.fontWeight]
- * @property {number} [inner.insideFitFactor]
- * @property {number} [inner.estimatedCharWidth]
  *
  * @property {Object} [outer] - settings for labels rendered outside circles
  * @property {string} [outer.textColor]
@@ -129,7 +107,6 @@ export function clearLabelLayoutCache() {
  * @property {string} [outer.fontWeight]
  * @property {number} [outer.padding]
  * @property {LabelLinkStyle} [outer.link]
- * @property {HighlightStyle} [outer.highlight]
  */
 
 /**
@@ -184,29 +161,14 @@ export function getLabelStyle(
     depthOuter?.fontWeight ?? globalOuter?.fontWeight ?? undefined;
 
   const innerMinFontSize =
-    depthInner?.minFontSize ??
-    globalInner?.minFontSize ??
-    globalLabel?.minFontSize ??
-    8;
+    depthInner?.minFontSize ?? globalInner?.minFontSize ?? 8;
   const innerMaxFontSize =
-    depthInner?.maxFontSize ??
-    globalInner?.maxFontSize ??
-    globalLabel?.maxFontSize ??
-    14;
+    depthInner?.maxFontSize ?? globalInner?.maxFontSize ?? 14;
 
-  const outerFontSize =
-    depthOuter?.fontSize ?? globalOuter?.fontSize ?? globalLabel?.fontSize;
+  const outerFontSize = depthOuter?.fontSize ?? globalOuter?.fontSize;
 
-  const padding =
-    depthOuter?.padding ?? globalOuter?.padding ?? globalLabel?.padding ?? 4;
-  const insideFitFactor =
-    depthInner?.insideFitFactor ??
-    globalInner?.insideFitFactor ??
-    globalLabel?.insideFitFactor ??
-    0.9;
-
-  const linkFromDepth = depthOuter?.link ?? labelFromDepth?.link ?? null;
-  const globalLink = globalOuter?.link ?? globalLabel?.link ?? {};
+  const linkFromDepth = depthOuter?.link ?? null;
+  const globalLink = globalOuter?.link ?? {};
 
   const link = {
     strokeColor:
@@ -219,34 +181,27 @@ export function getLabelStyle(
   };
 
   const depthLabelHighlight = {};
-  const innerFromLabel = labelFromDepth?.inner?.highlight ?? null;
-  const innerFromDepthHighlight = depthStyle?.highlight?.label?.inner ?? null;
-  const innerRaw = innerFromLabel ?? innerFromDepthHighlight ?? null;
-  if (innerRaw) {
+  const innerHighlight = depthStyle?.highlight?.label?.inner ?? null;
+  if (innerHighlight) {
     depthLabelHighlight.inner = {
-      textColor: innerRaw?.textColor,
-      textOpacity: innerRaw?.textOpacity,
-      fontWeight: innerRaw?.fontWeight,
+      textColor: innerHighlight?.textColor,
+      textOpacity: innerHighlight?.textOpacity,
+      fontWeight: innerHighlight?.fontWeight,
     };
   }
-  const outerFromLabel = labelFromDepth?.outer?.highlight ?? null;
-  const outerFromDepthHighlight = depthStyle?.highlight?.label?.outer ?? null;
-  const outerRaw = outerFromLabel ?? outerFromDepthHighlight ?? null;
-  if (outerRaw) {
+  const outerHighlight = depthStyle?.highlight?.label?.outer ?? null;
+  if (outerHighlight) {
     depthLabelHighlight.outer = {
-      textColor: outerRaw?.textColor,
-      textOpacity: outerRaw?.textOpacity,
-      fontWeight: outerRaw?.fontWeight,
+      textColor: outerHighlight?.textColor,
+      textOpacity: outerHighlight?.textOpacity,
+      fontWeight: outerHighlight?.fontWeight,
     };
   }
 
   return {
-    padding,
-    link,
     highlight: Object.keys(depthLabelHighlight).length
       ? depthLabelHighlight
       : undefined,
-    insideFitFactor,
     inner: {
       textColor: innerTextColor,
       textOpacity: innerTextOpacity,
@@ -260,7 +215,7 @@ export function getLabelStyle(
       textOpacity: outerTextOpacity,
       fontFamily: outerFontFamily,
       fontWeight: outerFontWeight,
-      padding: depthOuter?.padding ?? globalOuter?.padding ?? undefined,
+      padding: depthOuter?.padding ?? globalOuter?.padding,
       link: {
         strokeColor: link.strokeColor,
         strokeOpacity: link.strokeOpacity,
@@ -377,40 +332,21 @@ export function drawCenteredLabel(
   const fontSize = calculateFontSize(radius, minFontSize, maxFontSize);
   const h = highlightStyle || {};
   const ls = labelStyle || {};
-  const hHasDepth = h && /** @type {any} */ (h).__hasDepthHighlight;
-  const hFlat =
-    highlightActive &&
-    h &&
-    hHasDepth &&
-    (h.textColor !== undefined ||
-      h.textOpacity !== undefined ||
-      h.fontWeight !== undefined)
-      ? h
-      : null;
-  const hInner =
-    highlightActive && h && /** @type {any} */ (h).__hasDepthHighlight
-      ? (h.inner ?? null)
-      : null;
+  const hInner = highlightActive ? (h.inner ?? null) : null;
   const fillColor =
-    hFlat && hFlat.textColor !== undefined
-      ? hFlat.textColor
-      : hInner && hInner.textColor !== undefined
-        ? hInner.textColor
-        : (ls.inner?.textColor ?? '#333333');
+    hInner && hInner.textColor !== undefined
+      ? hInner.textColor
+      : (ls.inner?.textColor ?? '#333333');
   const alpha =
-    hFlat && hFlat.textOpacity !== undefined
-      ? hFlat.textOpacity
-      : hInner && hInner.textOpacity !== undefined
-        ? hInner.textOpacity
-        : (ls.inner?.textOpacity ?? 1);
+    hInner && hInner.textOpacity !== undefined
+      ? hInner.textOpacity
+      : (ls.inner?.textOpacity ?? 1);
   const fontWeightPrefix =
-    hFlat && hFlat.fontWeight
-      ? `${hFlat.fontWeight} `
-      : hInner && hInner.fontWeight
-        ? `${hInner.fontWeight} `
-        : ls.inner?.fontWeight
-          ? `${ls.inner.fontWeight} `
-          : '';
+    hInner && hInner.fontWeight
+      ? `${hInner.fontWeight} `
+      : ls.inner?.fontWeight
+        ? `${ls.inner.fontWeight} `
+        : '';
 
   const fontFamily = ls.inner?.fontFamily ?? 'monospace';
   setCanvasStyles(ctx, {
@@ -472,8 +408,6 @@ export function shouldShowLabel(
  * @param {Array<any>} nodesWithLabels
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
- * @param {string|null|undefined} hoveredNodeId
- * @param {Array<string>|Set<string>|null|undefined} highlightedNodeIds
  * @returns {void}
  */
 export function drawLabelConnectors(
@@ -483,8 +417,6 @@ export function drawLabelConnectors(
   nodesWithLabels = [],
   depthStyleCache = new Map(),
   negativeDepthNodes = new Map(),
-  hoveredNodeId,
-  highlightedNodeIds,
 ) {
   if (!ctx || !links || links.length === 0) return;
 
@@ -497,7 +429,7 @@ export function drawLabelConnectors(
       const nodeId = linkSeg.nodeId;
       const globalLabel = mergedStyle?.label ?? {};
       const globalOuter = globalLabel.outer ?? {};
-      const globalLink = globalOuter.link ?? globalLabel.link ?? {};
+      const globalLink = globalOuter.link ?? {};
 
       const nodeData =
         nodesWithLabels &&
@@ -516,7 +448,7 @@ export function drawLabelConnectors(
           depthStyleCache,
           negativeDepthNodes,
         );
-        depthLink = (labelStyle && labelStyle.link) || {};
+        depthLink = (labelStyle && labelStyle.outer?.link) || {};
         nodeLink =
           nodeData.node && nodeData.node.label && nodeData.node.label.link
             ? nodeData.node.label.link
@@ -529,64 +461,15 @@ export function drawLabelConnectors(
         ...(nodeLink || {}),
       };
 
-      const isHighlighted =
-        (hoveredNodeId ?? undefined) === nodeId ||
-        highlightedContains(highlightedNodeIds, nodeId);
-
-      if (isHighlighted) {
-        const globalHighlightLink =
-          mergedStyle?.highlight?.label?.outer?.link ??
-          mergedStyle?.highlight?.label?.link ??
-          {};
-
-        let depthStyle = null;
-        if (
-          depthStyleCache &&
-          nodeData &&
-          depthStyleCache.has(nodeData.depth)
-        ) {
-          depthStyle = depthStyleCache.get(nodeData.depth);
-        } else if (mergedStyle?.depths && nodeData) {
-          for (const ds of mergedStyle.depths) {
-            if (ds.depth === nodeData.depth) {
-              depthStyle = ds;
-              break;
-            } else if (ds.depth < 0) {
-              const nodesAtThisNegativeDepth = negativeDepthNodes.get(ds.depth);
-              if (
-                nodesAtThisNegativeDepth &&
-                nodesAtThisNegativeDepth.has(nodeId)
-              ) {
-                depthStyle = ds;
-                break;
-              }
-            }
-          }
-        }
-
-        const depthHighlightLink =
-          depthStyle?.highlight?.label?.outer?.link ??
-          depthStyle?.highlight?.label?.link ??
-          depthStyle?.label?.highlight?.link ??
-          {};
-
-        linkStyle = {
-          ...(linkStyle || {}),
-          ...(depthHighlightLink || {}),
-          ...(globalHighlightLink || {}),
-        };
-      }
-
       let highlightTextColor = undefined;
       if (nodeData && nodeData.highlightStyle) {
         const hs = nodeData.highlightStyle;
-        highlightTextColor = (hs.outer && hs.outer.textColor) ?? hs.textColor;
+        highlightTextColor = hs.outer?.textColor;
       }
       const color =
         linkStyle.strokeColor ??
         highlightTextColor ??
         globalOuter.textColor ??
-        globalLabel.textColor ??
         '#333333';
       const width =
         typeof linkStyle.strokeWidth === 'number'
@@ -691,9 +574,7 @@ export function drawPositionedLabel(
     const labelPadding =
       typeof labelStyle.outer?.padding === 'number'
         ? labelStyle.outer.padding
-        : typeof labelStyle.padding === 'number'
-          ? labelStyle.padding
-          : 4; // padding is outer-only but kept as top-level fallback for backwards compat
+        : 4;
     ctx.fillText(text, x + labelPadding, y + labelPadding);
   }
 
@@ -833,27 +714,18 @@ export function computeLabelLayout(
   const globalInner = globalLabel.inner ?? {};
   const globalOuter = globalLabel.outer ?? {};
   const labelFontFamily =
-    globalOuter.fontFamily ??
-    globalInner.fontFamily ??
-    globalLabel.fontFamily ??
-    'monospace';
-  const labelMinFontSize =
-    globalInner.minFontSize ?? globalLabel.minFontSize ?? 8;
-  const labelMaxFontSize =
-    globalInner.maxFontSize ?? globalLabel.maxFontSize ?? 14;
-  const globalLabelPadding = globalOuter.padding ?? globalLabel.padding ?? 4;
+    globalOuter.fontFamily ?? globalInner.fontFamily ?? 'monospace';
+  const labelMinFontSize = globalInner.minFontSize ?? 8;
+  const labelMaxFontSize = globalInner.maxFontSize ?? 14;
+  const globalLabelPadding = globalOuter.padding ?? 4;
   const globalLinkPadding =
     globalOuter.link && typeof globalOuter.link.padding === 'number'
       ? globalOuter.link.padding
-      : globalLabel.link && typeof globalLabel.link.padding === 'number'
-        ? globalLabel.link.padding
-        : 0;
+      : 0;
   const globalLinkLength =
     globalOuter.link && typeof globalOuter.link.length === 'number'
       ? globalOuter.link.length
-      : globalLabel.link && typeof globalLabel.link.length === 'number'
-        ? globalLabel.link.length
-        : 5;
+      : 5;
 
   nodesWithLabels.forEach((nodeData) => {
     const node = nodeData.node;
@@ -867,86 +739,20 @@ export function computeLabelLayout(
     );
 
     node.label = node.label ?? {};
-    node.label.padding =
-      perNodeStyle?.padding ??
-      (typeof node.label.padding === 'number'
-        ? node.label.padding
-        : undefined) ??
-      globalLabelPadding;
+    node.label.padding = perNodeStyle?.outer?.padding ?? globalLabelPadding;
 
     node.label.link = node.label.link ?? {};
     node.label.link.padding =
-      perNodeStyle?.link?.padding ??
-      (typeof node.label.link.padding === 'number'
-        ? node.label.link.padding
-        : undefined) ??
-      globalLinkPadding;
+      perNodeStyle?.outer?.link?.padding ?? globalLinkPadding;
     node.label.link.length =
-      perNodeStyle?.link?.length ??
-      (typeof node.label.link.length === 'number'
-        ? node.label.link.length
-        : undefined) ??
-      globalLinkLength;
+      perNodeStyle?.outer?.link?.length ?? globalLinkLength;
 
     nodeData.labelPadding = node.label.padding;
     nodeData.linkPadding = node.label.link.padding;
     nodeData.linkLength = node.label.link.length;
 
-    const nodeIsHighlighted =
-      (typeof hoveredNodeId !== 'undefined' &&
-        hoveredNodeId !== null &&
-        node.id === hoveredNodeId) ||
-      highlightedContains(highlightedNodeIds, node.id);
-
-    if (nodeIsHighlighted) {
-      const globalHighlightLink =
-        mergedStyle?.highlight?.label?.outer?.link ??
-        mergedStyle?.highlight?.label?.link ??
-        {};
-
-      let depthStyleObj = null;
-      if (depthStyleCache && depthStyleCache.has(depth)) {
-        depthStyleObj = depthStyleCache.get(depth);
-      } else if (mergedStyle?.depths) {
-        for (const ds of mergedStyle.depths) {
-          if (ds.depth === depth) {
-            depthStyleObj = ds;
-            break;
-          } else if (ds.depth < 0) {
-            const nodesAtThisNegativeDepth = negativeDepthNodes.get(ds.depth);
-            if (
-              nodesAtThisNegativeDepth &&
-              nodesAtThisNegativeDepth.has(node.id)
-            ) {
-              depthStyleObj = ds;
-              break;
-            }
-          }
-        }
-      }
-
-      const depthHighlightLink =
-        depthStyleObj?.highlight?.label?.outer?.link ??
-        depthStyleObj?.highlight?.label?.link ??
-        depthStyleObj?.label?.highlight?.link ??
-        {};
-
-      node.label.link.padding =
-        depthHighlightLink?.padding ??
-        globalHighlightLink?.padding ??
-        node.label.link.padding;
-      node.label.link.length =
-        depthHighlightLink?.length ??
-        globalHighlightLink?.length ??
-        node.label.link.length;
-
-      nodeData.linkPadding = node.label.link.padding;
-      nodeData.linkLength = node.label.link.length;
-    }
-
-    const globalLink =
-      mergedStyle?.label?.outer?.link ?? mergedStyle?.label?.link ?? {};
-    const depthLink = perNodeStyle?.link ?? {};
+    const globalLink = mergedStyle?.label?.outer?.link ?? {};
+    const depthLink = perNodeStyle?.outer?.link ?? {};
     const nodeLink = node.label && node.label.link ? node.label.link : {};
     nodeData.linkStyle = {
       ...(globalLink || {}),
@@ -956,15 +762,9 @@ export function computeLabelLayout(
 
     const globalHighlight = mergedStyle?.highlight?.label ?? {};
     const depthHighlight = perNodeStyle?.highlight ?? {};
-    const baseHighlightMerged = {
+    nodeData.highlightStyle = {
       ...(globalHighlight || {}),
       ...(depthHighlight || {}),
-    };
-    const hasDepthHighlight =
-      depthHighlight && Object.keys(depthHighlight).length > 0;
-    nodeData.highlightStyle = {
-      ...baseHighlightMerged,
-      __hasDepthHighlight: hasDepthHighlight,
     };
   });
 
@@ -1114,8 +914,6 @@ export function drawLabels(
       nodesWithLabels,
       depthStyleCache,
       negativeDepthNodes,
-      hoveredNodeId,
-      highlightedNodeIds,
     );
   }
 
