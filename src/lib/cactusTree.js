@@ -743,6 +743,7 @@ export class CactusTree {
       this.width,
       this.height,
       () => this._scheduleRender(),
+      () => this._scheduleDraw(),
     );
 
     this._boundHandlers = handlers;

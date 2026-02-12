@@ -25,13 +25,13 @@ function getEventCoordinates(event, canvas) {
  * @param {Object} state - Component state
  * @param {number} currentX - Current X coordinate
  * @param {number} currentY - Current Y coordinate
- * @param {Function} scheduleRender - Render scheduling function
+ * @param {Function} scheduleDraw - Draw scheduling function (lightweight, no layout recomputation)
  */
 function handlePanning(
   /** @type {any} */ state,
   /** @type {number} */ currentX,
   /** @type {number} */ currentY,
-  /** @type {Function} */ scheduleRender,
+  /** @type {Function} */ scheduleDraw,
 ) {
   if (!state.isDragging || !state.pannable) return;
 
@@ -41,7 +41,7 @@ function handlePanning(
   state.panY += deltaY;
   state.lastMouseX = currentX;
   state.lastMouseY = currentY;
-  scheduleRender();
+  scheduleDraw();
 }
 
 /**
@@ -103,13 +103,13 @@ function handleZoom(
  * @param {Object} state - Component state
  * @param {number} x - X coordinate relative to canvas
  * @param {number} y - Y coordinate relative to canvas
- * @param {Function} scheduleRender - Render scheduling function
+ * @param {Function} scheduleDraw - Draw scheduling function (lightweight, no layout recomputation)
  */
 function handleHoverDetection(
   /** @type {any} */ state,
   /** @type {number} */ x,
   /** @type {number} */ y,
-  /** @type {Function} */ scheduleRender,
+  /** @type {Function} */ scheduleDraw,
 ) {
   if (!state.renderedNodes.length) return;
 
@@ -134,10 +134,10 @@ function handleHoverDetection(
     );
   }
 
-  // Only re-render if hover state changed
+  // Only redraw if hover state changed
   if (newHoveredNodeId !== state.hoveredNodeId) {
     state.hoveredNodeId = newHoveredNodeId;
-    scheduleRender();
+    scheduleDraw();
   }
 }
 
@@ -146,24 +146,31 @@ function handleHoverDetection(
  * @param {{ canvas: HTMLCanvasElement, hoveredNodeId: string|null, renderedNodes: Array<any>, isDragging: boolean, pannable: boolean, panX: number, panY: number, currentZoom: number, lastMouseX: number, lastMouseY: number }} state - Component state object
  * @param {number} width - Canvas width
  * @param {number} height - Canvas height
- * @param {Function} scheduleRender - Function to schedule a re-render
+ * @param {Function} scheduleRender - Function to schedule a full re-render (layout + draw)
+ * @param {Function} scheduleDraw - Function to schedule a lightweight redraw (no layout recomputation)
  * @returns {function(MouseEvent): void} Mouse move event handler
  */
-export function createMouseMoveHandler(state, width, height, scheduleRender) {
+export function createMouseMoveHandler(
+  state,
+  width,
+  height,
+  scheduleRender,
+  scheduleDraw,
+) {
   return function handleMouseMove(/** @type {MouseEvent} */ event) {
     if (!state.canvas) return;
 
     const coords = getEventCoordinates(event, state.canvas);
 
-    // Handle panning
-    handlePanning(state, coords.x, coords.y, scheduleRender);
+    // Handle panning (lightweight draw only — pan doesn't change layout)
+    handlePanning(state, coords.x, coords.y, scheduleDraw);
 
     state.lastMouseX = coords.x;
     state.lastMouseY = coords.y;
 
     // Handle hovering (only if not dragging)
     if (!state.isDragging) {
-      handleHoverDetection(state, coords.x, coords.y, scheduleRender);
+      handleHoverDetection(state, coords.x, coords.y, scheduleDraw);
     }
   };
 }
@@ -201,15 +208,15 @@ export function createMouseUpHandler(state) {
 /**
  * Creates mouse leave handler
  * @param {{ isDragging: boolean, hoveredNodeId: string|null }} state - Component state object
- * @param {Function} scheduleRender - Function to schedule a re-render
+ * @param {Function} scheduleDraw - Function to schedule a lightweight redraw
  * @returns {function(): void} Mouse leave event handler
  */
-export function createMouseLeaveHandler(state, scheduleRender) {
+export function createMouseLeaveHandler(state, scheduleDraw) {
   return function handleMouseLeave() {
     state.isDragging = false;
     if (state.hoveredNodeId !== null) {
       state.hoveredNodeId = null;
-      scheduleRender();
+      scheduleDraw();
     }
   };
 }
@@ -246,11 +253,12 @@ export function createWheelHandler(state, width, height, scheduleRender) {
 /**
  * Creates touch start handler
  * @param {{ canvas: HTMLCanvasElement, isDragging: boolean, pannable: boolean, zoomable: boolean, lastMouseX: number, lastMouseY: number, touches: Touch[], lastTouchDistance: number, renderedNodes: any[] }} state - Component state object
+ * @param {Function} scheduleDraw - Function to schedule a lightweight redraw
  * @returns {function(TouchEvent): void} Touch start event handler
  */
 export function createTouchStartHandler(
   /** @type {any} */ state,
-  /** @type {Function} */ scheduleRender,
+  /** @type {Function} */ scheduleDraw,
 ) {
   return function handleTouchStart(/** @type {TouchEvent} */ event) {
     event.preventDefault();
@@ -269,7 +277,7 @@ export function createTouchStartHandler(
       }
 
       // Handle hover detection for single touch (tap to highlight)
-      handleHoverDetection(state, coords.x, coords.y, scheduleRender);
+      handleHoverDetection(state, coords.x, coords.y, scheduleDraw);
     } else if (touches.length === 2 && state.zoomable) {
       // Two touches - start pinch zoom
       const touch1 = getEventCoordinates(touches[0], state.canvas);
@@ -286,19 +294,26 @@ export function createTouchStartHandler(
  * @param {{ canvas: HTMLCanvasElement, isDragging: boolean, pannable: boolean, zoomable: boolean, panX: number, panY: number, currentZoom: number, lastMouseX: number, lastMouseY: number, touches: Touch[], lastTouchDistance: number, minZoomLimit: number, maxZoomLimit: number }} state - Component state object
  * @param {number} width - Canvas width
  * @param {number} height - Canvas height
- * @param {Function} scheduleRender - Function to schedule a re-render
+ * @param {Function} scheduleRender - Function to schedule a full re-render (layout + draw)
+ * @param {Function} scheduleDraw - Function to schedule a lightweight redraw (no layout recomputation)
  * @returns {function(TouchEvent): void} Touch move event handler
  */
-export function createTouchMoveHandler(state, width, height, scheduleRender) {
+export function createTouchMoveHandler(
+  state,
+  width,
+  height,
+  scheduleRender,
+  scheduleDraw,
+) {
   return function handleTouchMove(/** @type {TouchEvent} */ event) {
     event.preventDefault();
 
     const touches = /** @type {Touch[]} */ (Array.from(event.touches));
 
     if (touches.length === 1 && state.isDragging && state.pannable) {
-      // Single touch panning
+      // Single touch panning (lightweight draw only — pan doesn't change layout)
       const coords = getEventCoordinates(touches[0], state.canvas);
-      handlePanning(state, coords.x, coords.y, scheduleRender);
+      handlePanning(state, coords.x, coords.y, scheduleDraw);
     } else if (touches.length === 2 && state.zoomable) {
       // Pinch zoom
       const touch1 = getEventCoordinates(touches[0], state.canvas);
@@ -362,7 +377,8 @@ export function createTouchEndHandler(state) {
  * @param {{ canvas: HTMLCanvasElement, hoveredNodeId: string|null, renderedNodes: any[], isDragging: boolean, pannable: boolean, zoomable: boolean, panX: number, panY: number, currentZoom: number, lastMouseX: number, lastMouseY: number, minZoomLimit: number, maxZoomLimit: number, touches: Touch[], lastTouchDistance: number }} state - Component state object
  * @param {number} width - Canvas width
  * @param {number} height - Canvas height
- * @param {Function} scheduleRender - Function to schedule a re-render
+ * @param {Function} scheduleRender - Function to schedule a full re-render (layout + draw)
+ * @param {Function} scheduleDraw - Function to schedule a lightweight redraw (no layout recomputation)
  * @returns {{ onMouseMove: function(MouseEvent): void, onMouseDown: function(MouseEvent): void, onMouseUp: function(): void, onMouseLeave: function(): void, onWheel: function(WheelEvent): void, onTouchStart: function(TouchEvent): void, onTouchMove: function(TouchEvent): void, onTouchEnd: function(TouchEvent): void }} Object containing all mouse and touch event handlers
  */
 export function createMouseHandlers(
@@ -370,15 +386,28 @@ export function createMouseHandlers(
   /** @type {number} */ width,
   /** @type {number} */ height,
   /** @type {Function} */ scheduleRender,
+  /** @type {Function} */ scheduleDraw,
 ) {
   return {
-    onMouseMove: createMouseMoveHandler(state, width, height, scheduleRender),
+    onMouseMove: createMouseMoveHandler(
+      state,
+      width,
+      height,
+      scheduleRender,
+      scheduleDraw,
+    ),
     onMouseDown: createMouseDownHandler(state),
     onMouseUp: createMouseUpHandler(state),
-    onMouseLeave: createMouseLeaveHandler(state, scheduleRender),
+    onMouseLeave: createMouseLeaveHandler(state, scheduleDraw),
     onWheel: createWheelHandler(state, width, height, scheduleRender),
-    onTouchStart: createTouchStartHandler(state, scheduleRender),
-    onTouchMove: createTouchMoveHandler(state, width, height, scheduleRender),
+    onTouchStart: createTouchStartHandler(state, scheduleDraw),
+    onTouchMove: createTouchMoveHandler(
+      state,
+      width,
+      height,
+      scheduleRender,
+      scheduleDraw,
+    ),
     onTouchEnd: createTouchEndHandler(state),
   };
 }

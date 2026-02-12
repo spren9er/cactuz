@@ -52,13 +52,13 @@ function createMockMouseEvent(x = 100, y = 100) {
 describe('createMouseMoveHandler', () => {
   it('returns a function', () => {
     const state = createMockState();
-    const handler = createMouseMoveHandler(state, 800, 600, vi.fn());
+    const handler = createMouseMoveHandler(state, 800, 600, vi.fn(), vi.fn());
     expect(typeof handler).toBe('function');
   });
 
   it('updates lastMouseX/Y on move', () => {
     const state = createMockState();
-    const handler = createMouseMoveHandler(state, 800, 600, vi.fn());
+    const handler = createMouseMoveHandler(state, 800, 600, vi.fn(), vi.fn());
 
     handler(createMockMouseEvent(150, 200));
     expect(state.lastMouseX).toBe(150);
@@ -66,30 +66,42 @@ describe('createMouseMoveHandler', () => {
   });
 
   it('pans when dragging', () => {
-    const scheduleRender = vi.fn();
+    const scheduleDraw = vi.fn();
     const state = createMockState({
       isDragging: true,
       lastMouseX: 100,
       lastMouseY: 100,
     });
-    const handler = createMouseMoveHandler(state, 800, 600, scheduleRender);
+    const handler = createMouseMoveHandler(
+      state,
+      800,
+      600,
+      vi.fn(),
+      scheduleDraw,
+    );
 
     handler(createMockMouseEvent(120, 130));
 
     expect(state.panX).toBe(20);
     expect(state.panY).toBe(30);
-    expect(scheduleRender).toHaveBeenCalled();
+    expect(scheduleDraw).toHaveBeenCalled();
   });
 
   it('does not pan when pannable is false', () => {
-    const scheduleRender = vi.fn();
+    const scheduleDraw = vi.fn();
     const state = createMockState({
       isDragging: true,
       pannable: false,
       lastMouseX: 100,
       lastMouseY: 100,
     });
-    const handler = createMouseMoveHandler(state, 800, 600, scheduleRender);
+    const handler = createMouseMoveHandler(
+      state,
+      800,
+      600,
+      vi.fn(),
+      scheduleDraw,
+    );
 
     handler(createMockMouseEvent(120, 130));
     expect(state.panX).toBe(0);
@@ -97,7 +109,7 @@ describe('createMouseMoveHandler', () => {
 
   it('does nothing when canvas is null', () => {
     const state = createMockState({ canvas: null });
-    const handler = createMouseMoveHandler(state, 800, 600, vi.fn());
+    const handler = createMouseMoveHandler(state, 800, 600, vi.fn(), vi.fn());
     expect(() => handler(createMockMouseEvent())).not.toThrow();
   });
 });
@@ -143,28 +155,28 @@ describe('createMouseUpHandler', () => {
 
 describe('createMouseLeaveHandler', () => {
   it('clears drag and hover state', () => {
-    const scheduleRender = vi.fn();
+    const scheduleDraw = vi.fn();
     const state = createMockState({
       isDragging: true,
       hoveredNodeId: 'someNode',
     });
-    const handler = createMouseLeaveHandler(state, scheduleRender);
+    const handler = createMouseLeaveHandler(state, scheduleDraw);
 
     handler();
 
     expect(state.isDragging).toBe(false);
     expect(state.hoveredNodeId).toBeNull();
-    expect(scheduleRender).toHaveBeenCalled();
+    expect(scheduleDraw).toHaveBeenCalled();
   });
 
   it('does not schedule render when hoveredNodeId was already null', () => {
-    const scheduleRender = vi.fn();
+    const scheduleDraw = vi.fn();
     const state = createMockState({ hoveredNodeId: null });
-    const handler = createMouseLeaveHandler(state, scheduleRender);
+    const handler = createMouseLeaveHandler(state, scheduleDraw);
 
     handler();
 
-    expect(scheduleRender).not.toHaveBeenCalled();
+    expect(scheduleDraw).not.toHaveBeenCalled();
   });
 });
 
@@ -318,7 +330,7 @@ describe('createTouchEndHandler', () => {
 describe('createMouseHandlers', () => {
   it('returns all 8 handler functions', () => {
     const state = createMockState();
-    const handlers = createMouseHandlers(state, 800, 600, vi.fn());
+    const handlers = createMouseHandlers(state, 800, 600, vi.fn(), vi.fn());
 
     expect(typeof handlers.onMouseMove).toBe('function');
     expect(typeof handlers.onMouseDown).toBe('function');
