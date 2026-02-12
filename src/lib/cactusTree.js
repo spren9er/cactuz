@@ -644,18 +644,6 @@ export class CactusTree {
     });
   }
 
-  _scheduleDraw() {
-    if (this._animationFrameId) {
-      cancelAnimationFrame(this._animationFrameId);
-    }
-
-    this._animationFrameId = requestAnimationFrame(() => {
-      if (!this.canvas || !this.ctx || !this.renderedNodes.length) return;
-      this._draw();
-      this._animationFrameId = null;
-    });
-  }
-
   // ── Internal: event handling ────────────────────────────────────────────
 
   _setupMouseHandlers() {
