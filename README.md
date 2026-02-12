@@ -10,6 +10,8 @@ A JavaScript library for visualizing hierarchical data structures using the *Cac
 
 The library **cactuz** is based on the research paper *[CactusTree: A Tree Drawing Approach for Hierarchical Edge Bundling](https://ieeexplore.ieee.org/document/8031596)* by Tommy Dang and Angus Forbes. It provides a framework-agnostic `CactusTree` class for rendering interactive tree visualizations on an HTML canvas, as well as a low-level `CactusLayout` class for computing the layout independently.
 
+See [cactuz.spren9er.de](https://cactuz.spren9er.de) for a live demo and interactive playground.
+
 ## Features
 
 - **Framework-Agnostic** - Works with any JavaScript framework or plain HTML
@@ -49,8 +51,6 @@ const tree = new CactusTree(canvas, {
   edges,
 });
 ```
-
-See [cactuz.spren9er.de](https://cactuz.spren9er.de) for a live demo and interactive playground.
 
 ## API Reference
 
@@ -145,12 +145,16 @@ interface Options {
 
 interface EdgeOptions {
   bundlingStrength?: number;  // Edge bundling strength (0..1, default: 0.97)
-  filterMode?: 'hide' | 'mute'; // Hover behavior when over a leaf: 'hide' hides unrelated edges, 'mute' shows them at reduced opacity (default: 'mute')
-  muteOpacity?: number;         // When filterMode is 'mute', multiplier applied to unrelated edges (0..1, default: 0.1)
+  filterMode?: 'hide' | 'mute'; // Hover behavior when over a leaf:
+                              // 'hide' hides unrelated edges
+                              // 'mute' shows them at reduced opacity
+                              // (default: 'mute')
+  muteOpacity?: number;       // When filterMode is 'mute', multiplier applied 
+                              // to unrelated edges (0..1, default: 0.1)
 }
 ```
 
-**Note:** Negative values for `overlap` create gaps and connect nodes with edges.
+**Note:** Negative values for `overlap` create gaps and nodes are connected with links.
 
 #### Styles
 
@@ -232,7 +236,7 @@ interface Styles {
 
 #### Depth-Specific Styling
 
-Each item in `styles.depths` must include a `depth` integer. The node with `depth` 0 is the root of the tree.
+Each item in `styles.depths` must include a `depth` integer (or a wildcard `'*'`; see below). The node with `depth` 0 is the root of the tree.
 
 Positive integers (1, 2, 3, ...) refer to deeper levels away from the root:
   - 1 = direct children of the root,
@@ -250,7 +254,8 @@ These negative-depth entries are not absolute numeric depths in the tree; instea
 
 ```typescript
 interface ColorScale {
-  scale: string;              // d3-scale-chromatic sequential scale name (e.g. 'magma', 'viridis')
+  scale: string;              // d3-scale-chromatic sequential scale name
+                              // (e.g. 'magma', 'viridis')
   reverse?: boolean;          // Reverse the scale direction (default: false)
 }
 
@@ -319,7 +324,7 @@ interface DepthStyle {
 
 #### Wildcard Depth Styling
 
-Setting `depth` to `'*'` applies a style to every depth level in the tree. When combined with `ColorScale` objects for `fillColor` and/or `strokeColor`, it automatically samples colors from a [d3-scale-chromatic](https://d3js.org/d3-scale-chromatic) sequential color scale. The number of sampled colors equals the tree depth + 1, evenly distributed across the scale from 0 to 1.
+Setting `depth` to `'*'` applies a style to every depth level in the tree. When combined with `ColorScale` objects for `fillColor` and/or `strokeColor`, it automatically samples colors from a [d3-scale-chromatic](https://d3js.org/d3-scale-chromatic) sequential color scale. The number of sampled colors equals the _tree depth + 1_, evenly distributed across the scale from 0 to 1.
 
 All d3 sequential scales are supported: `magma`, `viridis`, `inferno`, `plasma`, `blues`, `greens`, `reds`, `turbo`, `cividis`, `warm`, `cool`, and more.
 
@@ -423,50 +428,61 @@ const tree = new CactusTree(canvas, {
   edges,
   styles: {
     node: {
-      fillColor: '#f0f8ff',
-      strokeColor: '#4682b4',
-      strokeWidth: 2,
+      strokeColor: '#333333'
     },
     edge: {
-      strokeColor: '#e74c3c',
-      strokeOpacity: 0.25,
-      strokeWidth: 2,
+      strokeColor: '#ffffff'
+    },
+    link: {
+      strokeColor: '#333333'
     },
     label: {
       inner: {
-        textColor: '#2c3e50',
-        fontFamily: 'Arial, sans-serif',
-        minFontSize: 8,
-        maxFontSize: 16,
+        textColor: '#efefef',
+        fontFamily: 'monospace',
+        minFontSize: 9,
+        maxFontSize: 14
       },
       outer: {
-        textColor: '#00ff00',
-        fontFamily: 'Arial, sans-serif',
-        padding: 2,
+        textColor: '#333333',
+        textOpacity: 1,
+        fontFamily: 'monospace',
+        fontSize: 9,
         link: {
-          strokeColor: '#aaaaaa',
-          strokeWidth: 0.6,
-          padding: 1,
-        },
-      },
+          strokeColor: '#cccccc'
+        }
+      }
     },
     depths: [
       {
-        depth: 0,
-        node: { fillColor: '#2c3e50', strokeColor: '#ecf0f1' },
-        label: { inner: { textColor: '#ecf0f1' } },
+        depth: -1,
+        label: {
+          inner: {
+            textColor: '#333333'
+          }
+        },
+        highlight: {
+          node: {
+            fillColor: '#ffffff',
+            strokeColor: '#333333',
+            strokeWidth: 1.5
+          },
+          label: {
+            inner: {
+              textColor: '#333333'
+            }
+          }
+        }
       },
       {
-        depth: -1,
-        node: { fillColor: '#e74c3c', strokeColor: '#c0392b' },
-        label: {
-          inner: { textColor: '#ffffff' },
-          outer: { fontWeight: 'bold' },
-        },
-      },
-    ],
-  },
-});
+        depth: '*',
+         node: {
+           fillColor: { scale: 'magma' }
+         }
+       }
+    ]
+  }
+);
 ```
 
 ### Negative Overlap
@@ -489,7 +505,9 @@ const tree = new CactusTree(canvas, {
   <img src="https://github.com/spren9er/cactuz/blob/main/docs/images/cactus_tree_advanced.png?raw=true" alt="cactus-tree-advanced" width="75%" height="75%">
 </div>
 
-For a negative overlap parameter, nodes are connected by edges. When hovering over leaf nodes, only the edges connected to that node are shown, while all other edges are hidden. This allows for better readability in dense visualizations.
+For a negative overlap parameter, nodes are connected by links (see top-level `links` for styling).
+
+When hovering over leaf nodes, edges connected to that node are highlighted, while all other edges are hidden or muted (depending on `filterMode`). This allows for better readability in dense visualizations.
 
 ## Svelte Component
 
