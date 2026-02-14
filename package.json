@@ -1,6 +1,6 @@
 {
   "name": "cactuz",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "A JavaScript library for visualizing hierarchical data as cactus tree",
   "scripts": {
     "dev": "vite dev",
@@ -61,8 +61,8 @@
     "prettier": "^3.8.1",
     "prettier-plugin-svelte": "^3.4.1",
     "publint": "^0.3.17",
-    "svelte": "^5.50.3",
-    "svelte-check": "^4.3.6",
+    "svelte": "^5.51.0",
+    "svelte-check": "^4.4.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-devtools-json": "^1.0.0",

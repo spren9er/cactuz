@@ -67,55 +67,11 @@ export function clearLabelLayoutCache() {
 }
 
 /**
- * @typedef {Object} LabelLinkStyle
- * @property {string} [strokeColor]
- * @property {number} [strokeOpacity]
- * @property {number} [strokeWidth]
- * @property {number} [padding]
- * @property {number} [length]
- */
-
-/**
- * @typedef {Object} HighlightLabelLinkStyle
- * @property {string} [strokeColor]
- * @property {number} [strokeOpacity]
- * @property {number} [strokeWidth]
- */
-
-/**
- * @typedef {Object} HighlightStyle
- * @property {Object} [inner] - inner label highlight overrides
- * @property {string} [inner.textColor]
- * @property {number} [inner.textOpacity]
- * @property {string} [inner.fontWeight]
  *
- * @property {Object} [outer] - outer label highlight overrides
- * @property {string} [outer.textColor]
- * @property {number} [outer.textOpacity]
- * @property {string} [outer.fontWeight]
- * @property {HighlightLabelLinkStyle} [outer.link]
- */
-
-/**
- * @typedef {Object} LabelStyle
- * @property {HighlightStyle} [highlight]
- *
- * @property {Object} [inner] - settings for labels rendered inside circles
- * @property {string} [inner.textColor]
- * @property {number} [inner.textOpacity]
- * @property {string} [inner.fontFamily]
- * @property {number} [inner.minFontSize]
- * @property {number} [inner.maxFontSize]
- * @property {string} [inner.fontWeight]
- *
- * @property {Object} [outer] - settings for labels rendered outside circles
- * @property {string} [outer.textColor]
- * @property {number} [outer.textOpacity]
- * @property {string} [outer.fontFamily]
- * @property {number} [outer.fontSize]
- * @property {string} [outer.fontWeight]
- * @property {number} [outer.padding]
- * @property {LabelLinkStyle} [outer.link]
+ * @typedef {import('$lib/types.js').LabelStyle} LabelStyle
+ * @typedef {import('$lib/types.js').LabelLinkStyle} LabelLinkStyle
+ * @typedef {import('$lib/types.js').HighlightLabelStyle} HighlightLabelStyle
+ * @typedef {import('$lib/types.js').HighlightLabelLinkStyle} HighlightLabelLinkStyle
  */
 
 /**
@@ -126,7 +82,7 @@ export function clearLabelLayoutCache() {
  * @param {any} mergedStyle
  * @param {Map<number, any>} depthStyleCache
  * @param {Map<number, Set<string>>} negativeDepthNodes
- * @returns {LabelStyle}
+ * @returns {any}
  */
 export function getLabelStyle(
   depth,
@@ -329,7 +285,7 @@ export function truncateText(ctx, text, maxWidth) {
  * @param {number} [minFontSize]
  * @param {number} [maxFontSize]
  * @param {boolean} [highlightActive]
- * @param {HighlightStyle} [highlightStyle]
+ * @param {HighlightLabelStyle} [highlightStyle]
  * @returns {void}
  */
 export function drawCenteredLabel(
@@ -603,7 +559,7 @@ export function drawPositionedLabel(
     const labelPadding =
       typeof labelStyle.outer?.padding === 'number'
         ? labelStyle.outer.padding
-        : 4;
+        : 1;
     ctx.fillText(text, x + labelPadding, y + labelPadding);
   }
 
@@ -744,9 +700,9 @@ export function computeLabelLayout(
   const globalOuter = globalLabel.outer ?? {};
   const labelFontFamily =
     globalOuter.fontFamily ?? globalInner.fontFamily ?? 'monospace';
-  const labelMinFontSize = globalInner.minFontSize ?? 8;
+  const labelMinFontSize = globalInner.minFontSize ?? 9;
   const labelMaxFontSize = globalInner.maxFontSize ?? 14;
-  const globalLabelPadding = globalOuter.padding ?? 4;
+  const globalLabelPadding = globalOuter.padding ?? 1;
   const globalLinkPadding =
     globalOuter.link && typeof globalOuter.link.padding === 'number'
       ? globalOuter.link.padding

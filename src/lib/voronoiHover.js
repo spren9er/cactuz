@@ -9,9 +9,7 @@
 import { Delaunay } from 'd3-delaunay';
 
 /**
- * @typedef {Object} VoronoiData
- * @property {Delaunay} delaunay - Delaunay triangulation
- * @property {Array<{ x: number, y: number, radius: number, nodeId: string }>} leafEntries
+ * @typedef {import('$lib/types.js').VoronoiData} VoronoiData
  */
 
 /**

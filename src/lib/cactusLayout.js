@@ -10,41 +10,10 @@
  */
 
 /**
- * @typedef {Object} TreeNode
- * @property {string|number} id - Unique identifier
- * @property {string} name - Display name
- * @property {string|number|null} parent - Parent node ID
- * @property {number} [weight] - Optional explicit weight
- * @property {TreeNode[]} [children] - Child nodes (built internally)
- * @property {TreeNode|null} [parentRef] - Parent node reference (built internally)
- */
-
-/**
- * @typedef {Object} NodeData
- * @property {number} x - X coordinate
- * @property {number} y - Y coordinate
- * @property {number} radius - Node radius
- * @property {TreeNode} node - Reference to original tree node
- * @property {boolean} isLeaf - Whether this is a leaf node
- * @property {number} depth - Depth in hierarchy (0 = root)
- * @property {number} angle - Angle in radians (direction from parent to this node)
- */
-
-/**
- * @typedef {Object} BoundingBox
- * @property {number} minX - Minimum X coordinate
- * @property {number} maxX - Maximum X coordinate
- * @property {number} minY - Minimum Y coordinate
- * @property {number} maxY - Maximum Y coordinate
- * @property {number} width - Width of bounding box
- * @property {number} height - Height of bounding box
- */
-
-/**
- * @typedef {Object} ChildInfo
- * @property {TreeNode} child - Child node
- * @property {number} weight - Child node weight
- * @property {number} radius - Child node radius
+ * @typedef {import('$lib/types.js').TreeNode} TreeNode
+ * @typedef {import('$lib/types.js').NodeData} NodeData
+ * @typedef {import('$lib/types.js').BoundingBox} BoundingBox
+ * @typedef {import('$lib/types.js').ChildNode} ChildNode
  */
 
 /** @type {CactusLayout|null} */
@@ -473,7 +442,7 @@ export class CactusLayout {
   }
 
   /**
-   * @param {Array<{id: string|number, name: string, parent: string|number|null, weight?: number}>} nodeArray
+   * @param {TreeNode[]} nodeArray
    */
   buildHierarchyFromArray(nodeArray) {
     const nodeMap = new Map();

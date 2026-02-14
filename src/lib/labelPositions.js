@@ -21,6 +21,12 @@ export class Label {
     this.y = y;
     this.width = width;
     this.height = height;
+    /** @type {'left'|'center'|'right'} */
+    this.initialXAnchor = 'center';
+    /** @type {'top'|'middle'|'bottom'} */
+    this.initialYAnchor = 'middle';
+    /** @type {number|undefined} */
+    this.anchorPadding = undefined;
   }
 
   /**
@@ -96,14 +102,27 @@ export class Link {
  * Monte Carlo label positioning algorithm
  * Uses simulated annealing to find optimal label positions
  */
+/**
+ * @typedef {Object} LabelerOptions
+ * @property {number} [maxMove]
+ * @property {number} [maxAngle]
+ * @property {number} [labelAnchorPadding]
+ * @property {Array<Label>} [fixedLabels]
+ * @property {number} [wLeaderLineLength]
+ * @property {number} [wLeaderLineIntersection]
+ * @property {number} [wLabelLabelOverlap]
+ * @property {number} [wLabelAnchorOverlap]
+ * @property {number} [wOrientation]
+ * @property {{labelPadding?:number,linkPadding?:number,linkLength?:number}} [preservedOptions]
+ */
 export class CircleAwareLabeler {
   constructor(
-    /** @type {any[]} */ labels,
-    /** @type {any[]} */ anchors,
-    /** @type {any[]} */ allNodes,
+    /** @type {Label[]} */ labels,
+    /** @type {Anchor[]} */ anchors,
+    /** @type {any} */ allNodes,
     /** @type {number} */ width,
     /** @type {number} */ height,
-    /** @type {any} */ options = {},
+    /** @type {LabelerOptions} */ options = {},
   ) {
     this.labels = [...labels]; // Copy to avoid mutating originals
     this.anchors = anchors;
@@ -612,121 +631,102 @@ export class LabelPositioner {
    */
   setupLabels() {
     return this.renderedNodes
-      .filter(/** @type {any} */ (nodeData) => this.shouldShowLabel(nodeData))
-      .map(
-        /** @type {any} */ (nodeData) => {
-          const { x, y, radius, node } = nodeData;
+      .filter((nodeData) => this.shouldShowLabel(nodeData))
+      .map((nodeData) => {
+        const { x, y, radius, node } = nodeData;
 
-          // Measure text dimensions
-          const text = node.name || node.id;
+        // Measure text dimensions
+        const text = node.name || node.id;
 
-          // Allow per-node label padding and per-node link settings (fall back to options)
-          // Use explicit typeof/ternary fallbacks to avoid mixing ?? and || operators,
-          // and to ensure defaults are explicit numeric values.
-          const nodeLabelPadding =
-            node && node.label && typeof node.label.padding === 'number'
-              ? node.label.padding
-              : node && typeof node.labelPadding === 'number'
-                ? node.labelPadding
-                : typeof this.options.labelPadding === 'number'
-                  ? this.options.labelPadding
-                  : 2;
-          const nodeLinkPadding =
-            node &&
-            node.label &&
-            node.label.link &&
-            typeof node.label.link.padding === 'number'
-              ? node.label.link.padding
-              : node && typeof node.linkPadding === 'number'
-                ? node.linkPadding
-                : typeof this.options.linkPadding === 'number'
-                  ? this.options.linkPadding
-                  : 0;
-          const nodeLinkLength =
-            node &&
-            node.label &&
-            node.label.link &&
-            typeof node.label.link.length === 'number'
-              ? node.label.link.length
-              : node && typeof node.linkLength === 'number'
-                ? node.linkLength
-                : typeof this.options.linkLength === 'number'
-                  ? this.options.linkLength
-                  : 0;
+        // Allow per-node label padding and per-node link settings
+        const nodeLabelPadding =
+          node?.label?.padding ??
+          (typeof this.options.labelPadding === 'number'
+            ? this.options.labelPadding
+            : 2);
+        const nodeLinkPadding =
+          node?.label?.link?.padding ??
+          (typeof this.options.linkPadding === 'number'
+            ? this.options.linkPadding
+            : 0);
+        const nodeLinkLength =
+          node?.label?.link?.length ??
+          (typeof this.options.linkLength === 'number'
+            ? this.options.linkLength
+            : 0);
 
-          const textWidth = this.measureTextWidth(text, nodeLabelPadding);
-          const textHeight = this.fontSize + nodeLabelPadding * 2;
+        const textWidth = this.measureTextWidth(text, nodeLabelPadding);
+        const textHeight = this.fontSize + nodeLabelPadding * 2;
 
-          // Check if label fits inside the circle
-          const fitsInside = this.canFitInsideCircle(
-            textWidth,
-            textHeight,
-            radius,
-          );
+        // Check if label fits inside the circle
+        const fitsInside = this.canFitInsideCircle(
+          textWidth,
+          textHeight,
+          radius,
+        );
 
-          let labelPosition, isInside;
-          let preserved = false;
+        let labelPosition, isInside;
+        let preserved = false;
 
-          if (fitsInside) {
-            // Place label centered inside the circle
-            labelPosition = {
-              x: x - textWidth / 2,
-              y: y - textHeight / 2,
-            };
-            isInside = true;
-          } else if (
-            this.preservedPositions &&
-            this.preservedPositions.has(node.id)
-          ) {
-            // Use preserved position from previous frame
-            const prev = this.preservedPositions.get(node.id);
-            labelPosition = { x: prev.x, y: prev.y };
-            isInside = false;
-            preserved = true;
-          } else {
-            // Find position outside circle that doesn't overlap with other circles
-            labelPosition = this.findOutsidePosition(
-              x,
-              y,
-              radius,
-              textWidth,
-              textHeight,
-              {
-                labelPadding: nodeLabelPadding,
-                linkPadding: nodeLinkPadding,
-                linkLength: nodeLinkLength,
-              },
-            );
-            isInside = false;
-          }
-
-          const label = new Label(
-            node.id,
-            text,
-            labelPosition.x,
-            labelPosition.y,
-            textWidth,
-            textHeight,
-          );
-
-          const anchor = new Anchor(x, y, radius);
-
-          // Include per-label padding/link info so overlap resolver can compute max anchor padding
-          const anchorPadding =
-            nodeLabelPadding + nodeLinkPadding + nodeLinkLength;
-
-          return {
-            label,
-            anchor,
-            isInside,
-            preserved,
-            labelPadding: nodeLabelPadding,
-            linkPadding: nodeLinkPadding,
-            linkLength: nodeLinkLength,
-            anchorPadding,
+        if (fitsInside) {
+          // Place label centered inside the circle
+          labelPosition = {
+            x: x - textWidth / 2,
+            y: y - textHeight / 2,
           };
-        },
-      );
+          isInside = true;
+        } else if (
+          this.preservedPositions &&
+          this.preservedPositions.has(node.id)
+        ) {
+          // Use preserved position from previous frame
+          const prev = this.preservedPositions.get(node.id);
+          labelPosition = { x: prev.x, y: prev.y };
+          isInside = false;
+          preserved = true;
+        } else {
+          // Find position outside circle that doesn't overlap with other circles
+          labelPosition = this.findOutsidePosition(
+            x,
+            y,
+            radius,
+            textWidth,
+            textHeight,
+            {
+              labelPadding: nodeLabelPadding,
+              linkPadding: nodeLinkPadding,
+              linkLength: nodeLinkLength,
+            },
+          );
+          isInside = false;
+        }
+
+        const label = new Label(
+          node.id,
+          text,
+          labelPosition.x,
+          labelPosition.y,
+          textWidth,
+          textHeight,
+        );
+
+        const anchor = new Anchor(x, y, radius);
+
+        // Include per-label padding/link info so overlap resolver can compute max anchor padding
+        const anchorPadding =
+          nodeLabelPadding + nodeLinkPadding + nodeLinkLength;
+
+        return {
+          label,
+          anchor,
+          isInside,
+          preserved,
+          labelPadding: nodeLabelPadding,
+          linkPadding: nodeLinkPadding,
+          linkLength: nodeLinkLength,
+          anchorPadding,
+        };
+      });
   }
 
   /**
@@ -1045,9 +1045,9 @@ export class LabelPositioner {
     // CircleAwareLabeler can respect individual node settings during
     // energy computations.
     const defaultAnchorPadding =
-      (this.options.linkPadding || 0) +
-      (this.options.linkLength || 0) +
-      (this.options.labelPadding || 0);
+      (this.options?.linkPadding ?? 0) +
+      (this.options?.linkLength ?? 0) +
+      (this.options?.labelPadding ?? 0);
 
     const newLabelObjs = newLabels.map((d) => d.label);
     const newAnchors = newLabels.map((d) => d.anchor);
@@ -1064,7 +1064,7 @@ export class LabelPositioner {
     const labeler = new CircleAwareLabeler(
       newLabelObjs,
       newAnchors,
-      nodesWithLabels,
+      /** @type {import('$lib/types.js').NodeData[]} */ (nodesWithLabels),
       this.width,
       this.height,
       {

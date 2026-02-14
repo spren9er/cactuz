@@ -60,6 +60,11 @@ export interface OuterLabelStyle {
   link?: LabelLinkStyle;
 }
 
+export interface HighlightLabelStyle {
+  inner?: HighlightInnerLabelStyle;
+  outer?: HighlightOuterLabelStyle;
+}
+
 export interface LabelStyle {
   inner?: InnerLabelStyle;
   outer?: OuterLabelStyle;
@@ -121,4 +126,68 @@ export interface Styles {
   link?: LinkStyle;
   highlight?: HighlightStyle;
   depths?: DepthStyle[];
+}
+
+export interface TreeNode {
+  id: string | number;
+  name?: string;
+  parent?: string | number | null;
+  weight?: number;
+  children?: TreeNode[];
+  parentRef?: TreeNode | null;
+  label?: {
+    padding?: number;
+    link?: {
+      padding?: number;
+      length?: number;
+    } | null;
+  } | null;
+}
+
+export interface NodeData {
+  x: number;
+  y: number;
+  radius: number;
+  node: TreeNode;
+  isLeaf: boolean;
+  depth: number;
+  angle: number;
+  label?: any;
+  linkStyle?: LinkStyle;
+  highlightStyle?: HighlightLabelStyle;
+  /**
+   * Runtime convenience fields set by layout/label code to avoid ad-hoc property
+   * lookups at call sites. These are intentionally explicit so missing or
+   * mistyped fields are detected by static checks.
+   */
+  labelPadding?: number;
+  linkPadding?: number;
+  linkLength?: number;
+}
+
+export interface BoundingBox {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  width: number;
+  height: number;
+}
+
+export interface ChildNode {
+  child: TreeNode;
+  weight: number;
+  radius: number;
+}
+
+export interface VoronoiLeafEntry {
+  x: number;
+  y: number;
+  radius: number;
+  nodeId: string;
+}
+
+export interface VoronoiData {
+  delaunay: import('d3-delaunay').Delaunay;
+  leafEntries: VoronoiLeafEntry[];
 }
