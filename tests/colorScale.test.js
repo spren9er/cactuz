@@ -22,15 +22,19 @@ describe('getInterpolator', () => {
       'cividis',
     ];
     for (const name of names) {
-      const fn = getInterpolator(name);
-      expect(fn, `interpolator for "${name}"`).toBeTypeOf('function');
+      const res = getInterpolator(name);
+      expect(res, `interpolator for "${name}"`).not.toBeNull();
+      if (!res) continue;
+      expect(res.interpolator).toBeTypeOf('function');
+      expect(typeof res.key).toBe('string');
     }
   });
 
   it('returns a function that produces CSS color strings', () => {
-    const fn = getInterpolator('viridis');
-    expect(fn).not.toBeNull();
-    const color = /** @type {Function} */ (fn)(0.5);
+    const res = getInterpolator('viridis');
+    expect(res).not.toBeNull();
+    if (!res) throw new Error('interpolator not found');
+    const color = /** @type {Function} */ (res.interpolator)(0.5);
     expect(typeof color).toBe('string');
     expect(color).toMatch(/^(#|rgb)/);
   });
@@ -42,8 +46,13 @@ describe('getInterpolator', () => {
 
   it('handles capitalisation of first character', () => {
     // 'Blues' starts with uppercase in d3 (interpolateBlues)
-    expect(getInterpolator('Blues')).toBeTypeOf('function');
-    expect(getInterpolator('blues')).toBeTypeOf('function');
+    const r1 = getInterpolator('Blues');
+    const r2 = getInterpolator('blues');
+    expect(r1).not.toBeNull();
+    expect(r2).not.toBeNull();
+    if (!r1 || !r2) throw new Error('interpolator not found');
+    expect(r1.interpolator).toBeTypeOf('function');
+    expect(r2.interpolator).toBeTypeOf('function');
   });
 });
 
@@ -51,7 +60,11 @@ describe('getInterpolator', () => {
 
 describe('sampleColors', () => {
   const interpolator = /** @type {(t: number) => string} */ (
-    getInterpolator('viridis')
+    (function () {
+      const res = getInterpolator('viridis');
+      if (!res) throw new Error('interpolator not found');
+      return res.interpolator;
+    })()
   );
 
   it('returns n colors', () => {

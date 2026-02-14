@@ -1,16 +1,28 @@
 import * as d3ScaleChromatic from 'd3-scale-chromatic';
 
+const PERCEPTUALLY_UNIFORM_SCALES = [
+  'Viridis',
+  'Inferno',
+  'Magma',
+  'Plasma',
+  'Cividis',
+  'Turbo',
+  'Warm',
+  'Cool',
+  'CubehelixDefault',
+];
+
 /**
- * Resolve a scale name (e.g. 'magma') to a d3 sequential interpolator function.
+ * Resolve a scale name (e.g. 'magma') to a d3 sequential interpolator.
  * @param {string} name - Scale name (case-insensitive, e.g. 'magma', 'viridis', 'Blues')
- * @returns {((t: number) => string) | null} The interpolator function, or null if not found
+ * @returns {{ key: string, interpolator: ((t: number) => string) } | null} The interpolator name and function, or null if not found
  */
 export function getInterpolator(name) {
   const key = 'interpolate' + name.charAt(0).toUpperCase() + name.slice(1);
   const interpolator = /** @type {Record<string, any>} */ (d3ScaleChromatic)[
     key
   ];
-  return typeof interpolator === 'function' ? interpolator : null;
+  return typeof interpolator === 'function' ? { key, interpolator } : null;
 }
 
 /**
@@ -75,16 +87,32 @@ export function expandWildcardDepths(depths, maxDepth) {
     let strokeColors = null;
 
     if (isColorScale(fillScale)) {
-      const interpolator = getInterpolator(fillScale.scale);
-      if (interpolator) {
-        fillColors = sampleColors(interpolator, n, fillScale.reverse);
+      const fillInterpolator = getInterpolator(fillScale.scale);
+      if (fillInterpolator) {
+        const { key, interpolator } = fillInterpolator;
+        let reverse = fillScale.reverse;
+        if (
+          !PERCEPTUALLY_UNIFORM_SCALES.includes(key.replace('interpolate', ''))
+        ) {
+          reverse = !reverse;
+        }
+
+        fillColors = sampleColors(interpolator, n, reverse);
       }
     }
 
     if (isColorScale(strokeScale)) {
-      const interpolator = getInterpolator(strokeScale.scale);
-      if (interpolator) {
-        strokeColors = sampleColors(interpolator, n, strokeScale.reverse);
+      const strokeInterpolator = getInterpolator(strokeScale.scale);
+      if (strokeInterpolator) {
+        const { key, interpolator } = strokeInterpolator;
+        let reverse = strokeScale.reverse;
+        if (
+          !PERCEPTUALLY_UNIFORM_SCALES.includes(key.replace('interpolate', ''))
+        ) {
+          reverse = !reverse;
+        }
+
+        strokeColors = sampleColors(interpolator, n, reverse);
       }
     }
 
