@@ -198,7 +198,7 @@ describe('mergeStyles (via CactusTree.mergedStyle)', () => {
     expect(tree.mergedStyle.edge.strokeColor).toBe('#333333');
     expect(tree.mergedStyle.link.strokeColor).toBe('#aaaaaa');
     expect(tree.mergedStyle.highlight.node.strokeColor).toBe('#333333');
-    expect(tree.mergedStyle.highlight.edge.strokeOpacity).toBe(0.5);
+    expect(tree.mergedStyle.highlight.edge.strokeOpacity).toBe(1);
 
     tree.destroy();
   });
