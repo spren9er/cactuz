@@ -3,7 +3,7 @@
 A JavaScript library for visualizing hierarchical data structures using the *CactusTree* algorithm with hierarchical edge bundling.
 
 <div align="center">
-  <img src="https://github.com/spren9er/cactuz/blob/main/docs/images/cactus_tree_simple.png?raw=true" alt="cactus-tree-simple" width="75%" height="75%">
+  <img src="https://github.com/spren9er/cactuz/blob/main/docs/images/cactuz.png?raw=true" alt="cactus-tree" width="75%" height="75%">
 </div>
 
 ## Overview
@@ -526,10 +526,6 @@ const tree = new CactusTree(canvas, {
   },
 });
 ```
-
-<div align="center">
-  <img src="https://github.com/spren9er/cactuz/blob/main/docs/images/cactus_tree_advanced.png?raw=true" alt="cactus-tree-advanced" width="75%" height="75%">
-</div>
 
 For a negative overlap parameter, nodes are connected by links (see top-level `links` for styling).
 
