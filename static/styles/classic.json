@@ -4,11 +4,11 @@
     "fillOpacity": 1,
     "strokeColor": "#aaaaaa",
     "strokeOpacity": 1,
-    "strokeWidth": 1
+    "strokeWidth": 0
   },
   "edge": {
-    "strokeColor": "#333333",
-    "strokeOpacity": 0.1,
+    "strokeColor": "#efefef",
+    "strokeOpacity": 0.2,
     "strokeWidth": 1
   },
   "edgeNode": {
@@ -17,7 +17,7 @@
   },
   "label": {
     "inner": {
-      "textColor": "#333333",
+      "textColor": "#efefef",
       "textOpacity": 1,
       "fontFamily": "monospace",
       "fontWeight": "normal",
@@ -47,8 +47,7 @@
   },
   "highlight": {
     "node": {
-      "fillColor": "#dedede",
-      "fillOpacity": 1,
+      "fillOpacity": 0.8,
       "strokeColor": "#333333",
       "strokeOpacity": 1,
       "strokeWidth": 1
@@ -64,7 +63,7 @@
     },
     "label": {
       "inner": {
-        "textColor": "#333333",
+        "textColor": "#efefef",
         "textOpacity": 1,
         "fontWeight": "bold"
       },
@@ -77,12 +76,19 @@
   },
   "depths": [
     {
+      "depth": "*",
+      "node": {
+        "fillColor": { "scale": "greys" }
+      }
+    },
+    {
       "depth": -1,
       "node": {
         "fillColor": "#333333",
         "fillOpacity": 0.5,
         "strokeColor": "#333333",
-        "strokeOpacity": 0.5
+        "strokeOpacity": 0.5,
+        "strokeWidth": 1
       },
       "label": {
         "inner": {
