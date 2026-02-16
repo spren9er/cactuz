@@ -174,6 +174,13 @@ interface Styles {
     strokeOpacity?: number;
     strokeWidth?: number;
   };
+  edgeNode?: {
+    fillColor?: string;
+    fillOpacity?: number;
+    strokeColor?: string;
+    strokeOpacity?: number;
+    strokeWidth?: number;
+  };
   label?: {
     inner: {
       textColor?: string;
