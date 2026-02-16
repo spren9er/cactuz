@@ -1,10 +1,15 @@
 {
   "node": {
+    "fillOpacity": 0.97,
     "strokeColor": "#333333",
     "strokeWidth": 0.5
   },
   "edge": {
     "strokeColor": "#ffffff"
+  },
+  "edgeNode": {
+    "fillOpacity": 0.97,
+    "strokeOpacity": 1
   },
   "link": {
     "strokeColor": "#333333"
@@ -27,8 +32,12 @@
     }
   },
   "highlight": {
+    "node": {
+      "fillOpacity": 0.97,
+      "strokeOpacity": 1
+    },
     "edgeNode": {
-      "fillColor": "#ffffff",
+      "fillColor": "#efefef",
       "strokeColor": "#333333",
       "strokeWidth": 1
     }
@@ -36,6 +45,10 @@
   "depths": [
     {
       "depth": -1,
+      "node": {
+        "fillOpacity": 0.75,
+        "strokeOpacity": 0.75
+      },
       "label": {
         "inner": {
           "textColor": "#333333"
@@ -43,8 +56,6 @@
       },
       "highlight": {
         "node": {
-          "fillColor": "#ffffff",
-          "strokeColor": "#333333",
           "strokeWidth": 2
         },
         "label": {
@@ -58,7 +69,7 @@
       "depth": "*",
        "node": {
          "fillColor": { "scale": "magma" }
-       }
-     }
+      }
+    }
   ]
 }

@@ -80,14 +80,12 @@ const DEFAULT_STYLE = {
   highlight: {
     node: {
       strokeColor: '#333333',
-      strokeWidth: 1,
     },
     edge: {
-      strokeOpacity: 0.5,
+      strokeOpacity: 1,
     },
     edgeNode: {
       strokeColor: '#777777',
-      strokeWidth: 1,
     },
     label: {
       inner: {},
@@ -126,6 +124,7 @@ function mergeStyles(userStyles) {
   return {
     node: mergeGroup('node'),
     edge: mergeGroup('edge'),
+    edgeNode: mergeGroup('edgeNode'),
     label: {
       ...DEFAULT_STYLE.label,
       ...(s.label || {}),
@@ -145,14 +144,14 @@ function mergeStyles(userStyles) {
         ...((DEFAULT_STYLE.highlight && DEFAULT_STYLE.highlight.node) || {}),
         ...((s.highlight && s.highlight.node) || {}),
       },
+      edge: {
+        ...((DEFAULT_STYLE.highlight && DEFAULT_STYLE.highlight.edge) || {}),
+        ...((s.highlight && s.highlight.edge) || {}),
+      },
       edgeNode: {
         ...((DEFAULT_STYLE.highlight && DEFAULT_STYLE.highlight.edgeNode) ||
           {}),
         ...((s.highlight && s.highlight.edgeNode) || {}),
-      },
-      edge: {
-        ...((DEFAULT_STYLE.highlight && DEFAULT_STYLE.highlight.edge) || {}),
-        ...((s.highlight && s.highlight.edge) || {}),
       },
       label: {
         ...((DEFAULT_STYLE.highlight && DEFAULT_STYLE.highlight.label) || {}),
@@ -404,6 +403,13 @@ export class CactusTree {
       }
     }
 
+    // Compute all edge node ids (nodes that appear in any edge)
+    const allEdgeNodeIds = new Set();
+    for (const edge of this.edges || []) {
+      allEdgeNodeIds.add(edge.source);
+      allEdgeNodeIds.add(edge.target);
+    }
+
     // Node highlight set
     const nodeHighlightedIds = (() => {
       const s = new Set();
@@ -444,6 +450,7 @@ export class CactusTree {
       this.depthStyleCache,
       this.negativeDepthNodes,
       nodeHighlightedIds,
+      allEdgeNodeIds,
       'nonLeaf',
     );
 
@@ -472,6 +479,7 @@ export class CactusTree {
       this.depthStyleCache,
       this.negativeDepthNodes,
       nodeHighlightedIds,
+      allEdgeNodeIds,
       'leaf',
     );
 

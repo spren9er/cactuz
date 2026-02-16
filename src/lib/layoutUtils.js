@@ -227,14 +227,8 @@ export function buildLookupMaps(renderedNodes, mergedStyle) {
     maxDepth,
   );
 
-  // Cache depth styles for performance
-  if (expandedDepths) {
-    expandedDepths.forEach((depthStyle) => {
-      if (depthStyle.depth >= 0) {
-        depthStyleCache.set(depthStyle.depth, depthStyle);
-      }
-    });
-  }
+  // Store expanded depths back for resolveDepthStyle to iterate in order
+  mergedStyle.depths = expandedDepths;
 
   // Calculate negative depth mappings
   negativeDepthNodes.set(-1, new Set(leafNodes));

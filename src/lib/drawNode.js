@@ -39,11 +39,13 @@ export function readStyleProp(
 
 /**
  * Resolve the applicable depth style for a node.
- * Checks positive depth cache first, then negative depths (which override positive if matched).
+ * Iterates all depth entries in their natural (user-defined) order,
+ * merging matching ones. Positive depths match by exact depth number,
+ * negative depths match by node membership in negativeDepthNodes sets.
  * @param {number} depth
  * @param {string} nodeId
  * @param {any} mergedStyle
- * @param {Map<any, any>} depthStyleCache
+ * @param {Map<any, any>} _depthStyleCache - Unused, kept for API compatibility
  * @param {Map<any, any>} negativeDepthNodes
  * @returns {any} Depth style object or null
  */
@@ -51,52 +53,95 @@ export function resolveDepthStyle(
   depth,
   nodeId,
   mergedStyle,
-  depthStyleCache,
+  _depthStyleCache,
   negativeDepthNodes,
 ) {
-  // Apply positive depth first
-  let depthStyle = depthStyleCache.get(depth);
+  if (!mergedStyle?.depths) return null;
 
-  // Then apply negative depths (merge on top of existing depth style).
-  // Last matching negative depth wins (later entries override earlier ones).
-  if (mergedStyle?.depths) {
-    for (const ds of mergedStyle.depths) {
-      if (ds.depth < 0) {
-        const nodesAtThisNegativeDepth = negativeDepthNodes.get(ds.depth);
-        if (nodesAtThisNegativeDepth && nodesAtThisNegativeDepth.has(nodeId)) {
-          if (depthStyle) {
-            // Merge: negative depth properties override, but missing ones
-            // are preserved from the existing (e.g. wildcard) depth style
-            const merged = { ...depthStyle };
-            for (const key of Object.keys(ds)) {
-              if (key === 'depth') continue;
-              const base = depthStyle[key];
-              const override = ds[key];
-              if (
-                base &&
-                override &&
-                typeof base === 'object' &&
-                typeof override === 'object'
-              ) {
-                merged[key] = { ...base, ...override };
-              } else {
-                merged[key] = override;
-              }
-            }
-            depthStyle = merged;
-          } else {
-            depthStyle = ds;
-          }
+  let depthStyle = null;
+
+  for (const ds of mergedStyle.depths) {
+    let matches = false;
+
+    if (ds.depth >= 0) {
+      matches = ds.depth === depth;
+    } else if (ds.depth < 0) {
+      const nodesAtThisNegativeDepth = negativeDepthNodes.get(ds.depth);
+      matches = !!(
+        nodesAtThisNegativeDepth && nodesAtThisNegativeDepth.has(nodeId)
+      );
+    }
+
+    if (!matches) continue;
+
+    if (depthStyle) {
+      /** @type {Record<string, any>} */
+      const merged = { ...depthStyle };
+      for (const key of Object.keys(ds)) {
+        if (key === 'depth') continue;
+        const base = depthStyle[key];
+        const override = ds[key];
+        if (
+          base &&
+          override &&
+          typeof base === 'object' &&
+          typeof override === 'object'
+        ) {
+          merged[key] = { ...base, ...override };
+        } else {
+          merged[key] = override;
         }
       }
+      depthStyle = merged;
+    } else {
+      depthStyle = ds;
     }
   }
 
-  return depthStyle || null;
+  return depthStyle;
 }
 
 /**
- * Calculates the node style properties for rendering using nested style groups
+ * Read a property from a chain of style sources, returning the first defined value.
+ * @param {string} prop - Property name (e.g. 'fillColor')
+ * @param {Array<Record<string, any>|null|undefined>} sources - Style objects to check in order
+ * @param {*} defaultValue - Fallback if no source has the property
+ * @returns {*}
+ */
+function readFromChain(prop, sources, defaultValue) {
+  for (const source of sources) {
+    if (source && source[prop] !== undefined) {
+      return source[prop];
+    }
+  }
+  return defaultValue;
+}
+
+/**
+ * Calculates the node style properties for rendering.
+ *
+ * Precedence rules for each property (first defined value wins):
+ *
+ * 1. Directly hovered node with edges:
+ *    depthStyle.highlight.node -> highlight.edgeNode -> highlight.node -> edgeNode -> depthStyle.node -> node
+ *
+ * 2. Directly hovered node without edges:
+ *    depthStyle.highlight.node -> highlight.node -> depthStyle.node -> node
+ *
+ * 3. Edge neighbor of hovered node:
+ *    highlight.edgeNode -> edgeNode -> depthStyle.node -> node
+ *
+ * 4. Highlighted but not edge neighbor:
+ *    depthStyle.highlight.node -> highlight.node -> depthStyle.node -> node
+ *
+ * 5. Not highlighted + has edge:
+ *    edgeNode -> depthStyle.node -> node
+ *
+ * 6. Not highlighted + no edge:
+ *    depthStyle.node -> node
+ *
+ * edgeNode has no depth-based support.
+ *
  * @param {any} node - The node object
  * @param {number} depth - Node depth
  * @param {string|null} hoveredNodeId - ID of currently hovered node
@@ -104,6 +149,7 @@ export function resolveDepthStyle(
  * @param {Map<any, any>} depthStyleCache
  * @param {Map<any, any>} negativeDepthNodes
  * @param {Set<string>|null} highlightedNodeIds - Set of node ids considered highlighted due to link association (may be null)
+ * @param {Set<string>|null} allEdgeNodeIds - Set of node ids that appear in any edge (may be null)
  * @returns {any} Style properties for the node: { fill, fillOpacity, stroke, strokeWidth, strokeOpacity, isHovered }
  */
 export function calculateNodeStyle(
@@ -114,6 +160,7 @@ export function calculateNodeStyle(
   depthStyleCache,
   negativeDepthNodes,
   highlightedNodeIds,
+  allEdgeNodeIds,
 ) {
   const depthStyle = resolveDepthStyle(
     depth,
@@ -123,50 +170,6 @@ export function calculateNodeStyle(
     negativeDepthNodes,
   );
 
-  // Defaults (use previous defaults as reasonable fallbacks)
-  const defaultFill = '#efefef';
-  const defaultFillOpacity = 1;
-  const defaultStroke = '#333333';
-  const defaultStrokeWidth = 1;
-  const defaultStrokeOpacity = 1;
-
-  // Node values (check depth override, then global)
-  const currentFill = readStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'fillColor',
-    defaultFill,
-  );
-  const currentFillOpacity = readStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'fillOpacity',
-    defaultFillOpacity,
-  );
-  const currentStroke = readStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'strokeColor',
-    defaultStroke,
-  );
-  const currentStrokeWidth = readStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'strokeWidth',
-    defaultStrokeWidth,
-  );
-  const currentStrokeOpacity = readStyleProp(
-    depthStyle,
-    mergedStyle,
-    'node',
-    'strokeOpacity',
-    defaultStrokeOpacity,
-  );
-
   const isDirectlyHovered = hoveredNodeId === node.id;
   const isLinkedHovered =
     highlightedNodeIds && typeof highlightedNodeIds.has === 'function'
@@ -174,96 +177,59 @@ export function calculateNodeStyle(
       : false;
   const isHovered = isDirectlyHovered || isLinkedHovered;
 
-  // Determine which highlight group to use:
-  // - directly hovered node → highlight.node
-  // - edge-linked node → highlight.edgeNode
-  const highlightGroup = isDirectlyHovered ? 'node' : 'edgeNode';
+  const hasEdge =
+    allEdgeNodeIds && typeof allEdgeNodeIds.has === 'function'
+      ? allEdgeNodeIds.has(node.id)
+      : false;
 
-  /**
-   * Read a node highlight property with depth-specific override fallback.
-   * For directly hovered (group = 'node'):
-   *   Precedence: depthStyle.highlight.node > mergedStyle.highlight.node
-   * For edge-linked (group = 'edgeNode'):
-   *   Only global: mergedStyle.highlight.edgeNode (no depth-level support)
-   * @param {string} group - 'node' or 'edgeNode'
-   * @param {string} prop
-   * @param {*} [defaultValue]
-   * @returns {*}
-   */
-  function readNodeHighlightProp(group, prop, defaultValue) {
-    if (group === 'node') {
-      if (
-        depthStyle &&
-        depthStyle.highlight &&
-        depthStyle.highlight.node &&
-        depthStyle.highlight.node[prop] !== undefined
-      ) {
-        return depthStyle.highlight.node[prop];
-      }
-    }
-    if (
-      mergedStyle &&
-      mergedStyle.highlight &&
-      mergedStyle.highlight[group] &&
-      mergedStyle.highlight[group][prop] !== undefined
-    ) {
-      return mergedStyle.highlight[group][prop];
-    }
-    return defaultValue;
+  // Build property source chain based on state
+  const globalNode = mergedStyle?.node || null;
+  const depthNode = depthStyle?.node || null;
+  const globalEdgeNode = mergedStyle?.edgeNode || null;
+  const globalHighlightNode = mergedStyle?.highlight?.node || null;
+  const globalHighlightEdgeNode = mergedStyle?.highlight?.edgeNode || null;
+  const depthHighlightNode = depthStyle?.highlight?.node || null;
+
+  /** @type {Array<Record<string, any>|null|undefined>} */
+  let sources;
+
+  if (isDirectlyHovered && hasEdge) {
+    // Directly hovered node with edges
+    // depthStyle.highlight.node -> highlight.edgeNode -> highlight.node -> edgeNode -> depthStyle.node -> node
+    sources = [
+      depthHighlightNode,
+      globalHighlightEdgeNode,
+      globalHighlightNode,
+      globalEdgeNode,
+      depthNode,
+      globalNode,
+    ];
+  } else if (isDirectlyHovered) {
+    // Directly hovered node without edges
+    // depthStyle.highlight.node -> highlight.node -> depthStyle.node -> node
+    sources = [depthHighlightNode, globalHighlightNode, depthNode, globalNode];
+  } else if (isHovered && hasEdge) {
+    // Edge neighbor of hovered node
+    // highlight.edgeNode -> edgeNode -> depthStyle.node -> node
+    sources = [globalHighlightEdgeNode, globalEdgeNode, depthNode, globalNode];
+  } else if (isHovered && !hasEdge) {
+    // Non-edge neighbor highlight
+    // depthStyle.highlight.node -> highlight.node -> depthStyle.node -> node
+    sources = [depthHighlightNode, globalHighlightNode, depthNode, globalNode];
+  } else if (!isHovered && hasEdge) {
+    // edgeNode -> depthStyle.node -> node
+    sources = [globalEdgeNode, depthNode, globalNode];
+  } else {
+    // depthStyle.node -> node
+    sources = [depthNode, globalNode];
   }
 
-  const highlightFill = readNodeHighlightProp(
-    highlightGroup,
-    'fillColor',
-    undefined,
-  );
-  const highlightFillOpacity = readNodeHighlightProp(
-    highlightGroup,
-    'fillOpacity',
-    undefined,
-  );
-  const highlightStroke = readNodeHighlightProp(
-    highlightGroup,
-    'strokeColor',
-    undefined,
-  );
-  const highlightStrokeOpacity = readNodeHighlightProp(
-    highlightGroup,
-    'strokeOpacity',
-    undefined,
-  );
-  const highlightStrokeWidth = readNodeHighlightProp(
-    highlightGroup,
-    'strokeWidth',
-    undefined,
-  );
-
-  const finalFill =
-    isHovered && highlightFill !== undefined ? highlightFill : currentFill;
-  const finalFillOpacity =
-    isHovered && highlightFillOpacity !== undefined
-      ? highlightFillOpacity
-      : currentFillOpacity;
-  const finalStroke =
-    isHovered && highlightStroke !== undefined
-      ? highlightStroke
-      : currentStroke;
-  const finalStrokeOpacity =
-    isHovered && highlightStrokeOpacity !== undefined
-      ? highlightStrokeOpacity
-      : currentStrokeOpacity;
-
-  const finalStrokeWidth =
-    isHovered && highlightStrokeWidth !== undefined
-      ? highlightStrokeWidth
-      : currentStrokeWidth;
-
   return {
-    fill: finalFill,
-    fillOpacity: finalFillOpacity,
-    stroke: finalStroke,
-    strokeWidth: finalStrokeWidth,
-    strokeOpacity: finalStrokeOpacity,
+    fill: readFromChain('fillColor', sources, '#efefef'),
+    fillOpacity: readFromChain('fillOpacity', sources, 1),
+    stroke: readFromChain('strokeColor', sources, '#333333'),
+    strokeWidth: readFromChain('strokeWidth', sources, 1),
+    strokeOpacity: readFromChain('strokeOpacity', sources, 1),
     isHovered,
   };
 }
@@ -281,6 +247,7 @@ export function calculateNodeStyle(
  * @param {Map<any, any>} depthStyleCache
  * @param {Map<any, any>} negativeDepthNodes
  * @param {Set<string>|null} highlightedNodeIds - Set of node ids considered highlighted due to link association (may be null)
+ * @param {Set<string>|null} allEdgeNodeIds - Set of node ids that appear in any edge (may be null)
  * @returns {boolean} Whether the node was rendered
  */
 export function drawNode(
@@ -295,6 +262,7 @@ export function drawNode(
   depthStyleCache,
   negativeDepthNodes,
   highlightedNodeIds,
+  allEdgeNodeIds,
 ) {
   if (!ctx) return false;
 
@@ -309,6 +277,7 @@ export function drawNode(
       depthStyleCache,
       negativeDepthNodes,
       highlightedNodeIds,
+      allEdgeNodeIds,
     )
   );
 
@@ -370,6 +339,7 @@ export function drawNode(
  * @param {Map<any, any>} depthStyleCache
  * @param {Map<any, any>} negativeDepthNodes
  * @param {Set<string>|null} highlightedNodeIds
+ * @param {Set<string>|null} allEdgeNodeIds
  * @param {'all'|'nonLeaf'|'leaf'} [mode='all']
  * @returns {{ rendered: number, filtered: number }}
  */
@@ -382,6 +352,7 @@ export function drawNodes(
   depthStyleCache,
   negativeDepthNodes,
   highlightedNodeIds,
+  allEdgeNodeIds,
   mode = 'all',
 ) {
   if (!ctx || !renderedNodes || !renderedNodes.length) {
@@ -421,6 +392,7 @@ export function drawNodes(
       depthStyleCache,
       negativeDepthNodes,
       highlightedNodeIds,
+      allEdgeNodeIds,
     );
 
     if (wasRendered) renderedCount++;

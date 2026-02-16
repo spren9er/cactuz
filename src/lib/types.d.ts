@@ -122,6 +122,7 @@ export interface DepthStyle {
 export interface Styles {
   node?: NodeStyle;
   edge?: EdgeStyle;
+  edgeNode?: NodeStyle;
   label?: LabelStyle;
   link?: LinkStyle;
   highlight?: HighlightStyle;

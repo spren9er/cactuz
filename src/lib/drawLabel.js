@@ -348,6 +348,7 @@ export function drawCenteredLabel(
  * @param {string|null} hoveredNodeId
  * @param {any[]|Set<string>} visibleNodeIds
  * @param {{textColor?: string}} labelStyleWrapper
+ * @param {any[]|Set<string>|null} [highlightedNodeIds=null]
  * @returns {boolean}
  */
 export function shouldShowLabel(
@@ -358,8 +359,24 @@ export function shouldShowLabel(
   hoveredNodeId,
   visibleNodeIds,
   labelStyleWrapper,
+  highlightedNodeIds = null,
 ) {
-  if (radius < 1) return false;
+  if (radius < 1) {
+    // Allow labels for tiny leaf nodes that are highlighted via edges
+    if (
+      hoveredNodeId !== null &&
+      leafNodes.has(nodeId) &&
+      highlightedContains(highlightedNodeIds, nodeId)
+    ) {
+      return shouldShowLeafLabel(
+        nodeId,
+        leafNodes,
+        hoveredNodeId,
+        visibleNodeIds,
+      );
+    }
+    return false;
+  }
   const isActualLeaf = leafNodes.has(nodeId);
   if (isActualLeaf)
     return shouldShowLeafLabel(
@@ -653,6 +670,7 @@ export function computeLabelLayout(
       hoveredNodeId,
       highlightedNodeIds,
       { textColor: labelStyle.inner?.textColor },
+      highlightedNodeIds,
     );
   });
 

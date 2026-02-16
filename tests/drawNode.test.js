@@ -65,16 +65,14 @@ describe('readStyleProp', () => {
 // ── resolveDepthStyle ───────────────────────────────────────────────────────
 
 describe('resolveDepthStyle', () => {
-  it('returns positive depth style from cache', () => {
-    const depthStyleCache = new Map();
+  it('returns positive depth style from depths array', () => {
     const style2 = { depth: 2, node: { fillColor: '#ff0000' } };
-    depthStyleCache.set(2, style2);
 
     const result = resolveDepthStyle(
       2,
       'node1',
-      { depths: [] },
-      depthStyleCache,
+      { depths: [style2] },
+      new Map(),
       new Map(),
     );
     expect(result).toBe(style2);
@@ -205,6 +203,7 @@ describe('calculateNodeStyle', () => {
       new Map(),
       new Map(),
       null,
+      null,
     );
     expect(style.fill).toBe('#efefef');
     expect(style.fillOpacity).toBe(1);
@@ -222,13 +221,14 @@ describe('calculateNodeStyle', () => {
       new Map(),
       new Map(),
       null,
+      null,
     );
     expect(style.fill).toBe('#dedede');
     expect(style.stroke).toBe('#333333');
     expect(style.isHovered).toBe(true);
   });
 
-  it('returns base style for link-highlighted node when edgeNode not configured', () => {
+  it('returns highlight.node style for link-highlighted node without edge', () => {
     const highlightedIds = new Set(['a']);
     const style = calculateNodeStyle(
       { id: 'a' },
@@ -238,14 +238,16 @@ describe('calculateNodeStyle', () => {
       new Map(),
       new Map(),
       highlightedIds,
+      null,
     );
-    // No highlight.edgeNode configured → no highlight styling applied
-    expect(style.fill).toBe('#efefef');
+    // Highlighted + no edge → highlight.node styling applied
+    expect(style.fill).toBe('#dedede');
     expect(style.isHovered).toBe(true);
   });
 
-  it('returns edgeNode highlight style for link-highlighted node', () => {
+  it('returns edgeNode highlight style for link-highlighted node with edge', () => {
     const highlightedIds = new Set(['a']);
+    const allEdgeNodeIds = new Set(['a']);
     const mergedStyle = {
       ...defaultMergedStyle,
       highlight: {
@@ -264,6 +266,7 @@ describe('calculateNodeStyle', () => {
       new Map(),
       new Map(),
       highlightedIds,
+      allEdgeNodeIds,
     );
     expect(style.fill).toBe('#ffaaaa');
     expect(style.stroke).toBe('#ff0000');
@@ -292,6 +295,7 @@ describe('calculateNodeStyle', () => {
       depthStyleCache,
       new Map(),
       null,
+      null,
     );
     expect(style.fill).toBe('#ff0000');
     expect(style.stroke).toBe('#0000ff');
@@ -318,6 +322,7 @@ describe('calculateNodeStyle', () => {
       mergedStyle,
       depthStyleCache,
       new Map(),
+      null,
       null,
     );
     expect(style.fill).toBe('#00ff00');
@@ -347,6 +352,7 @@ describe('calculateNodeStyle', () => {
       mergedStyle,
       new Map(),
       new Map(),
+      null,
       null,
     );
     // fillColor comes from highlight
@@ -441,6 +447,7 @@ describe('drawNode', () => {
         new Map(),
         new Map(),
         null,
+        null,
       ),
     ).toBe(false);
   });
@@ -460,6 +467,7 @@ describe('drawNode', () => {
         new Map(),
         new Map(),
         null,
+        null,
       ),
     ).toBe(false);
   });
@@ -477,6 +485,7 @@ describe('drawNode', () => {
       mergedStyle,
       new Map(),
       new Map(),
+      null,
       null,
     );
     expect(result).toBe(true);
@@ -533,6 +542,7 @@ describe('drawNodes', () => {
       new Map(),
       new Map(),
       null,
+      null,
     );
     expect(result).toEqual({ rendered: 0, filtered: 0 });
   });
@@ -548,6 +558,7 @@ describe('drawNodes', () => {
       new Map(),
       new Map(),
       null,
+      null,
     );
     expect(result).toEqual({ rendered: 0, filtered: 0 });
   });
@@ -562,6 +573,7 @@ describe('drawNodes', () => {
       mergedStyle,
       new Map(),
       new Map(),
+      null,
       null,
       'all',
     );
@@ -580,6 +592,7 @@ describe('drawNodes', () => {
       new Map(),
       new Map(),
       null,
+      null,
       'nonLeaf',
     );
     expect(result.rendered).toBe(2);
@@ -596,6 +609,7 @@ describe('drawNodes', () => {
       mergedStyle,
       new Map(),
       new Map(),
+      null,
       null,
       'leaf',
     );

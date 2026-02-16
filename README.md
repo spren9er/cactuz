@@ -217,6 +217,13 @@ interface Styles {
       strokeOpacity?: number;
       strokeWidth?: number;
     };
+    edgeNode?: {
+      fillColor?: string;
+      fillOpacity?: number;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWidth?: number;
+    };
     label?: {
       inner: {
         textColor?: string;
@@ -256,6 +263,8 @@ Negative integers (-1, -2, -3, ...) are supported as a convenience for leaf-orie
   - and so on.
 
 These negative-depth entries are not absolute numeric depths in the tree; instead the implementation maps them to groups of nodes computed from the layout. This is useful when you want to style leaves or near-leaf levels without knowing their positive depth value.
+
+Depth-based styles are applied in the natural order given in the `depths` array. When multiple entries match a node (e.g. a wildcard `'*'` and a numeric depth), later entries override earlier ones. This means the order you define entries in determines their precedence.
 
 ```typescript
 interface ColorScale {
@@ -338,7 +347,7 @@ Setting `depth` to `'*'` applies a style to every depth level in the tree. When 
 
 All d3 sequential scales are supported: `magma`, `viridis`, `inferno`, `plasma`, `blues`, `greens`, `reds`, `turbo`, `cividis`, `warm`, `cool`, and more.
 
-Wildcard entries are always applied first, so explicit numeric depth entries override them. This allows you to define a color gradient across the entire tree and still customize individual levels.
+Wildcard entries are expanded in place within the `depths` array. Entries that appear later in the array override earlier ones, so placing a wildcard before explicit numeric depth entries allows you to define a color gradient across the entire tree and still customize individual levels.
 
 ```javascript
 const tree = new CactusTree(canvas, {

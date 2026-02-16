@@ -66,13 +66,11 @@ export function isColorScale(value) {
 export function expandWildcardDepths(depths, maxDepth) {
   if (!depths || !depths.length) return depths || [];
 
-  // Wildcard entries are expanded first so numeric depth entries override them
-  const wildcardExpanded = [];
-  const numericEntries = [];
+  const result = [];
 
   for (const entry of depths) {
     if (entry.depth !== '*') {
-      numericEntries.push(entry);
+      result.push(entry);
       continue;
     }
 
@@ -145,11 +143,9 @@ export function expandWildcardDepths(depths, maxDepth) {
       if (entry.link) expanded.link = entry.link;
       if (entry.highlight) expanded.highlight = entry.highlight;
 
-      wildcardExpanded.push(expanded);
+      result.push(expanded);
     }
   }
-
-  const result = [...wildcardExpanded, ...numericEntries];
 
   return result;
 }

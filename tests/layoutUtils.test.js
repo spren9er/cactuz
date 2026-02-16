@@ -168,7 +168,7 @@ describe('buildLookupMaps', () => {
     expect(grandparents.has('root')).toBe(true);
   });
 
-  it('builds depthStyleCache for positive depths', () => {
+  it('stores expanded depths in mergedStyle.depths', () => {
     const rendered = createRenderedNodes();
     /** @type {any[]} */
     const depths = [
@@ -178,12 +178,14 @@ describe('buildLookupMaps', () => {
     ];
 
     /** @type {any} */
-    const maps = buildLookupMaps(rendered, { depths });
+    const mergedStyle = { depths };
+    buildLookupMaps(rendered, mergedStyle);
 
-    expect(maps.depthStyleCache.has(0)).toBe(true);
-    expect(maps.depthStyleCache.has(1)).toBe(true);
-    // Negative depths should NOT be in depthStyleCache
-    expect(maps.depthStyleCache.has(-1)).toBe(false);
+    // Expanded depths are stored back in mergedStyle.depths
+    expect(mergedStyle.depths.length).toBe(3);
+    expect(mergedStyle.depths[0].depth).toBe(0);
+    expect(mergedStyle.depths[1].depth).toBe(1);
+    expect(mergedStyle.depths[2].depth).toBe(-1);
   });
 
   it('builds parentToChildrenNodeMap', () => {

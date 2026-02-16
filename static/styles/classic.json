@@ -11,6 +11,10 @@
     "strokeOpacity": 0.1,
     "strokeWidth": 1
   },
+  "edgeNode": {
+    "fillOpacity": 1,
+    "strokeOpacity": 1
+  },
   "label": {
     "inner": {
       "textColor": "#333333",
@@ -51,7 +55,7 @@
     },
     "edge": {
       "strokeColor": "#ea575a",
-      "strokeOpacity": 0.5,
+      "strokeOpacity": 1,
       "strokeWidth": 1
     },
     "edgeNode": {
@@ -76,7 +80,9 @@
       "depth": -1,
       "node": {
         "fillColor": "#333333",
-        "strokeColor": "#333333"
+        "fillOpacity": 0.5,
+        "strokeColor": "#333333",
+        "strokeOpacity": 0.5
       },
       "label": {
         "inner": {
@@ -86,7 +92,9 @@
       "highlight": {
         "node": {
           "fillColor": "#ffbbb7",
+          "fillOpacity": 1,
           "strokeColor": "#ea575a",
+          "strokeOpacity": 1,
           "strokeWidth": 2
         },
         "label": {
