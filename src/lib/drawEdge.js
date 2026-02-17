@@ -9,7 +9,113 @@
  */
 
 import { setCanvasStyles, colorWithAlpha } from './canvasUtils.js';
-import { resolveDepthStyle } from './drawNode.js';
+import { resolveDepthStyle, calculateNodeStyle } from './drawNode.js';
+
+/**
+ * Clip a path's endpoints to the perimeter of the source and target circles.
+ * Accounts for the node's stroke width extending outward from the circle edge.
+ * Mutates the first and last points of the coords array in place.
+ *
+ * @param {Array<{x:number,y:number}>} coords - Path coordinates (at least 2 points)
+ * @param {{x:number,y:number,radius:number}} sourceNode - Source node with radius
+ * @param {{x:number,y:number,radius:number}} targetNode - Target node with radius
+ * @param {number} [sourceStrokeWidth=0] - Visible stroke width of source node
+ * @param {number} [targetStrokeWidth=0] - Visible stroke width of target node
+ * @returns {Array<{x:number,y:number}>} The (possibly shortened) coords array
+ */
+export function clipToPerimeter(
+  coords,
+  sourceNode,
+  targetNode,
+  sourceStrokeWidth = 0,
+  targetStrokeWidth = 0,
+) {
+  if (coords.length < 2) return coords;
+
+  const sourceRadius = (sourceNode.radius || 0) + sourceStrokeWidth / 2;
+  const targetRadius = (targetNode.radius || 0) + targetStrokeWidth / 2;
+
+  // Clip start point to source circle perimeter
+  if (sourceRadius > 0) {
+    const next = coords[1];
+    const dx = next.x - sourceNode.x;
+    const dy = next.y - sourceNode.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 0) {
+      coords[0] = {
+        x: sourceNode.x + (dx / dist) * sourceRadius,
+        y: sourceNode.y + (dy / dist) * sourceRadius,
+      };
+    }
+  }
+
+  // Clip end point to target circle perimeter
+  if (targetRadius > 0) {
+    const lastIdx = coords.length - 1;
+    const prev = coords[lastIdx - 1];
+    const dx = prev.x - targetNode.x;
+    const dy = prev.y - targetNode.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 0) {
+      coords[lastIdx] = {
+        x: targetNode.x + (dx / dist) * targetRadius,
+        y: targetNode.y + (dy / dist) * targetRadius,
+      };
+    }
+  }
+
+  return coords;
+}
+
+/**
+ * Compute the visible stroke width for a node.
+ * Returns 0 if the stroke is invisible (transparent, 'none', zero opacity/width).
+ *
+ * @param {any} nodeData - Rendered node data ({node, depth, id, ...})
+ * @param {any} hoveredNodeId
+ * @param {any} mergedStyle
+ * @param {Map<any,any>|null} depthStyleCache
+ * @param {Map<any,any>|null} negativeDepthNodes
+ * @param {Set<string>|null} highlightedNodeIds
+ * @param {Set<string>|null} allEdgeNodeIds
+ * @returns {number}
+ */
+function resolveVisibleStrokeWidth(
+  nodeData,
+  hoveredNodeId,
+  mergedStyle,
+  depthStyleCache,
+  negativeDepthNodes,
+  highlightedNodeIds,
+  allEdgeNodeIds,
+) {
+  const style = calculateNodeStyle(
+    nodeData.node,
+    nodeData.depth,
+    hoveredNodeId,
+    mergedStyle,
+    depthStyleCache ?? new Map(),
+    negativeDepthNodes ?? new Map(),
+    highlightedNodeIds,
+    allEdgeNodeIds,
+  );
+
+  const color = style.stroke;
+  if (
+    !color ||
+    color === 'none' ||
+    color === 'transparent' ||
+    color === 'rgba(0,0,0,0)' ||
+    color === 'rgba(0, 0, 0, 0)'
+  ) {
+    return 0;
+  }
+
+  const opacity = style.strokeOpacity ?? 1;
+  if (opacity <= 0) return 0;
+
+  return style.strokeWidth ?? 0;
+}
 
 /**
  * Build hierarchical path (array of ancestor nodes) between two rendered nodes.
@@ -258,6 +364,7 @@ export function drawEdge(
   muteOpacity = 1,
   skipFiltered = false,
   negativeDepthNodes = null,
+  edgePoint = 'center',
 ) {
   let highlightedSet = null;
   if (highlightedNodeIds != null) {
@@ -386,13 +493,60 @@ export function drawEdge(
   ctx.beginPath();
 
   if (!bundlingStrength || bundlingStrength <= 0) {
-    ctx.moveTo(sourceNode.x, sourceNode.y);
-    ctx.lineTo(targetNode.x, targetNode.y);
+    const straightCoords = [
+      { x: sourceNode.x, y: sourceNode.y },
+      { x: targetNode.x, y: targetNode.y },
+    ];
+    if (edgePoint === 'perimeter') {
+      const sSW = resolveVisibleStrokeWidth(
+        sourceNode,
+        hoveredNodeId,
+        mergedStyle,
+        depthStyleCache,
+        negativeDepthNodes,
+        highlightedSet,
+        null,
+      );
+      const tSW = resolveVisibleStrokeWidth(
+        targetNode,
+        hoveredNodeId,
+        mergedStyle,
+        depthStyleCache,
+        negativeDepthNodes,
+        highlightedSet,
+        null,
+      );
+      clipToPerimeter(straightCoords, sourceNode, targetNode, sSW, tSW);
+    }
+    ctx.moveTo(straightCoords[0].x, straightCoords[0].y);
+    ctx.lineTo(straightCoords[1].x, straightCoords[1].y);
     ctx.stroke();
 
     if (ctx.lineWidth !== prevWidth) ctx.lineWidth = prevWidth;
     if (ctx.strokeStyle !== prevStroke) ctx.strokeStyle = prevStroke;
     return true;
+  }
+
+  if (edgePoint === 'perimeter') {
+    const sSW = resolveVisibleStrokeWidth(
+      sourceNode,
+      hoveredNodeId,
+      mergedStyle,
+      depthStyleCache,
+      negativeDepthNodes,
+      highlightedSet,
+      null,
+    );
+    const tSW = resolveVisibleStrokeWidth(
+      targetNode,
+      hoveredNodeId,
+      mergedStyle,
+      depthStyleCache,
+      negativeDepthNodes,
+      highlightedSet,
+      null,
+    );
+    clipToPerimeter(pathCoords, sourceNode, targetNode, sSW, tSW);
   }
 
   if (bundlingStrength >= 1) {
@@ -436,46 +590,95 @@ export function drawEdge(
     return true;
   }
 
-  {
-    const i = 0;
-    const pt = pathCoords[0];
-    const frac = n === 1 ? 0 : i / (n - 1);
-    const straightX = sourceNode.x * (1 - frac) + targetNode.x * frac;
-    const straightY = sourceNode.y * (1 - frac) + targetNode.y * frac;
-    const fx = straightX * (1 - bundlingStrength) + pt.x * bundlingStrength;
-    const fy = straightY * (1 - bundlingStrength) + pt.y * bundlingStrength;
-    ctx.moveTo(fx, fy);
+  // Compute the source/target perimeter radii once for post-projection
+  let sourcePerimRadius = 0;
+  let targetPerimRadius = 0;
+  if (edgePoint === 'perimeter') {
+    const sSW2 = resolveVisibleStrokeWidth(
+      sourceNode,
+      hoveredNodeId,
+      mergedStyle,
+      depthStyleCache,
+      negativeDepthNodes,
+      highlightedSet,
+      null,
+    );
+    const tSW2 = resolveVisibleStrokeWidth(
+      targetNode,
+      hoveredNodeId,
+      mergedStyle,
+      depthStyleCache,
+      negativeDepthNodes,
+      highlightedSet,
+      null,
+    );
+    sourcePerimRadius = (sourceNode.radius || 0) + sSW2 / 2;
+    targetPerimRadius = (targetNode.radius || 0) + tSW2 / 2;
   }
 
-  for (let i = 1; i < n; i++) {
+  // Compute all blended points first
+  /** @type {Array<{x:number,y:number}>} */
+  const blended = [];
+  for (let i = 0; i < n; i++) {
     const pt = pathCoords[i];
-    if (!pt) continue;
-
+    if (!pt) {
+      blended.push({ x: 0, y: 0 });
+      continue;
+    }
     const frac = n === 1 ? 0 : i / (n - 1);
     const straightX = sourceNode.x * (1 - frac) + targetNode.x * frac;
     const straightY = sourceNode.y * (1 - frac) + targetNode.y * frac;
-    const fx = straightX * (1 - bundlingStrength) + pt.x * bundlingStrength;
-    const fy = straightY * (1 - bundlingStrength) + pt.y * bundlingStrength;
+    blended.push({
+      x: straightX * (1 - bundlingStrength) + pt.x * bundlingStrength,
+      y: straightY * (1 - bundlingStrength) + pt.y * bundlingStrength,
+    });
+  }
+
+  // Project first/last blended points onto the perimeter
+  if (edgePoint === 'perimeter' && blended.length >= 2) {
+    if (sourcePerimRadius > 0) {
+      const p = blended[0];
+      const dx = p.x - sourceNode.x;
+      const dy = p.y - sourceNode.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 0) {
+        blended[0] = {
+          x: sourceNode.x + (dx / dist) * sourcePerimRadius,
+          y: sourceNode.y + (dy / dist) * sourcePerimRadius,
+        };
+      }
+    }
+    if (targetPerimRadius > 0) {
+      const lastIdx = blended.length - 1;
+      const p = blended[lastIdx];
+      const dx = p.x - targetNode.x;
+      const dy = p.y - targetNode.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 0) {
+        blended[lastIdx] = {
+          x: targetNode.x + (dx / dist) * targetPerimRadius,
+          y: targetNode.y + (dy / dist) * targetPerimRadius,
+        };
+      }
+    }
+  }
+
+  // Draw the blended path
+  ctx.moveTo(blended[0].x, blended[0].y);
+
+  for (let i = 1; i < n; i++) {
+    const pt = blended[i];
 
     if (i === n - 1) {
-      ctx.lineTo(fx, fy);
+      ctx.lineTo(pt.x, pt.y);
     } else {
-      const next = pathCoords[i + 1];
+      const next = blended[i + 1];
       if (next) {
-        const nextFrac = (i + 1) / (n - 1);
-        const nextStraightX =
-          sourceNode.x * (1 - nextFrac) + targetNode.x * nextFrac;
-        const nextStraightY =
-          sourceNode.y * (1 - nextFrac) + targetNode.y * nextFrac;
-        const nx =
-          nextStraightX * (1 - bundlingStrength) + next.x * bundlingStrength;
-        const ny =
-          nextStraightY * (1 - bundlingStrength) + next.y * bundlingStrength;
-        const cpx = (fx + nx) * 0.5;
-        const cpy = (fy + ny) * 0.5;
-        ctx.quadraticCurveTo(fx, fy, cpx, cpy);
+        const cpx = (pt.x + next.x) * 0.5;
+        const cpy = (pt.y + next.y) * 0.5;
+        ctx.quadraticCurveTo(pt.x, pt.y, cpx, cpy);
       } else {
-        ctx.lineTo(fx, fy);
+        ctx.lineTo(pt.x, pt.y);
       }
     }
   }
@@ -592,6 +795,7 @@ export function drawEdges(
     typeof edgesOptionsLocal.muteOpacity === 'number'
       ? edgesOptionsLocal.muteOpacity
       : 0.1;
+  const edgePoint = edgesOptionsLocal.edgePoint ?? 'center';
 
   const backgroundEdges = [];
   const highlightedEdges = [];
@@ -646,6 +850,7 @@ export function drawEdges(
         muteOpacity,
         skipFiltered,
         negativeDepthNodes,
+        edgePoint,
       );
 
       if (drawn) {
@@ -696,6 +901,7 @@ export function drawEdges(
         1,
         false,
         negativeDepthNodes,
+        edgePoint,
       );
       if (drawnByBundling) {
         visibleSet.add(li.source);
@@ -721,9 +927,34 @@ export function drawEdges(
       strokeStyle: strokeStyleWithAlpha,
       lineWidth: width,
     });
+    const fallbackCoords = [
+      { x: sNode.x, y: sNode.y },
+      { x: tNode.x, y: tNode.y },
+    ];
+    if (edgePoint === 'perimeter') {
+      const sSW = resolveVisibleStrokeWidth(
+        sNode,
+        hoveredNodeId,
+        mergedStyle,
+        depthStyleCache,
+        negativeDepthNodes,
+        highlightedSet,
+        null,
+      );
+      const tSW = resolveVisibleStrokeWidth(
+        tNode,
+        hoveredNodeId,
+        mergedStyle,
+        depthStyleCache,
+        negativeDepthNodes,
+        highlightedSet,
+        null,
+      );
+      clipToPerimeter(fallbackCoords, sNode, tNode, sSW, tSW);
+    }
     ctx.beginPath();
-    ctx.moveTo(sNode.x, sNode.y);
-    ctx.lineTo(tNode.x, tNode.y);
+    ctx.moveTo(fallbackCoords[0].x, fallbackCoords[0].y);
+    ctx.lineTo(fallbackCoords[1].x, fallbackCoords[1].y);
     ctx.stroke();
 
     if (ctx.lineWidth !== prevWidth) ctx.lineWidth = prevWidth;

@@ -5,6 +5,7 @@ import {
   shouldFilterEdge,
   drawEdge,
   computeVisibleEdgeNodeIds,
+  clipToPerimeter,
 } from '$lib/drawEdge.js';
 
 // ── buildHierarchicalPath ───────────────────────────────────────────────────
@@ -389,5 +390,221 @@ describe('drawEdge', () => {
     );
 
     expect(ctx.stroke).toHaveBeenCalled();
+  });
+
+  it('clips endpoints to perimeter when edgePoint is perimeter', () => {
+    const ctx = createMockCtx();
+    const source = {
+      x: 0,
+      y: 0,
+      radius: 10,
+      depth: 1,
+      id: 'a',
+      node: { id: 'a', parentRef: null },
+    };
+    const target = {
+      x: 100,
+      y: 0,
+      radius: 10,
+      depth: 1,
+      id: 'b',
+      node: { id: 'b', parentRef: null },
+    };
+
+    // Use a style with transparent node stroke so only radius matters
+    const noStrokeStyle = {
+      ...mergedStyle,
+      node: { fillColor: '#fff', strokeColor: 'transparent', strokeWidth: 0 },
+    };
+
+    drawEdge(
+      ctx,
+      { source: 'a', target: 'b' },
+      source,
+      target,
+      new Map(),
+      new Map(),
+      null,
+      noStrokeStyle,
+      null,
+      null,
+      0,
+      false,
+      1,
+      false,
+      null,
+      'perimeter',
+    );
+
+    // radius 10 + nodeStroke 0 = 10
+    expect(ctx.moveTo).toHaveBeenCalledWith(10, 0);
+    expect(ctx.lineTo).toHaveBeenCalledWith(90, 0);
+  });
+
+  it('accounts for stroke width in perimeter clipping', () => {
+    const ctx = createMockCtx();
+    const source = {
+      x: 0,
+      y: 0,
+      radius: 10,
+      depth: 1,
+      id: 'a',
+      node: { id: 'a', parentRef: null },
+    };
+    const target = {
+      x: 100,
+      y: 0,
+      radius: 10,
+      depth: 1,
+      id: 'b',
+      node: { id: 'b', parentRef: null },
+    };
+
+    const strokeStyle = {
+      ...mergedStyle,
+      node: {
+        fillColor: '#fff',
+        strokeColor: '#000',
+        strokeWidth: 4,
+        strokeOpacity: 1,
+      },
+    };
+
+    drawEdge(
+      ctx,
+      { source: 'a', target: 'b' },
+      source,
+      target,
+      new Map(),
+      new Map(),
+      null,
+      strokeStyle,
+      null,
+      null,
+      0,
+      false,
+      1,
+      false,
+      null,
+      'perimeter',
+    );
+
+    // radius 10 + nodeStroke 4/2 = 12
+    expect(ctx.moveTo).toHaveBeenCalledWith(12, 0);
+    expect(ctx.lineTo).toHaveBeenCalledWith(88, 0);
+  });
+});
+
+// ── clipToPerimeter ─────────────────────────────────────────────────────────
+
+describe('clipToPerimeter', () => {
+  it('clips start and end points to circle perimeters', () => {
+    const coords = [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+    ];
+    const source = { x: 0, y: 0, radius: 10 };
+    const target = { x: 100, y: 0, radius: 20 };
+
+    const result = clipToPerimeter(coords, source, target);
+
+    expect(result[0].x).toBeCloseTo(10);
+    expect(result[0].y).toBeCloseTo(0);
+    expect(result[1].x).toBeCloseTo(80);
+    expect(result[1].y).toBeCloseTo(0);
+  });
+
+  it('handles diagonal paths', () => {
+    const coords = [
+      { x: 0, y: 0 },
+      { x: 100, y: 100 },
+    ];
+    const source = { x: 0, y: 0, radius: 10 };
+    const target = { x: 100, y: 100, radius: 10 };
+    const dist = Math.sqrt(2);
+
+    const result = clipToPerimeter(coords, source, target);
+
+    expect(result[0].x).toBeCloseTo(10 / dist);
+    expect(result[0].y).toBeCloseTo(10 / dist);
+    expect(result[1].x).toBeCloseTo(100 - 10 / dist);
+    expect(result[1].y).toBeCloseTo(100 - 10 / dist);
+  });
+
+  it('handles multi-point paths (clips only endpoints)', () => {
+    const coords = [
+      { x: 0, y: 0 },
+      { x: 50, y: 50 },
+      { x: 100, y: 0 },
+    ];
+    const source = { x: 0, y: 0, radius: 10 };
+    const target = { x: 100, y: 0, radius: 10 };
+
+    const result = clipToPerimeter(coords, source, target);
+
+    // Middle point unchanged
+    expect(result[1]).toEqual({ x: 50, y: 50 });
+    // Start clipped toward second point (50,50)
+    expect(result[0].x).toBeGreaterThan(0);
+    expect(result[0].y).toBeGreaterThan(0);
+    // End clipped toward second-to-last point (50,50)
+    expect(result[2].x).toBeLessThan(100);
+    expect(result[2].y).toBeGreaterThan(0);
+  });
+
+  it('returns coords unchanged for zero radii', () => {
+    const coords = [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+    ];
+    const source = { x: 0, y: 0, radius: 0 };
+    const target = { x: 100, y: 0, radius: 0 };
+
+    const result = clipToPerimeter(coords, source, target);
+
+    expect(result[0]).toEqual({ x: 0, y: 0 });
+    expect(result[1]).toEqual({ x: 100, y: 0 });
+  });
+
+  it('returns coords unchanged for single-point path', () => {
+    const coords = [{ x: 50, y: 50 }];
+    const source = { x: 0, y: 0, radius: 10 };
+    const target = { x: 100, y: 0, radius: 10 };
+
+    const result = clipToPerimeter(coords, source, target);
+
+    expect(result).toEqual([{ x: 50, y: 50 }]);
+  });
+
+  it('accounts for stroke width in effective radius', () => {
+    const coords = [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+    ];
+    const source = { x: 0, y: 0, radius: 10 };
+    const target = { x: 100, y: 0, radius: 10 };
+
+    // strokeWidth 6 -> effective radius = 10 + 3 = 13
+    const result = clipToPerimeter(coords, source, target, 6, 6);
+
+    expect(result[0].x).toBeCloseTo(13);
+    expect(result[0].y).toBeCloseTo(0);
+    expect(result[1].x).toBeCloseTo(87);
+    expect(result[1].y).toBeCloseTo(0);
+  });
+
+  it('uses zero stroke width when not provided', () => {
+    const coords = [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+    ];
+    const source = { x: 0, y: 0, radius: 10 };
+    const target = { x: 100, y: 0, radius: 10 };
+
+    // No stroke width args -> defaults to 0
+    const result = clipToPerimeter(coords, source, target);
+
+    expect(result[0].x).toBeCloseTo(10);
+    expect(result[1].x).toBeCloseTo(90);
   });
 });

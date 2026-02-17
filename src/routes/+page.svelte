@@ -14,16 +14,22 @@
 
   $: displayedEdges = showEdgeBundling ? edges : [];
 
-  let config = {
+  /** @type {import('$lib/types.js').Options} */
+  let options = {
     overlap: 0.2,
     arcSpan: 225,
     sizeGrowthRate: 0.8,
     orientation: 90,
     zoom: 1.0,
     numLabels: 20,
+  };
+
+  /** @type {import('$lib/types.js').EdgeOptions} */
+  let edgeOptions = {
     bundlingStrength: 0.97,
-    filterMode: /** @type {'hide' | 'mute'} */ ('mute'),
+    filterMode: 'mute',
     muteOpacity: 0.1,
+    edgePoint: 'perimeter',
   };
 
   let showEdgeBundling = true;
@@ -159,84 +165,84 @@
     <div class="control-grid">
       <div class="control-group">
         <label for="overlap">
-          Overlap: {config.overlap}
+          Overlap: {options.overlap}
           <input
             id="overlap"
             type="range"
             min="-2"
             max="1"
             step="0.02"
-            bind:value={config.overlap}
+            bind:value={options.overlap}
           />
         </label>
       </div>
 
       <div class="control-group">
         <label for="arcSpan">
-          Arc Span: {config.arcSpan}°
+          Arc Span: {options.arcSpan}°
           <input
             id="arcSpan"
             type="range"
             min="0"
             max="360"
             step="1"
-            bind:value={config.arcSpan}
+            bind:value={options.arcSpan}
           />
         </label>
       </div>
 
       <div class="control-group">
         <label for="sizeGrowthRate">
-          Growth Rate: {config.sizeGrowthRate}
+          Growth Rate: {options.sizeGrowthRate}
           <input
             id="sizeGrowthRate"
             type="range"
             min="0.5"
             max="1.0"
             step="0.01"
-            bind:value={config.sizeGrowthRate}
+            bind:value={options.sizeGrowthRate}
           />
         </label>
       </div>
 
       <div class="control-group">
         <label for="zoom">
-          Zoom: {config.zoom}
+          Zoom: {options.zoom}
           <input
             id="zoom"
             type="range"
             min="0.25"
             max="2.0"
             step="0.05"
-            bind:value={config.zoom}
+            bind:value={options.zoom}
           />
         </label>
       </div>
 
       <div class="control-group">
         <label for="orientation">
-          Orientation: {config.orientation}°
+          Orientation: {options.orientation}°
           <input
             id="orientation"
             type="range"
             min={0}
             max={360}
             step="1"
-            bind:value={config.orientation}
+            bind:value={options.orientation}
           />
         </label>
       </div>
 
       <div class="control-group">
         <label for="numLabels">
-          Number of Labels: {config.numLabels}
+          Number of Labels: {options.numLabels}
           <input
             id="numLabels"
             type="range"
             min="0"
             max="60"
             step="1"
-            bind:value={config.numLabels}
+            bind:value={options.numLabels}
           />
         </label>
       </div>
@@ -278,18 +284,14 @@
       {nodes}
       edges={displayedEdges}
       options={{
-        overlap: config.overlap,
-        arcSpan: (config.arcSpan * Math.PI) / 180,
-        sizeGrowthRate: config.sizeGrowthRate,
-        orientation: (config.orientation * Math.PI) / 180,
-        zoom: config.zoom,
-        numLabels: config.numLabels,
+        overlap: options.overlap,
+        arcSpan: ((options.arcSpan ?? 0) * Math.PI) / 180,
+        sizeGrowthRate: options.sizeGrowthRate,
+        orientation: ((options.orientation ?? 0) * Math.PI) / 180,
+        zoom: options.zoom,
+        numLabels: options.numLabels,
         collapseDuration: 300,
-        edges: {
-          bundlingStrength: config.bundlingStrength,
-          filterMode: config.filterMode,
-          muteOpacity: config.muteOpacity,
-        },
+        edges: edgeOptions,
       }}
       styles={currentStyles}
     />
@@ -306,14 +308,14 @@
     <div class="bundle-row row2">
       <div class="control-group">
         <label for="bundlingStrength">
-          Bundling Strength: {config.bundlingStrength.toFixed(2)}
+          Bundling Strength: {edgeOptions.bundlingStrength?.toFixed(2)}
           <input
             id="bundlingStrength"
             type="range"
             min="0"
             max="1"
             step="0.01"
-            bind:value={config.bundlingStrength}
+            bind:value={edgeOptions.bundlingStrength}
             disabled={!showEdgeBundling}
             aria-disabled={!showEdgeBundling}
           />
@@ -321,9 +323,21 @@
       </div>
 
       <label class="filter-mode-label">
+        Point:
+        <select
+          bind:value={edgeOptions.edgePoint}
+          disabled={!showEdgeBundling}
+          aria-disabled={!showEdgeBundling}
+        >
+          <option value="center">center</option>
+          <option value="perimeter">perimeter</option>
+        </select>
+      </label>
+
+      <label class="filter-mode-label">
         Filter Mode:
         <select
-          bind:value={config.filterMode}
+          bind:value={edgeOptions.filterMode}
           disabled={!showEdgeBundling}
           aria-disabled={!showEdgeBundling}
         >
@@ -334,16 +348,17 @@
 
       <div class="control-group">
         <label for="muteOpacity">
-          Mute Opacity: {config.muteOpacity.toFixed(2)}
+          Mute Opacity: {edgeOptions.muteOpacity?.toFixed(2)}
           <input
             id="muteOpacity"
             type="range"
             min="0"
             max="1"
             step="0.01"
-            bind:value={config.muteOpacity}
-            disabled={!showEdgeBundling || config.filterMode === 'hide'}
-            aria-disabled={!showEdgeBundling || config.filterMode === 'hide'}
+            bind:value={edgeOptions.muteOpacity}
+            disabled={!showEdgeBundling || edgeOptions.filterMode === 'hide'}
+            aria-disabled={!showEdgeBundling ||
+              edgeOptions.filterMode === 'hide'}
           />
         </label>
       </div>
@@ -512,7 +527,7 @@
 
   .bundle-row.row2 {
     display: grid;
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, minmax(140px, 1fr));
     gap: 25px;
     width: 100%;
     align-items: start;

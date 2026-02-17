@@ -37,6 +37,7 @@ const DEFAULT_OPTIONS = {
     bundlingStrength: 0.97,
     filterMode: 'mute',
     muteOpacity: 0.1,
+    edgePoint: 'center',
   },
 };
 
@@ -499,7 +500,7 @@ export class CactusTree {
       return s;
     })();
 
-    // Draw all nodes in DFS order (keeps subtrees visually intact)
+    // Draw all nodes in DFS order (keeps subtrees intact when overlapping)
     drawNodes(
       this.ctx,
       drawableNodes,
@@ -512,7 +513,7 @@ export class CactusTree {
       allEdgeNodeIds,
     );
 
-    // Draw edges on top of nodes
+    // Draw edges on top of all nodes
     drawEdge.drawEdges(
       this.ctx,
       this.edges,

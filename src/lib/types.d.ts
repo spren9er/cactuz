@@ -2,6 +2,7 @@ export interface EdgeOptions {
   bundlingStrength?: number;
   filterMode?: 'hide' | 'mute';
   muteOpacity?: number;
+  edgePoint?: 'center' | 'perimeter';
 }
 
 export interface Options {
