@@ -274,12 +274,20 @@ describe('render', () => {
     }
   });
 
-  it('returns nodes sorted by depth ascending', () => {
+  it('returns nodes in DFS pre-order (parent before descendants)', () => {
     const layout = new CactusLayout(800, 600, 1, 0.5, Math.PI, 0.75);
     const result = layout.render(sampleNodes, 400, 300);
 
-    for (let i = 1; i < result.length; i++) {
-      expect(result[i].depth).toBeGreaterThanOrEqual(result[i - 1].depth);
+    const indexById = new Map();
+    result.forEach((n, i) => indexById.set(n.node.id, i));
+
+    // Each node with a parent must appear after its parent
+    for (const nd of result) {
+      if (nd.node.parent) {
+        expect(indexById.get(nd.node.parent)).toBeLessThan(
+          indexById.get(nd.node.id),
+        );
+      }
     }
   });
 

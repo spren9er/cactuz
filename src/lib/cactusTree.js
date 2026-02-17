@@ -499,7 +499,7 @@ export class CactusTree {
       return s;
     })();
 
-    // Draw non-leaf nodes
+    // Draw all nodes in DFS order (keeps subtrees visually intact)
     drawNodes(
       this.ctx,
       drawableNodes,
@@ -510,10 +510,9 @@ export class CactusTree {
       this.negativeDepthNodes,
       nodeHighlightedIds,
       allEdgeNodeIds,
-      'nonLeaf',
     );
 
-    // Draw edges
+    // Draw edges on top of nodes
     drawEdge.drawEdges(
       this.ctx,
       this.edges,
@@ -526,20 +525,6 @@ export class CactusTree {
       this.mergedOptions?.edges ?? {},
       this.depthStyleCache,
       this.negativeDepthNodes,
-    );
-
-    // Draw leaf nodes (on top of edges)
-    drawNodes(
-      this.ctx,
-      drawableNodes,
-      this.leafNodes,
-      this.hoveredNodeId,
-      this.mergedStyle,
-      this.depthStyleCache,
-      this.negativeDepthNodes,
-      nodeHighlightedIds,
-      allEdgeNodeIds,
-      'leaf',
     );
 
     // Draw labels (collapsed descendants already excluded from visibleNodes)

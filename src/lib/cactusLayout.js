@@ -368,9 +368,6 @@ export class CactusLayout {
       node.radius = node.radius * this.globalScale;
     });
 
-    // Sort nodes by depth in ascending order
-    this.nodes.sort((a, b) => a.depth - b.depth);
-
     return this.nodes;
   }
 
