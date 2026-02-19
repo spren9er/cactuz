@@ -537,6 +537,8 @@ export class CactusTree {
       }
     }
 
+    const ctx = this.ctx;
+
     /**
      * Draw the label for a single node immediately after its circle is drawn.
      * @param {any} nodeData - entry from renderedNodes/drawableNodes
@@ -567,7 +569,7 @@ export class CactusTree {
         const maxFS =
           labelStyle.inner?.maxFontSize ?? labelLayout.labelMaxFontSize;
         drawCenteredLabel(
-          this.ctx,
+          ctx,
           text,
           nd.x,
           nd.y,
@@ -580,7 +582,7 @@ export class CactusTree {
         );
       } else {
         drawPositionedLabel(
-          this.ctx,
+          ctx,
           labelData,
           nd,
           this.leafNodes,
