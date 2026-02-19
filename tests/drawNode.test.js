@@ -452,7 +452,27 @@ describe('drawNode', () => {
     ).toBe(false);
   });
 
-  it('returns false for radius < 1', () => {
+  it('returns false for radius <= 0.1', () => {
+    const ctx = createMockCtx();
+    expect(
+      drawNode(
+        ctx,
+        0,
+        0,
+        0.1,
+        { id: 'a' },
+        0,
+        null,
+        mergedStyle,
+        new Map(),
+        new Map(),
+        null,
+        null,
+      ),
+    ).toBe(false);
+  });
+
+  it('returns true for radius > 0.1', () => {
     const ctx = createMockCtx();
     expect(
       drawNode(
@@ -469,7 +489,66 @@ describe('drawNode', () => {
         null,
         null,
       ),
-    ).toBe(false);
+    ).toBe(true);
+  });
+
+  it('halves stroke width when strokeWidth exceeds radius', () => {
+    const ctx = createMockCtx();
+    const style = {
+      node: {
+        fillColor: '#fff',
+        fillOpacity: 1,
+        strokeColor: '#000',
+        strokeOpacity: 1,
+        strokeWidth: 4,
+      },
+      depths: [],
+    };
+    drawNode(
+      ctx,
+      0,
+      0,
+      2,
+      { id: 'a' },
+      0,
+      null,
+      style,
+      new Map(),
+      new Map(),
+      null,
+      null,
+    );
+    // strokeWidth (4) > radius (2), so effectiveStrokeWidth = 4 / 2 = 2
+    expect(ctx.lineWidth).toBe(2);
+  });
+
+  it('uses full stroke width when strokeWidth does not exceed radius', () => {
+    const ctx = createMockCtx();
+    const style = {
+      node: {
+        fillColor: '#fff',
+        fillOpacity: 1,
+        strokeColor: '#000',
+        strokeOpacity: 1,
+        strokeWidth: 1,
+      },
+      depths: [],
+    };
+    drawNode(
+      ctx,
+      0,
+      0,
+      10,
+      { id: 'a' },
+      0,
+      null,
+      style,
+      new Map(),
+      new Map(),
+      null,
+      null,
+    );
+    expect(ctx.lineWidth).toBe(1);
   });
 
   it('draws a node and returns true', () => {

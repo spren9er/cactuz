@@ -280,12 +280,20 @@ describe('truncateText', () => {
 describe('shouldShowLabel', () => {
   const leafNodes = new Set(['leaf1']);
 
-  it('returns false for radius < 1', () => {
+  it('returns false for radius <= 0.1', () => {
+    expect(
+      shouldShowLabel({ id: 'a' }, 0.1, 'a', leafNodes, null, [], {
+        textColor: '#333',
+      }),
+    ).toBe(false);
+  });
+
+  it('returns true for radius > 0.1', () => {
     expect(
       shouldShowLabel({ id: 'a' }, 0.5, 'a', leafNodes, null, [], {
         textColor: '#333',
       }),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('returns true for non-leaf node with valid textColor', () => {
