@@ -39,7 +39,7 @@
     { value: 'flare', label: 'Flare' },
     { value: 'mammals', label: 'Mammals' },
     { value: 'NGFPathway', label: 'NGF Pathway' },
-    { value: 'rill', label: 'Rill' },
+    { value: 'random', label: 'Random' },
   ];
 
   /** @param {string} dataset */
