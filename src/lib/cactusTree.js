@@ -39,7 +39,6 @@ const DEFAULT_OPTIONS = {
   orientation: Math.PI / 2,
   zoom: 1.0,
   numLabels: 20,
-  collapseDuration: 300,
   edges: {
     bundlingStrength: 0.97,
     filterMode: 'mute',
@@ -730,7 +729,7 @@ export class CactusTree {
       this._collapseAnimFrameId = null;
     }
 
-    const duration = this.mergedOptions.collapseDuration ?? 300;
+    const duration = 300;
 
     // Snapshot start positions
     const startPositions = new Map();

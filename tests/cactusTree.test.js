@@ -505,28 +505,6 @@ describe('CactusTree collapse feature', () => {
     tree.destroy();
   });
 
-  it('defaults collapseDuration to 300', () => {
-    const { canvas } = createMockCanvas();
-    const tree = new CactusTree(canvas, { width: 800, height: 600 });
-
-    expect(tree.mergedOptions.collapseDuration).toBe(300);
-
-    tree.destroy();
-  });
-
-  it('allows custom collapseDuration via options', () => {
-    const { canvas } = createMockCanvas();
-    const tree = new CactusTree(canvas, {
-      width: 800,
-      height: 600,
-      options: { collapseDuration: 200 },
-    });
-
-    expect(tree.mergedOptions.collapseDuration).toBe(200);
-
-    tree.destroy();
-  });
-
   it('initializes collapse state as empty', () => {
     const { canvas } = createMockCanvas();
     const tree = new CactusTree(canvas, { width: 800, height: 600 });

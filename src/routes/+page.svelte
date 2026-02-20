@@ -290,7 +290,6 @@
         orientation: ((options.orientation ?? 0) * Math.PI) / 180,
         zoom: options.zoom,
         numLabels: options.numLabels,
-        collapseDuration: 300,
         edges: edgeOptions,
       }}
       styles={currentStyles}
